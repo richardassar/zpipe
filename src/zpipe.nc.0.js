@@ -817,7 +817,7 @@ function _def($source, $dest, $level) {
       var $opaque=(($strm+40)|0);
       HEAP32[(($opaque)>>2)]=0;
       var $0=$level_addr;
-      var $call=_deflateInit_($strm, $0, ((STRING_TABLE.__str)|0), 56);
+      var $call=_deflateInit2_($strm, $0, 8, 15, 8, 0, ((STRING_TABLE.__str)|0), 56);
       $ret=$call;
       var $1=$ret;
       var $cmp=(($1)|0)!=0;
@@ -846,7 +846,7 @@ function _def($source, $dest, $level) {
       var $5=$source_addr;
       var $call6=_feof($5);
       var $tobool7=(($call6)|0)!=0;
-      var $cond=$tobool7 ? 4 : 0;
+      var $cond=$tobool7 ? 4 : 1;
       $flush=$cond;
       var $arraydecay8=(($in)|0);
       var $next_in=(($strm)|0);
@@ -867,7 +867,7 @@ function _def($source, $dest, $level) {
     case 7: // $cond_true
       __label__ = 9; break;
     case 8: // $cond_false
-      ___assert_func(((STRING_TABLE.__str1)|0), 68, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str2)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 75, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str2)|0));
       __label__ = 9; break;
     case 9: // $cond_end
       var $avail_out13=(($strm+16)|0);
@@ -905,7 +905,7 @@ function _def($source, $dest, $level) {
     case 15: // $cond_true26
       __label__ = 17; break;
     case 16: // $cond_false27
-      ___assert_func(((STRING_TABLE.__str1)|0), 75, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str3)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 82, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str3)|0));
       __label__ = 17; break;
     case 17: // $cond_end28
       __label__ = 18; break;
@@ -920,7 +920,7 @@ function _def($source, $dest, $level) {
     case 20: // $cond_true33
       __label__ = 22; break;
     case 21: // $cond_false34
-      ___assert_func(((STRING_TABLE.__str1)|0), 79, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str4)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 86, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str4)|0));
       __label__ = 22; break;
     case 22: // $cond_end35
       var $call36=_deflateEnd($strm);
@@ -1004,7 +1004,7 @@ function _inf($source, $dest) {
       var $arraydecay14=(($out)|0);
       var $next_out=(($strm+12)|0);
       HEAP32[(($next_out)>>2)]=$arraydecay14;
-      var $call15=_inflate($strm, 0);
+      var $call15=_inflate($strm, 1);
       $ret=$call15;
       var $5=$ret;
       var $cmp16=(($5)|0)!=-2;
@@ -1012,7 +1012,7 @@ function _inf($source, $dest) {
     case 9: // $cond_true
       __label__ = 11; break;
     case 10: // $cond_false
-      ___assert_func(((STRING_TABLE.__str1)|0), 126, ((STRING_TABLE.___func___inf)|0), ((STRING_TABLE.__str2)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 133, ((STRING_TABLE.___func___inf)|0), ((STRING_TABLE.__str2)|0));
       __label__ = 11; break;
     case 11: // $cond_end
       var $6=$ret;
@@ -1258,28 +1258,6 @@ function _main($argc, $argv) {
   }
 }
 Module["_main"] = _main;_main["X"]=1;
-
-function _deflateInit_($strm, $level, $version, $stream_size) {
-  ;
-  var __label__;
-
-  var $strm_addr;
-  var $level_addr;
-  var $version_addr;
-  var $stream_size_addr;
-  $strm_addr=$strm;
-  $level_addr=$level;
-  $version_addr=$version;
-  $stream_size_addr=$stream_size;
-  var $0=$strm_addr;
-  var $1=$level_addr;
-  var $2=$version_addr;
-  var $3=$stream_size_addr;
-  var $call=_deflateInit2_($0, $1, 8, 15, 8, 0, $2, $3);
-  ;
-  return $call;
-}
-
 
 function _deflateInit2_($strm, $level, $method, $windowBits, $memLevel, $strategy, $version, $stream_size) {
   ;
@@ -28525,5 +28503,5 @@ if (Module['postRun']) {
   // {{MODULE_ADDITIONS}}
 
 
-// EMSCRIPTEN_GENERATED_FUNCTIONS: ["_def","_inf","_zerr","_main","_deflateInit_","_deflateInit2_","_deflateEnd","_deflateReset","_lm_init","_deflate","_putShortMSB","_flush_pending","_deflate_huff","_deflate_rle","_fill_window","_read_buf","_deflate_stored","_deflate_fast","_deflate_slow","_longest_match","_inflateReset","_inflateReset2","_inflateInit2_","_inflateInit_","_inflate","_tr_static_init","_fixedtables","_init_block","_updatewindow","_inflateEnd","__tr_init","__tr_stored_block","_copy_block","_bi_flush","__tr_align","__tr_flush_block","_detect_data_type","_build_tree","_build_bl_tree","_compress_block","_bi_windup","_send_all_trees","_send_tree","_bi_reverse","_scan_tree","_pqdownheap","_gen_bitlen","_gen_codes","_adler32","_crc32","_crc32_little","_crc32_big","_inflate_fast","_zcalloc","_zcfree","_inflate_table","_malloc","_tmalloc_small","_tmalloc_large","_sys_alloc","_free","_sys_trim","_segment_holding","_release_unused_segments","_init_mparams","_init_top","_mmap_alloc","_init_bins","_prepend_alloc","_add_segment"]
+// EMSCRIPTEN_GENERATED_FUNCTIONS: ["_def","_inf","_zerr","_main","_deflateInit2_","_deflateEnd","_deflateReset","_lm_init","_deflate","_putShortMSB","_flush_pending","_deflate_huff","_deflate_rle","_fill_window","_read_buf","_deflate_stored","_deflate_fast","_deflate_slow","_longest_match","_inflateReset","_inflateReset2","_inflateInit2_","_inflateInit_","_inflate","_tr_static_init","_fixedtables","_init_block","_updatewindow","_inflateEnd","__tr_init","__tr_stored_block","_copy_block","_bi_flush","__tr_align","__tr_flush_block","_detect_data_type","_build_tree","_build_bl_tree","_compress_block","_bi_windup","_send_all_trees","_send_tree","_bi_reverse","_scan_tree","_pqdownheap","_gen_bitlen","_gen_codes","_adler32","_crc32","_crc32_little","_crc32_big","_inflate_fast","_zcalloc","_zcfree","_inflate_table","_malloc","_tmalloc_small","_tmalloc_large","_sys_alloc","_free","_sys_trim","_segment_holding","_release_unused_segments","_init_mparams","_init_top","_mmap_alloc","_init_bins","_prepend_alloc","_add_segment"]
 
