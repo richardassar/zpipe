@@ -1178,7 +1178,7 @@ function _deflateInit2_($strm) {
           var $41 = $call + 5784 | 0;
           HEAP32[$41 >> 2] = $add_ptr130;
           var $42 = $call + 132 | 0;
-          HEAP32[$42 >> 2] = 9;
+          HEAP32[$42 >> 2] = 6;
           var $43 = $call + 136 | 0;
           HEAP32[$43 >> 2] = 0;
           HEAP8[$call + 36 | 0] = 8;
