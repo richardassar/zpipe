@@ -45,16 +45,16 @@ var zlib_inflated = zlib.Inflate(zlib_inflated);
 
 function showResults() {
 	console.log("--------------------------------------------");
-	console.log(zpipe_deflated);
+	console.log(zpipe_deflated, zpipe_deflated.length);
 	console.log("--------------------------------------------");
-	console.log(zpipe_inflated);
+	console.log(zpipe_inflated, zpipe_inflated.length);
 	console.log("--------------------------------------------");
-	console.log(zlib_deflated);
+	console.log(zlib_deflated, zlib_deflated.length);
 	console.log("--------------------------------------------");
-	console.log(zlib_inflated);
+	console.log(zlib_inflated, zlib_inflated.length);
 	console.log("--------------------------------------------");
-	console.log(zlib_inflated_zpipe_deflated);
+	console.log(zlib_inflated_zpipe_deflated, zlib_inflated_zpipe_deflated.length);
 	console.log("--------------------------------------------");
-	console.log(zpipe_inflated_zlib_deflated);
+	console.log(zpipe_inflated_zlib_deflated, zpipe_inflated_zlib_deflated.length);
 	console.log("--------------------------------------------");
 };
