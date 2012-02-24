@@ -13,9 +13,9 @@ z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.n
 ## Why?
 
 * Poor upload bandwidth
-* Currently no client-side compression API in browsers
-* You might want to compress IDAT chunks of client-side generated PNG images
-* You might like pipes
+* Currently no compression API exposed in browsers
+* You might want to compress IDAT chunks of client-side generated PNG images ;)
+* You might like pipes...
 
 **Smoking in the Browser**
 
@@ -41,5 +41,5 @@ Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.htm
 
 * Benchmark
 * Stress test
-* package.json
-* Ender / NPM publish
+* Ender
+* NPM publish
