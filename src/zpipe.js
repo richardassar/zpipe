@@ -803,7 +803,7 @@ function _def($source, $dest, $level) {
       var $opaque=(($strm+40)|0);
       HEAP32[(($opaque)>>2)]=0;
       var $0=$level_addr;
-      var $call=_deflateInit_($strm, $0, ((STRING_TABLE.__str)|0), 56);
+      var $call=_deflateInit2_($strm, $0, 8, 15, 8, 0, ((STRING_TABLE.__str)|0), 56);
       $ret=$call;
       var $1=$ret;
       var $cmp=(($1)|0)!=0;
@@ -832,7 +832,7 @@ function _def($source, $dest, $level) {
       var $5=$source_addr;
       var $call6=_feof($5);
       var $tobool7=(($call6)|0)!=0;
-      var $cond=$tobool7 ? 4 : 0;
+      var $cond=$tobool7 ? 4 : 1;
       $flush=$cond;
       var $arraydecay8=(($in)|0);
       var $next_in=(($strm)|0);
@@ -853,7 +853,7 @@ function _def($source, $dest, $level) {
     case 7: // $cond_true
       __label__ = 9; break;
     case 8: // $cond_false
-      ___assert_func(((STRING_TABLE.__str1)|0), 68, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str2)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 75, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str2)|0));
       __label__ = 9; break;
     case 9: // $cond_end
       var $avail_out13=(($strm+16)|0);
@@ -891,7 +891,7 @@ function _def($source, $dest, $level) {
     case 15: // $cond_true26
       __label__ = 17; break;
     case 16: // $cond_false27
-      ___assert_func(((STRING_TABLE.__str1)|0), 75, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str3)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 82, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str3)|0));
       __label__ = 17; break;
     case 17: // $cond_end28
       __label__ = 18; break;
@@ -906,7 +906,7 @@ function _def($source, $dest, $level) {
     case 20: // $cond_true33
       __label__ = 22; break;
     case 21: // $cond_false34
-      ___assert_func(((STRING_TABLE.__str1)|0), 79, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str4)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 86, ((STRING_TABLE.___func___def)|0), ((STRING_TABLE.__str4)|0));
       __label__ = 22; break;
     case 22: // $cond_end35
       var $call36=_deflateEnd($strm);
@@ -990,7 +990,7 @@ function _inf($source, $dest) {
       var $arraydecay14=(($out)|0);
       var $next_out=(($strm+12)|0);
       HEAP32[(($next_out)>>2)]=$arraydecay14;
-      var $call15=_inflate($strm, 0);
+      var $call15=_inflate($strm, 1);
       $ret=$call15;
       var $5=$ret;
       var $cmp16=(($5)|0)!=-2;
@@ -998,7 +998,7 @@ function _inf($source, $dest) {
     case 9: // $cond_true
       __label__ = 11; break;
     case 10: // $cond_false
-      ___assert_func(((STRING_TABLE.__str1)|0), 126, ((STRING_TABLE.___func___inf)|0), ((STRING_TABLE.__str2)|0));
+      ___assert_func(((STRING_TABLE.__str1)|0), 133, ((STRING_TABLE.___func___inf)|0), ((STRING_TABLE.__str2)|0));
       __label__ = 11; break;
     case 11: // $cond_end
       var $6=$ret;
@@ -1244,28 +1244,6 @@ function _main($argc, $argv) {
   }
 }
 Module["_main"] = _main;_main["X"]=1;
-
-function _deflateInit_($strm, $level, $version, $stream_size) {
-  ;
-  var __label__;
-
-  var $strm_addr;
-  var $level_addr;
-  var $version_addr;
-  var $stream_size_addr;
-  $strm_addr=$strm;
-  $level_addr=$level;
-  $version_addr=$version;
-  $stream_size_addr=$stream_size;
-  var $0=$strm_addr;
-  var $1=$level_addr;
-  var $2=$version_addr;
-  var $3=$stream_size_addr;
-  var $call=_deflateInit2_($0, $1, 8, 15, 8, 0, $2, $3);
-  ;
-  return $call;
-}
-
 
 function _deflateInit2_($strm, $level, $method, $windowBits, $memLevel, $strategy, $version, $stream_size) {
   ;
