@@ -29,7 +29,7 @@ z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.n
 
 **Smoking with Ender/Node**
 
-Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html) this exampl
+Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html)
 
     var zpipe = require("zpipe");
     
