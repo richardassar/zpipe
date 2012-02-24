@@ -10,7 +10,7 @@ zpipe is **not** a pipe, but it **is** the pipe you are looking for.
 
 ## About
 
-z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.net/) compression library, it has been cross-compiled from the ZLib source with [emscripten](http://github.com/kripken/emscripten).
+z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.net/) compression library, it has been cross-compiled from the ZLib source with [emscripten](https://github.com/kripken/emscripten).
 
 ## Why?
 
@@ -18,14 +18,6 @@ z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.n
 * Currently no client-side compression API in browsers
 * You might want to compress IDAT chunks of client-side generated PNG images
 * You might like pipes
-
-**Smoking in Node**
-
-    var zpipe = require("zpipe");
-    
-    var deflated = zpipe.deflate("the balloon");
-
-    var inflated = zpipe.inflate("deflated"); // "the balloon"
 
 **Smoking in the Browser**
 
@@ -36,6 +28,16 @@ z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.n
 
          var inflated = zpipe.inflate("deflated"); // "the balloon"
     </script>
+
+**Smoking with Ender/Node**
+
+Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html) this exampl
+
+    var zpipe = require("zpipe");
+    
+    var deflated = zpipe.deflate("the balloon");
+
+    var inflated = zpipe.inflate("deflated"); // "the balloon"
 
 ## TODO
 

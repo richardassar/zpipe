@@ -1,0 +1,12 @@
+{
+	"name": "zpipe",
+	"description": "Client-side DEFLATE module",
+	"keywords": ["zlib", "deflate", "javascript", "compression"],
+	"version": "0.0.1",
+	"author": "Richard Assar <richardassar@googlemail.com>",
+	"main": "./src/zpipe.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/richardassar/zpipe"
+	}
+}
