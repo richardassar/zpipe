@@ -29,7 +29,7 @@ z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.n
 
 **Smoking with Ender/Node**
 
-Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html)
+Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html) but we want automated testing and browser-side require() support
 
     var zpipe = require("zpipe");
     
@@ -39,7 +39,12 @@ Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.htm
 
 ## TODO
 
+* Web workers
 * Benchmark
-* Stress test
+* Better test
 * Ender
 * NPM publish
+
+## Notes
+
+z'pipe is currently a work in progress, don't use it yet...
