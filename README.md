@@ -1,6 +1,6 @@
 # Z'PIPE!
 
-zpipe is **not** a pipe, but it **is** the pipe you are looking for.
+zpipe is **not** a pipe.
 
 !["Ceci n'est pas une pipe"](http://upload.wikimedia.org/wikipedia/en/thumb/b/b9/MagrittePipe.jpg/300px-MagrittePipe.jpg "Ceci n'est pas une pipe")
 
