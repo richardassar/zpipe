@@ -390,6 +390,12 @@ function ccall(ident, returnType, argTypes, args) {
 
 Module["ccall"] = ccall;
 
+function cwrap(ident, returnType, argTypes) {
+  return (function() {
+    return ccall(ident, returnType, argTypes, Array.prototype.slice.call(arguments));
+  });
+}
+
 function setValue(ptr, value, type, noSafe) {
   type = type || "i8";
   if (type[type.length - 1] === "*") type = "i32";
@@ -1179,10 +1185,10 @@ function _main($argc, $argv) {
   __label__ = 0;
   while (1) switch (__label__) {
    case 0:
-    if ($argc == 1) {
+    if ($argc == 3) {
       __label__ = 1;
       break;
-    } else if ($argc == 2) {
+    } else if ($argc == 4) {
       __label__ = 3;
       break;
     } else {
@@ -19019,8 +19025,6 @@ Module["run"] = run;
 if (Module["preRun"]) {
   Module["preRun"]();
 }
-
-Module["noInitialRun"] = true;
 
 if (!Module["noInitialRun"]) {
   var ret = run();
