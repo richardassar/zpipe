@@ -1185,10 +1185,10 @@ function _main($argc, $argv) {
   __label__ = 0;
   while (1) switch (__label__) {
    case 0:
-    if ($argc == 3) {
+    if ($argc == 1) {
       __label__ = 1;
       break;
-    } else if ($argc == 4) {
+    } else if ($argc == 2) {
       __label__ = 3;
       break;
     } else {
