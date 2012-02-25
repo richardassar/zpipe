@@ -333,6 +333,23 @@ var CorrectionsMonitor = {
   print: (function() {})
 };
 
+function CHECK_OVERFLOW(value, bits, ignore, sig) {
+  if (ignore) return value;
+  var twopbits = Math.pow(2, bits);
+  var twopbits1 = Math.pow(2, bits - 1);
+  if (value === Infinity || value === -Infinity || value >= twopbits1 || value < -twopbits1) {
+    CorrectionsMonitor.note("SignedOverflow", 0, sig);
+    if (value === Infinity || value === -Infinity || Math.abs(value) >= twopbits) CorrectionsMonitor.note("Overflow");
+    if (bits <= 32) {
+      value = value & twopbits - 1;
+    }
+  } else {
+    CorrectionsMonitor.note("SignedOverflow", 1, sig);
+    CorrectionsMonitor.note("Overflow", 1, sig);
+  }
+  return value;
+}
+
 var __THREW__ = false;
 
 var ABORT = false;
@@ -389,6 +406,12 @@ function ccall(ident, returnType, argTypes, args) {
 }
 
 Module["ccall"] = ccall;
+
+function cwrap(ident, returnType, argTypes) {
+  return (function() {
+    return ccall(ident, returnType, argTypes, Array.prototype.slice.call(arguments));
+  });
+}
 
 function setValue(ptr, value, type, noSafe) {
   type = type || "i8";
@@ -779,27 +802,29 @@ function reSign(value, bits, ignore, sig) {
 
 function _def($source, $dest) {
   var $avail_out$s2;
-  var $strm$s2;
   var __stackBase__ = STACKTOP;
   STACKTOP += 32824;
   var __label__;
-  var $strm = __stackBase__, $strm$s2 = $strm >> 2;
+  var $strm = __stackBase__;
   var $in = __stackBase__ + 56;
   var $out = __stackBase__ + 16440;
-  HEAP32[$strm$s2 + 8] = 0;
-  HEAP32[$strm$s2 + 9] = 0;
-  HEAP32[$strm$s2 + 10] = 0;
+  var $zalloc = CHECK_OVERFLOW($strm + 32, 32, 0);
+  HEAP32[$zalloc >> 2] = 0;
+  var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0);
+  HEAP32[$zfree >> 2] = 0;
+  var $opaque = CHECK_OVERFLOW($strm + 40, 32, 0);
+  HEAP32[$opaque >> 2] = 0;
   var $0 = $strm;
   var $call = _deflateInit2_($0);
   var $cmp = ($call | 0) == 0;
   $do_body_preheader$$return$2 : do {
     if ($cmp) {
-      var $arraydecay = $in | 0;
-      var $avail_in = $strm + 4 | 0;
-      var $next_in = $strm | 0;
-      var $avail_out$s2 = ($strm + 16 | 0) >> 2;
-      var $arraydecay10 = $out | 0;
-      var $next_out = $strm + 12 | 0;
+      var $arraydecay = CHECK_OVERFLOW($in, 32, 0);
+      var $avail_in = CHECK_OVERFLOW($strm + 4, 32, 0);
+      var $next_in = CHECK_OVERFLOW($strm, 32, 0);
+      var $avail_out = CHECK_OVERFLOW($strm + 16, 32, 0), $avail_out$s2 = $avail_out >> 2;
+      var $arraydecay10 = CHECK_OVERFLOW($out, 32, 0);
+      var $next_out = CHECK_OVERFLOW($strm + 12, 32, 0);
       $do_body$4 : while (1) {
         var $call1 = _fread($arraydecay, 1, 16384, $source);
         HEAP32[$avail_in >> 2] = $call1;
@@ -818,9 +843,10 @@ function _def($source, $dest) {
           HEAP32[$next_out >> 2] = $arraydecay10;
           var $call11 = _deflate($0, $cond);
           if (($call11 | 0) == -2) {
-            ___assert_func(STRING_TABLE.__str1 | 0, 75, STRING_TABLE.___func___def | 0, STRING_TABLE.__str2 | 0);
+            ___assert_func(CHECK_OVERFLOW(STRING_TABLE.__str1, 32, 0), 75, CHECK_OVERFLOW(STRING_TABLE.___func___def, 32, 0), CHECK_OVERFLOW(STRING_TABLE.__str2, 32, 0));
           }
-          var $sub = 16384 - HEAP32[$avail_out$s2] | 0;
+          var $1 = HEAP32[$avail_out$s2];
+          var $sub = CHECK_OVERFLOW(16384 - $1, 32, 0);
           var $call15 = _fwrite($arraydecay10, 1, $sub, $dest);
           var $cmp16 = ($call15 | 0) == ($sub | 0);
           do {
@@ -835,13 +861,13 @@ function _def($source, $dest) {
               if ((HEAP32[$avail_in >> 2] | 0) == 0) {
                 __label__ = 13;
               } else {
-                ___assert_func(STRING_TABLE.__str1 | 0, 82, STRING_TABLE.___func___def | 0, STRING_TABLE.__str3 | 0);
+                ___assert_func(CHECK_OVERFLOW(STRING_TABLE.__str1, 32, 0), 82, CHECK_OVERFLOW(STRING_TABLE.___func___def, 32, 0), CHECK_OVERFLOW(STRING_TABLE.__str3, 32, 0));
               }
               if (!$tobool7) {
                 continue $do_body$4;
               }
               if (($call11 | 0) != 1) {
-                ___assert_func(STRING_TABLE.__str1 | 0, 86, STRING_TABLE.___func___def | 0, STRING_TABLE.__str4 | 0);
+                ___assert_func(CHECK_OVERFLOW(STRING_TABLE.__str1, 32, 0), 86, CHECK_OVERFLOW(STRING_TABLE.___func___def, 32, 0), CHECK_OVERFLOW(STRING_TABLE.__str4, 32, 0));
               }
               _deflateEnd($0);
               var $retval_0 = 0;
@@ -867,27 +893,29 @@ _def["X"] = 1;
 
 function _inf($source, $dest) {
   var $avail_out$s2;
-  var $strm$s2;
   var __stackBase__ = STACKTOP;
   STACKTOP += 32824;
-  var $strm = __stackBase__, $strm$s2 = $strm >> 2;
+  var $strm = __stackBase__;
   var $in = __stackBase__ + 56;
   var $out = __stackBase__ + 16440;
-  HEAP32[$strm$s2 + 8] = 0;
-  HEAP32[$strm$s2 + 9] = 0;
-  HEAP32[$strm$s2 + 10] = 0;
-  var $avail_in = $strm + 4 | 0;
+  var $zalloc = CHECK_OVERFLOW($strm + 32, 32, 0);
+  HEAP32[$zalloc >> 2] = 0;
+  var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0);
+  HEAP32[$zfree >> 2] = 0;
+  var $opaque = CHECK_OVERFLOW($strm + 40, 32, 0);
+  HEAP32[$opaque >> 2] = 0;
+  var $avail_in = CHECK_OVERFLOW($strm + 4, 32, 0);
   HEAP32[$avail_in >> 2] = 0;
-  var $next_in = $strm | 0;
+  var $next_in = CHECK_OVERFLOW($strm, 32, 0);
   HEAP32[$next_in >> 2] = 0;
   var $call = _inflateInit_($strm);
   var $cmp = ($call | 0) == 0;
   $do_body_preheader$$return$28 : do {
     if ($cmp) {
-      var $arraydecay = $in | 0;
-      var $avail_out$s2 = ($strm + 16 | 0) >> 2;
-      var $arraydecay14 = $out | 0;
-      var $next_out = $strm + 12 | 0;
+      var $arraydecay = CHECK_OVERFLOW($in, 32, 0);
+      var $avail_out = CHECK_OVERFLOW($strm + 16, 32, 0), $avail_out$s2 = $avail_out >> 2;
+      var $arraydecay14 = CHECK_OVERFLOW($out, 32, 0);
+      var $next_out = CHECK_OVERFLOW($strm + 12, 32, 0);
       var $ret_0 = 0;
       $do_body$30 : while (1) {
         var $ret_0;
@@ -906,7 +934,7 @@ function _inf($source, $dest) {
                 HEAP32[$next_out >> 2] = $arraydecay14;
                 var $call15 = _inflate($strm);
                 if ($call15 == -2) {
-                  ___assert_func(STRING_TABLE.__str1 | 0, 133, STRING_TABLE.___func___inf | 0, STRING_TABLE.__str2 | 0);
+                  ___assert_func(CHECK_OVERFLOW(STRING_TABLE.__str1, 32, 0), 133, CHECK_OVERFLOW(STRING_TABLE.___func___inf, 32, 0), CHECK_OVERFLOW(STRING_TABLE.__str2, 32, 0));
                 } else if ($call15 == 2) {
                   var $ret_1 = -3;
                   break $do_body$30;
@@ -914,7 +942,8 @@ function _inf($source, $dest) {
                   var $ret_1 = $call15;
                   break $do_body$30;
                 }
-                var $sub = 16384 - HEAP32[$avail_out$s2] | 0;
+                var $0 = HEAP32[$avail_out$s2];
+                var $sub = CHECK_OVERFLOW(16384 - $0, 32, 0);
                 var $call21 = _fwrite($arraydecay14, 1, $sub, $dest);
                 var $cmp22 = ($call21 | 0) == ($sub | 0);
                 do {
@@ -966,40 +995,54 @@ function _inf($source, $dest) {
 _inf["X"] = 1;
 
 function _zerr($ret) {
-  var $1 = HEAP32[HEAP32[__impure_ptr >> 2] + 12 >> 2];
-  var $2 = _fwrite(STRING_TABLE.__str5 | 0, 7, 1, $1);
+  var $0 = HEAP32[__impure_ptr >> 2];
+  var $_stderr = CHECK_OVERFLOW($0 + 12, 32, 0);
+  var $1 = HEAP32[$_stderr >> 2];
+  var $2 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str5, 32, 0), 7, 1, $1);
   do {
     if ($ret == -1) {
       var $3 = HEAP32[__impure_ptr >> 2];
-      var $4 = HEAP32[$3 + 4 >> 2];
+      var $_stdin = CHECK_OVERFLOW($3 + 4, 32, 0);
+      var $4 = HEAP32[$_stdin >> 2];
       var $call1 = _ferror($4);
       if (($call1 | 0) == 0) {
         var $7 = $3;
       } else {
-        var $5 = HEAP32[$3 + 12 >> 2];
-        var $6 = _fwrite(STRING_TABLE.__str6 | 0, 20, 1, $5);
+        var $_stderr2 = CHECK_OVERFLOW($3 + 12, 32, 0);
+        var $5 = HEAP32[$_stderr2 >> 2];
+        var $6 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str6, 32, 0), 20, 1, $5);
         var $7 = HEAP32[__impure_ptr >> 2];
       }
       var $7;
-      var $8 = HEAP32[$7 + 8 >> 2];
+      var $_stdout = CHECK_OVERFLOW($7 + 8, 32, 0);
+      var $8 = HEAP32[$_stdout >> 2];
       var $call4 = _ferror($8);
       if (($call4 | 0) == 0) {
         break;
       }
-      var $9 = HEAP32[$7 + 12 >> 2];
-      var $10 = _fwrite(STRING_TABLE.__str7 | 0, 21, 1, $9);
+      var $_stderr7 = CHECK_OVERFLOW($7 + 12, 32, 0);
+      var $9 = HEAP32[$_stderr7 >> 2];
+      var $10 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str7, 32, 0), 21, 1, $9);
     } else if ($ret == -2) {
-      var $12 = HEAP32[HEAP32[__impure_ptr >> 2] + 12 >> 2];
-      var $13 = _fwrite(STRING_TABLE.__str8 | 0, 26, 1, $12);
+      var $11 = HEAP32[__impure_ptr >> 2];
+      var $_stderr11 = CHECK_OVERFLOW($11 + 12, 32, 0);
+      var $12 = HEAP32[$_stderr11 >> 2];
+      var $13 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str8, 32, 0), 26, 1, $12);
     } else if ($ret == -3) {
-      var $15 = HEAP32[HEAP32[__impure_ptr >> 2] + 12 >> 2];
-      var $16 = _fwrite(STRING_TABLE.__str9 | 0, 35, 1, $15);
+      var $14 = HEAP32[__impure_ptr >> 2];
+      var $_stderr14 = CHECK_OVERFLOW($14 + 12, 32, 0);
+      var $15 = HEAP32[$_stderr14 >> 2];
+      var $16 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str9, 32, 0), 35, 1, $15);
     } else if ($ret == -4) {
-      var $18 = HEAP32[HEAP32[__impure_ptr >> 2] + 12 >> 2];
-      var $19 = _fwrite(STRING_TABLE.__str10 | 0, 14, 1, $18);
+      var $17 = HEAP32[__impure_ptr >> 2];
+      var $_stderr17 = CHECK_OVERFLOW($17 + 12, 32, 0);
+      var $18 = HEAP32[$_stderr17 >> 2];
+      var $19 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str10, 32, 0), 14, 1, $18);
     } else if ($ret == -6) {
-      var $21 = HEAP32[HEAP32[__impure_ptr >> 2] + 12 >> 2];
-      var $22 = _fwrite(STRING_TABLE.__str11 | 0, 23, 1, $21);
+      var $20 = HEAP32[__impure_ptr >> 2];
+      var $_stderr20 = CHECK_OVERFLOW($20 + 12, 32, 0);
+      var $21 = HEAP32[$_stderr20 >> 2];
+      var $22 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str11, 32, 0), 23, 1, $21);
     }
   } while (0);
   return;
@@ -1009,38 +1052,45 @@ function _zerr($ret) {
 function _main($argc, $argv) {
   var __label__;
   do {
-    if ($argc == 1) {
-      var $0 = HEAP32[__impure_ptr >> 2];
-      var $1 = HEAP32[$0 + 4 >> 2];
-      var $2 = HEAP32[$0 + 8 >> 2];
-      var $call = _def($1, $2);
-      if (($call | 0) == 0) {
+    if ($argc == 3) {
+      var $arrayidx = CHECK_OVERFLOW($argv + 4, 32, 0);
+      var $0 = HEAP32[$arrayidx >> 2];
+      var $call = _fopen($0, CHECK_OVERFLOW(STRING_TABLE.__str12, 32, 0));
+      var $arrayidx1 = CHECK_OVERFLOW($argv + 8, 32, 0);
+      var $1 = HEAP32[$arrayidx1 >> 2];
+      var $call2 = _fopen($1, CHECK_OVERFLOW(STRING_TABLE.__str13, 32, 0));
+      var $call3 = _def($call, $call2);
+      if (($call3 | 0) == 0) {
         var $retval_0 = 0;
         __label__ = 7;
         break;
       }
-      _zerr($call);
-      var $retval_0 = $call;
+      _zerr($call3);
+      var $retval_0 = $call3;
       __label__ = 7;
       break;
-    } else if ($argc == 2) {
-      var $3 = HEAP32[$argv + 4 >> 2];
-      var $call4 = _strcmp($3, STRING_TABLE.__str12 | 0);
-      if (($call4 | 0) != 0) {
+    } else if ($argc == 4) {
+      var $arrayidx7 = CHECK_OVERFLOW($argv + 4, 32, 0);
+      var $2 = HEAP32[$arrayidx7 >> 2];
+      var $call8 = _strcmp($2, CHECK_OVERFLOW(STRING_TABLE.__str14, 32, 0));
+      if (($call8 | 0) != 0) {
         __label__ = 6;
         break;
       }
-      var $4 = HEAP32[__impure_ptr >> 2];
-      var $5 = HEAP32[$4 + 4 >> 2];
-      var $6 = HEAP32[$4 + 8 >> 2];
-      var $call9 = _inf($5, $6);
-      if (($call9 | 0) == 0) {
+      var $arrayidx12 = CHECK_OVERFLOW($argv + 8, 32, 0);
+      var $3 = HEAP32[$arrayidx12 >> 2];
+      var $call13 = _fopen($3, CHECK_OVERFLOW(STRING_TABLE.__str12, 32, 0));
+      var $arrayidx15 = CHECK_OVERFLOW($argv + 12, 32, 0);
+      var $4 = HEAP32[$arrayidx15 >> 2];
+      var $call16 = _fopen($4, CHECK_OVERFLOW(STRING_TABLE.__str13, 32, 0));
+      var $call17 = _inf($call13, $call16);
+      if (($call17 | 0) == 0) {
         var $retval_0 = 0;
         __label__ = 7;
         break;
       }
-      _zerr($call9);
-      var $retval_0 = $call9;
+      _zerr($call17);
+      var $retval_0 = $call17;
       __label__ = 7;
       break;
     } else {
@@ -1048,8 +1098,10 @@ function _main($argc, $argv) {
     }
   } while (0);
   if (__label__ == 6) {
-    var $8 = HEAP32[HEAP32[__impure_ptr >> 2] + 12 >> 2];
-    var $9 = _fwrite(STRING_TABLE.__str13 | 0, 40, 1, $8);
+    var $5 = HEAP32[__impure_ptr >> 2];
+    var $_stderr = CHECK_OVERFLOW($5 + 12, 32, 0);
+    var $6 = HEAP32[$_stderr >> 2];
+    var $7 = _fwrite(CHECK_OVERFLOW(STRING_TABLE.__str15, 32, 0), 40, 1, $6);
     var $retval_0 = 1;
   }
   var $retval_0;
@@ -1068,23 +1120,24 @@ function _deflateInit2_($strm) {
     if ($cmp7) {
       var $retval_0 = -2;
     } else {
-      var $msg = $strm + 24 | 0;
+      var $msg = CHECK_OVERFLOW($strm + 24, 32, 0);
       HEAP32[$msg >> 2] = 0;
-      var $zalloc$s2 = ($strm + 32 | 0) >> 2;
+      var $zalloc = CHECK_OVERFLOW($strm + 32, 32, 0), $zalloc$s2 = $zalloc >> 2;
       var $0 = HEAP32[$zalloc$s2];
       if (($0 | 0) == 0) {
         HEAP32[$zalloc$s2] = 2;
-        HEAP32[$strm + 40 >> 2] = 0;
+        var $opaque = CHECK_OVERFLOW($strm + 40, 32, 0);
+        HEAP32[$opaque >> 2] = 0;
         var $1 = 2;
       } else {
         var $1 = $0;
       }
       var $1;
-      var $zfree = $strm + 36 | 0;
+      var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0);
       if ((HEAP32[$zfree >> 2] | 0) == 0) {
         HEAP32[$zfree >> 2] = 4;
       }
-      var $opaque67$s2 = ($strm + 40 | 0) >> 2;
+      var $opaque67 = CHECK_OVERFLOW($strm + 40, 32, 0), $opaque67$s2 = $opaque67 >> 2;
       var $3 = HEAP32[$opaque67$s2];
       var $call = FUNCTION_TABLE[$1]($3, 1, 5828);
       if (($call | 0) == 0) {
@@ -1092,38 +1145,50 @@ function _deflateInit2_($strm) {
         break;
       }
       var $4 = $call;
-      HEAP32[$strm + 28 >> 2] = $4;
+      var $state = CHECK_OVERFLOW($strm + 28, 32, 0);
+      HEAP32[$state >> 2] = $4;
       var $strm72 = $call;
       HEAP32[$strm72 >> 2] = $strm;
-      var $5 = $call + 24 | 0;
+      var $wrap73 = CHECK_OVERFLOW($call + 24, 32, 0);
+      var $5 = $wrap73;
       HEAP32[$5 >> 2] = 1;
-      var $6 = $call + 28 | 0;
+      var $gzhead = CHECK_OVERFLOW($call + 28, 32, 0);
+      var $6 = $gzhead;
       HEAP32[$6 >> 2] = 0;
-      var $7 = $call + 48 | 0;
+      var $w_bits = CHECK_OVERFLOW($call + 48, 32, 0);
+      var $7 = $w_bits;
       HEAP32[$7 >> 2] = 15;
-      var $8$s2 = ($call + 44 | 0) >> 2;
+      var $w_size = CHECK_OVERFLOW($call + 44, 32, 0);
+      var $8$s2 = $w_size >> 2;
       HEAP32[$8$s2] = 32768;
-      var $9 = $call + 52 | 0;
+      var $w_mask = CHECK_OVERFLOW($call + 52, 32, 0);
+      var $9 = $w_mask;
       HEAP32[$9 >> 2] = 32767;
-      var $10 = $call + 80 | 0;
+      var $hash_bits = CHECK_OVERFLOW($call + 80, 32, 0);
+      var $10 = $hash_bits;
       HEAP32[$10 >> 2] = 15;
-      var $11 = $call + 76 | 0;
+      var $hash_size = CHECK_OVERFLOW($call + 76, 32, 0);
+      var $11 = $hash_size;
       HEAP32[$11 >> 2] = 32768;
-      var $12 = $call + 84 | 0;
+      var $hash_mask = CHECK_OVERFLOW($call + 84, 32, 0);
+      var $12 = $hash_mask;
       HEAP32[$12 >> 2] = 32767;
-      var $13 = $call + 88 | 0;
+      var $hash_shift = CHECK_OVERFLOW($call + 88, 32, 0);
+      var $13 = $hash_shift;
       HEAP32[$13 >> 2] = 5;
       var $14 = HEAP32[$zalloc$s2];
       var $15 = HEAP32[$opaque67$s2];
       var $call87 = FUNCTION_TABLE[$14]($15, 32768, 2);
-      var $16 = $call + 56 | 0;
+      var $window = CHECK_OVERFLOW($call + 56, 32, 0);
+      var $16 = $window;
       HEAP32[$16 >> 2] = $call87;
       var $17 = HEAP32[$zalloc$s2];
       var $18 = HEAP32[$opaque67$s2];
       var $19 = HEAP32[$8$s2];
       var $call91 = FUNCTION_TABLE[$17]($18, $19, 2);
       var $20 = $call91;
-      var $21 = $call + 64 | 0;
+      var $prev = CHECK_OVERFLOW($call + 64, 32, 0);
+      var $21 = $prev;
       HEAP32[$21 >> 2] = $20;
       var $mul = HEAP32[$8$s2] << 1;
       _memset($call91, 0, $mul, 1);
@@ -1132,21 +1197,26 @@ function _deflateInit2_($strm) {
       var $25 = HEAP32[$11 >> 2];
       var $call97 = FUNCTION_TABLE[$23]($24, $25, 2);
       var $26 = $call97;
-      var $27 = $call + 68 | 0;
+      var $head = CHECK_OVERFLOW($call + 68, 32, 0);
+      var $27 = $head;
       HEAP32[$27 >> 2] = $26;
-      var $28 = $call + 5824 | 0;
+      var $high_water = CHECK_OVERFLOW($call + 5824, 32, 0);
+      var $28 = $high_water;
       HEAP32[$28 >> 2] = 0;
-      var $29 = $call + 5788 | 0;
+      var $lit_bufsize = CHECK_OVERFLOW($call + 5788, 32, 0);
+      var $29 = $lit_bufsize;
       HEAP32[$29 >> 2] = 16384;
       var $30 = HEAP32[$zalloc$s2];
       var $31 = HEAP32[$opaque67$s2];
       var $call103 = FUNCTION_TABLE[$30]($31, 16384, 4);
       var $32 = $call103;
-      var $33 = $call + 8 | 0;
+      var $pending_buf = CHECK_OVERFLOW($call + 8, 32, 0);
+      var $33 = $pending_buf;
       HEAP32[$33 >> 2] = $call103;
       var $34 = HEAPU32[$29 >> 2];
       var $mul105 = $34 << 2;
-      var $35 = $call + 12 | 0;
+      var $pending_buf_size = CHECK_OVERFLOW($call + 12, 32, 0);
+      var $35 = $pending_buf_size;
       HEAP32[$35 >> 2] = $mul105;
       var $cmp107 = (HEAP32[$16 >> 2] | 0) == 0;
       do {
@@ -1157,25 +1227,33 @@ function _deflateInit2_($strm) {
           if ((HEAP32[$27 >> 2] | 0) == 0 | ($call103 | 0) == 0) {
             break;
           }
-          var $add_ptr = ($34 >>> 1 << 1) + $32 | 0;
-          var $40 = $call + 5796 | 0;
+          var $div126 = $34 >>> 1;
+          var $add_ptr = CHECK_OVERFLOW(($div126 << 1) + $32, 32, 0);
+          var $d_buf = CHECK_OVERFLOW($call + 5796, 32, 0);
+          var $40 = $d_buf;
           HEAP32[$40 >> 2] = $add_ptr;
-          var $add_ptr130 = $call103 + $34 * 3 | 0;
-          var $41 = $call + 5784 | 0;
+          var $mul129 = CHECK_OVERFLOW($34 * 3, 32, 0);
+          var $add_ptr130 = CHECK_OVERFLOW($call103 + $mul129, 32, 0);
+          var $l_buf = CHECK_OVERFLOW($call + 5784, 32, 0);
+          var $41 = $l_buf;
           HEAP32[$41 >> 2] = $add_ptr130;
-          var $42 = $call + 132 | 0;
+          var $level131 = CHECK_OVERFLOW($call + 132, 32, 0);
+          var $42 = $level131;
           HEAP32[$42 >> 2] = 6;
-          var $43 = $call + 136 | 0;
+          var $strategy132 = CHECK_OVERFLOW($call + 136, 32, 0);
+          var $43 = $strategy132;
           HEAP32[$43 >> 2] = 0;
-          HEAP8[$call + 36 | 0] = 8;
+          var $44 = CHECK_OVERFLOW($call + 36, 32, 0);
+          HEAP8[$44] = 8;
           var $call135 = _deflateReset($strm);
           var $retval_0 = $call135;
           break $return$$if_end10$74;
         }
       } while (0);
-      var $39 = $call + 4 | 0;
+      var $status = CHECK_OVERFLOW($call + 4, 32, 0);
+      var $39 = $status;
       HEAP32[$39 >> 2] = 666;
-      HEAP32[$msg >> 2] = STRING_TABLE.__str664 | 0;
+      HEAP32[$msg >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str668, 32, 0);
       _deflateEnd($strm);
       var $retval_0 = -4;
     }
@@ -1190,59 +1268,70 @@ _deflateInit2_["X"] = 1;
 function _deflateEnd($strm) {
   var $zfree47_pre_pre$s2;
   var $state$s2;
-  var $strm$s2 = $strm >> 2;
   var $cmp = ($strm | 0) == 0;
   do {
     if (!$cmp) {
-      var $state$s2 = ($strm + 28 | 0) >> 2;
+      var $state = CHECK_OVERFLOW($strm + 28, 32, 0), $state$s2 = $state >> 2;
       var $0 = HEAP32[$state$s2];
       if (($0 | 0) == 0) {
         break;
       }
-      var $1 = HEAP32[$0 + 4 >> 2];
+      var $status3 = CHECK_OVERFLOW($0 + 4, 32, 0);
+      var $1 = HEAP32[$status3 >> 2];
       if (!($1 == 666 || $1 == 113 || $1 == 103 || $1 == 91 || $1 == 73 || $1 == 69 || $1 == 42)) {
         break;
       }
-      var $2 = HEAP32[$0 + 8 >> 2];
+      var $pending_buf = CHECK_OVERFLOW($0 + 8, 32, 0);
+      var $2 = HEAP32[$pending_buf >> 2];
       if (($2 | 0) == 0) {
         var $5 = $0;
       } else {
-        var $3 = HEAP32[$strm$s2 + 9];
-        var $4 = HEAP32[$strm$s2 + 10];
+        var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0);
+        var $3 = HEAP32[$zfree >> 2];
+        var $opaque = CHECK_OVERFLOW($strm + 40, 32, 0);
+        var $4 = HEAP32[$opaque >> 2];
         FUNCTION_TABLE[$3]($4, $2);
         var $5 = HEAP32[$state$s2];
       }
       var $5;
-      var $6 = HEAP32[$5 + 68 >> 2];
+      var $head = CHECK_OVERFLOW($5 + 68, 32, 0);
+      var $6 = HEAP32[$head >> 2];
       if (($6 | 0) == 0) {
         var $10 = $5;
       } else {
-        var $7 = HEAP32[$strm$s2 + 9];
-        var $8 = HEAP32[$strm$s2 + 10];
+        var $zfree26 = CHECK_OVERFLOW($strm + 36, 32, 0);
+        var $7 = HEAP32[$zfree26 >> 2];
+        var $opaque27 = CHECK_OVERFLOW($strm + 40, 32, 0);
+        var $8 = HEAP32[$opaque27 >> 2];
         var $9 = $6;
         FUNCTION_TABLE[$7]($8, $9);
         var $10 = HEAP32[$state$s2];
       }
       var $10;
-      var $11 = HEAP32[$10 + 64 >> 2];
-      var $zfree47_pre_pre$s2 = ($strm + 36 | 0) >> 2;
-      if (($11 | 0) == 0) {
+      var $prev = CHECK_OVERFLOW($10 + 64, 32, 0);
+      var $11 = HEAP32[$prev >> 2];
+      var $tobool32 = ($11 | 0) == 0;
+      var $zfree47_pre_pre = CHECK_OVERFLOW($strm + 36, 32, 0), $zfree47_pre_pre$s2 = $zfree47_pre_pre >> 2;
+      if ($tobool32) {
         var $15 = $10;
       } else {
         var $12 = HEAP32[$zfree47_pre_pre$s2];
-        var $13 = HEAP32[$strm$s2 + 10];
+        var $opaque35 = CHECK_OVERFLOW($strm + 40, 32, 0);
+        var $13 = HEAP32[$opaque35 >> 2];
         var $14 = $11;
         FUNCTION_TABLE[$12]($13, $14);
         var $15 = HEAP32[$state$s2];
       }
       var $15;
-      var $16 = HEAP32[$15 + 56 >> 2];
+      var $window = CHECK_OVERFLOW($15 + 56, 32, 0);
+      var $16 = HEAP32[$window >> 2];
       if (($16 | 0) == 0) {
+        var $opaque48_pre = CHECK_OVERFLOW($strm + 40, 32, 0);
         var $19 = $15;
-        var $opaque48_pre_phi = $strm + 40 | 0;
+        var $opaque48_pre_phi = $opaque48_pre;
       } else {
         var $17 = HEAP32[$zfree47_pre_pre$s2];
-        var $opaque43 = $strm + 40 | 0;
+        var $opaque43 = CHECK_OVERFLOW($strm + 40, 32, 0);
         var $18 = HEAP32[$opaque43 >> 2];
         FUNCTION_TABLE[$17]($18, $16);
         var $19 = HEAP32[$state$s2];
@@ -1263,38 +1352,45 @@ function _deflateEnd($strm) {
 _deflateEnd["X"] = 1;
 
 function _deflateReset($strm) {
-  var $strm$s2 = $strm >> 2;
   var $cmp = ($strm | 0) == 0;
   do {
     if ($cmp) {
       var $retval_0 = -2;
     } else {
-      var $0 = HEAP32[$strm$s2 + 7];
+      var $state = CHECK_OVERFLOW($strm + 28, 32, 0);
+      var $0 = HEAP32[$state >> 2];
       if (($0 | 0) == 0) {
         var $retval_0 = -2;
         break;
       }
-      if ((HEAP32[$strm$s2 + 8] | 0) == 0) {
+      var $zalloc = CHECK_OVERFLOW($strm + 32, 32, 0);
+      if ((HEAP32[$zalloc >> 2] | 0) == 0) {
         var $retval_0 = -2;
         break;
       }
-      if ((HEAP32[$strm$s2 + 9] | 0) == 0) {
+      var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0);
+      if ((HEAP32[$zfree >> 2] | 0) == 0) {
         var $retval_0 = -2;
         break;
       }
-      HEAP32[$strm$s2 + 5] = 0;
-      HEAP32[$strm$s2 + 2] = 0;
-      HEAP32[$strm$s2 + 6] = 0;
-      HEAP32[$strm$s2 + 11] = 2;
-      var $pending = $0 + 20 | 0;
+      var $total_out = CHECK_OVERFLOW($strm + 20, 32, 0);
+      HEAP32[$total_out >> 2] = 0;
+      var $total_in = CHECK_OVERFLOW($strm + 8, 32, 0);
+      HEAP32[$total_in >> 2] = 0;
+      var $msg = CHECK_OVERFLOW($strm + 24, 32, 0);
+      HEAP32[$msg >> 2] = 0;
+      var $data_type = CHECK_OVERFLOW($strm + 44, 32, 0);
+      HEAP32[$data_type >> 2] = 2;
+      var $pending = CHECK_OVERFLOW($0 + 20, 32, 0);
       HEAP32[$pending >> 2] = 0;
-      var $3 = HEAP32[$0 + 8 >> 2];
-      var $pending_out = $0 + 16 | 0;
+      var $pending_buf = CHECK_OVERFLOW($0 + 8, 32, 0);
+      var $3 = HEAP32[$pending_buf >> 2];
+      var $pending_out = CHECK_OVERFLOW($0 + 16, 32, 0);
       HEAP32[$pending_out >> 2] = $3;
-      var $wrap = $0 + 24 | 0;
+      var $wrap = CHECK_OVERFLOW($0 + 24, 32, 0);
       var $4 = HEAP32[$wrap >> 2];
       if (($4 | 0) < 0) {
-        var $sub = -$4 | 0;
+        var $sub = CHECK_OVERFLOW(-$4, 32, 0);
         HEAP32[$wrap >> 2] = $sub;
         var $5 = $sub;
       } else {
@@ -1302,7 +1398,7 @@ function _deflateReset($strm) {
       }
       var $5;
       var $cond = ($5 | 0) != 0 ? 42 : 113;
-      var $status = $0 + 4 | 0;
+      var $status = CHECK_OVERFLOW($0 + 4, 32, 0);
       HEAP32[$status >> 2] = $cond;
       if (($5 | 0) == 2) {
         var $call = _crc32(0, 0, 0);
@@ -1312,8 +1408,9 @@ function _deflateReset($strm) {
         var $cond16 = $call15;
       }
       var $cond16;
-      HEAP32[$strm$s2 + 12] = $cond16;
-      var $last_flush = $0 + 40 | 0;
+      var $adler = CHECK_OVERFLOW($strm + 48, 32, 0);
+      HEAP32[$adler >> 2] = $cond16;
+      var $last_flush = CHECK_OVERFLOW($0 + 40, 32, 0);
       HEAP32[$last_flush >> 2] = 0;
       var $6 = $0;
       __tr_init($6);
@@ -1329,28 +1426,55 @@ function _deflateReset($strm) {
 _deflateReset["X"] = 1;
 
 function _lm_init($s) {
-  var $s$s2 = $s >> 2;
-  var $mul = HEAP32[$s$s2 + 11] << 1;
-  HEAP32[$s$s2 + 15] = $mul;
-  var $hash_size = $s + 76 | 0;
-  var $head = $s + 68 | 0;
-  HEAP16[HEAP32[$head >> 2] + (HEAP32[$hash_size >> 2] - 1 << 1) >> 1] = 0;
+  var $w_size = CHECK_OVERFLOW($s + 44, 32, 0);
+  var $mul = HEAP32[$w_size >> 2] << 1;
+  var $window_size = CHECK_OVERFLOW($s + 60, 32, 0);
+  HEAP32[$window_size >> 2] = $mul;
+  var $hash_size = CHECK_OVERFLOW($s + 76, 32, 0);
+  var $1 = HEAP32[$hash_size >> 2];
+  var $sub = CHECK_OVERFLOW($1 - 1, 32, 0);
+  var $head = CHECK_OVERFLOW($s + 68, 32, 0);
+  var $2 = HEAP32[$head >> 2];
+  var $arrayidx = CHECK_OVERFLOW(($sub << 1) + $2, 32, 0);
+  HEAP16[$arrayidx >> 1] = 0;
   var $4 = HEAP32[$head >> 2];
-  var $mul4 = (HEAP32[$hash_size >> 2] << 1) - 2 | 0;
+  var $sub3 = HEAP32[$hash_size >> 2] << 1;
+  var $mul4 = CHECK_OVERFLOW($sub3 - 2, 32, 0);
   _memset($4, 0, $mul4, 1);
-  var $6 = HEAPU32[$s$s2 + 33];
-  HEAP32[$s$s2 + 32] = HEAPU16[(_configuration_table + 2 >> 1) + ($6 * 6 | 0)] & 65535;
-  HEAP32[$s$s2 + 35] = HEAPU16[(_configuration_table >> 1) + ($6 * 6 | 0)] & 65535;
-  HEAP32[$s$s2 + 36] = HEAPU16[(_configuration_table + 4 >> 1) + ($6 * 6 | 0)] & 65535;
-  HEAP32[$s$s2 + 31] = HEAPU16[(_configuration_table + 6 >> 1) + ($6 * 6 | 0)] & 65535;
-  HEAP32[$s$s2 + 27] = 0;
-  HEAP32[$s$s2 + 23] = 0;
-  HEAP32[$s$s2 + 29] = 0;
-  HEAP32[$s$s2 + 30] = 2;
-  HEAP32[$s$s2 + 24] = 2;
-  HEAP32[$s$s2 + 28] = 0;
-  HEAP32[$s$s2 + 26] = 0;
-  HEAP32[$s$s2 + 18] = 0;
+  var $level = CHECK_OVERFLOW($s + 132, 32, 0);
+  var $6 = HEAPU32[$level >> 2];
+  var $max_lazy = CHECK_OVERFLOW(_configuration_table + $6 * 12 + 2, 32, 0);
+  var $conv = HEAPU16[$max_lazy >> 1] & 65535;
+  var $max_lazy_match = CHECK_OVERFLOW($s + 128, 32, 0);
+  HEAP32[$max_lazy_match >> 2] = $conv;
+  var $good_length = CHECK_OVERFLOW(_configuration_table + $6 * 12, 32, 0);
+  var $conv8 = HEAPU16[$good_length >> 1] & 65535;
+  var $good_match = CHECK_OVERFLOW($s + 140, 32, 0);
+  HEAP32[$good_match >> 2] = $conv8;
+  var $nice_length = CHECK_OVERFLOW(_configuration_table + $6 * 12 + 4, 32, 0);
+  var $conv11 = HEAPU16[$nice_length >> 1] & 65535;
+  var $nice_match = CHECK_OVERFLOW($s + 144, 32, 0);
+  HEAP32[$nice_match >> 2] = $conv11;
+  var $max_chain = CHECK_OVERFLOW(_configuration_table + $6 * 12 + 6, 32, 0);
+  var $conv14 = HEAPU16[$max_chain >> 1] & 65535;
+  var $max_chain_length = CHECK_OVERFLOW($s + 124, 32, 0);
+  HEAP32[$max_chain_length >> 2] = $conv14;
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0);
+  HEAP32[$strstart >> 2] = 0;
+  var $block_start = CHECK_OVERFLOW($s + 92, 32, 0);
+  HEAP32[$block_start >> 2] = 0;
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0);
+  HEAP32[$lookahead >> 2] = 0;
+  var $prev_length = CHECK_OVERFLOW($s + 120, 32, 0);
+  HEAP32[$prev_length >> 2] = 2;
+  var $match_length = CHECK_OVERFLOW($s + 96, 32, 0);
+  HEAP32[$match_length >> 2] = 2;
+  var $match_start = CHECK_OVERFLOW($s + 112, 32, 0);
+  HEAP32[$match_start >> 2] = 0;
+  var $match_available = CHECK_OVERFLOW($s + 104, 32, 0);
+  HEAP32[$match_available >> 2] = 0;
+  var $ins_h = CHECK_OVERFLOW($s + 72, 32, 0);
+  HEAP32[$ins_h >> 2] = 0;
   return;
   return;
 }
@@ -1379,7 +1503,6 @@ function _deflate($strm, $flush) {
   var $gzindex248$s2;
   var $pending247$s2;
   var $gzhead242_pre_phi$s2;
-  var $15$s2;
   var $gzhead$s2;
   var $pending_buf$s2;
   var $pending$s2;
@@ -1388,54 +1511,63 @@ function _deflate($strm, $flush) {
   var $last_flush$s2;
   var $avail_out$s2;
   var $status$s2;
-  var $0$s2;
-  var $strm$s2 = $strm >> 2;
   var __label__;
   var $cmp = ($strm | 0) == 0;
   $return$$lor_lhs_false$2 : do {
     if ($cmp) {
       var $retval_0 = -2;
     } else {
-      var $0 = HEAPU32[$strm$s2 + 7], $0$s2 = $0 >> 2;
+      var $state = CHECK_OVERFLOW($strm + 28, 32, 0);
+      var $0 = HEAPU32[$state >> 2];
       if (($0 | 0) == 0 | $flush >>> 0 > 5) {
         var $retval_0 = -2;
         break;
       }
-      var $cmp7 = (HEAP32[$strm$s2 + 3] | 0) == 0;
+      var $next_out = CHECK_OVERFLOW($strm + 12, 32, 0);
+      var $cmp7 = (HEAP32[$next_out >> 2] | 0) == 0;
       do {
         if (!$cmp7) {
-          if ((HEAP32[$strm$s2] | 0) == 0) {
-            if ((HEAP32[$strm$s2 + 1] | 0) != 0) {
+          var $next_in = CHECK_OVERFLOW($strm, 32, 0);
+          if ((HEAP32[$next_in >> 2] | 0) == 0) {
+            var $avail_in = CHECK_OVERFLOW($strm + 4, 32, 0);
+            if ((HEAP32[$avail_in >> 2] | 0) != 0) {
               break;
             }
           }
-          var $status$s2 = ($0 + 4 | 0) >> 2;
+          var $status = CHECK_OVERFLOW($0 + 4, 32, 0), $status$s2 = $status >> 2;
           var $5 = HEAPU32[$status$s2];
           var $cmp14 = ($flush | 0) == 4;
           if (!(($5 | 0) != 666 | $cmp14)) {
             break;
           }
-          var $avail_out$s2 = ($strm + 16 | 0) >> 2;
+          var $avail_out = CHECK_OVERFLOW($strm + 16, 32, 0), $avail_out$s2 = $avail_out >> 2;
           if ((HEAP32[$avail_out$s2] | 0) == 0) {
-            HEAP32[$strm$s2 + 6] = STRING_TABLE.__str765 | 0;
+            var $msg19 = CHECK_OVERFLOW($strm + 24, 32, 0);
+            HEAP32[$msg19 >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str769, 32, 0);
             var $retval_0 = -5;
             break $return$$lor_lhs_false$2;
           }
-          HEAP32[$0$s2] = $strm;
-          var $last_flush$s2 = ($0 + 40 | 0) >> 2;
+          var $strm21 = CHECK_OVERFLOW($0, 32, 0);
+          HEAP32[$strm21 >> 2] = $strm;
+          var $last_flush = CHECK_OVERFLOW($0 + 40, 32, 0), $last_flush$s2 = $last_flush >> 2;
           var $7 = HEAP32[$last_flush$s2];
           HEAP32[$last_flush$s2] = $flush;
           var $cmp24 = ($5 | 0) == 42;
           do {
             if ($cmp24) {
-              if ((HEAP32[$0$s2 + 6] | 0) != 2) {
-                var $shl193 = (HEAP32[$0$s2 + 12] << 12) - 30720 | 0;
-                var $cmp195 = (HEAP32[$0$s2 + 34] | 0) > 1;
+              var $wrap = CHECK_OVERFLOW($0 + 24, 32, 0);
+              if ((HEAP32[$wrap >> 2] | 0) != 2) {
+                var $w_bits = CHECK_OVERFLOW($0 + 48, 32, 0);
+                var $add192 = HEAP32[$w_bits >> 2] << 12;
+                var $shl193 = CHECK_OVERFLOW($add192 - 30720, 32, 0);
+                var $strategy194 = CHECK_OVERFLOW($0 + 136, 32, 0);
+                var $cmp195 = (HEAP32[$strategy194 >> 2] | 0) > 1;
                 do {
                   if ($cmp195) {
                     var $level_flags_0 = 0;
                   } else {
-                    var $79 = HEAP32[$0$s2 + 33];
+                    var $level198 = CHECK_OVERFLOW($0 + 132, 32, 0);
+                    var $79 = HEAP32[$level198 >> 2];
                     if (($79 | 0) < 2) {
                       var $level_flags_0 = 0;
                       break;
@@ -1450,13 +1582,16 @@ function _deflate($strm, $flush) {
                 } while (0);
                 var $level_flags_0;
                 var $or = $level_flags_0 | $shl193;
-                var $strstart = $0 + 108 | 0;
+                var $strstart = CHECK_OVERFLOW($0 + 108, 32, 0);
                 var $header_0 = (HEAP32[$strstart >> 2] | 0) == 0 ? $or : $or | 32;
-                var $add223 = $header_0 | 31 - ($header_0 >>> 0) % 31;
+                var $rem = ($header_0 >>> 0) % 31;
+                var $sub222 = CHECK_OVERFLOW(31 - $rem, 32, 0);
+                var $add223 = $header_0 | $sub222;
                 HEAP32[$status$s2] = 113;
                 _putShortMSB($0, $add223);
-                var $adler235_pre$s2 = ($strm + 48 | 0) >> 2;
-                if ((HEAP32[$strstart >> 2] | 0) != 0) {
+                var $cmp226 = (HEAP32[$strstart >> 2] | 0) == 0;
+                var $adler235_pre = CHECK_OVERFLOW($strm + 48, 32, 0), $adler235_pre$s2 = $adler235_pre >> 2;
+                if (!$cmp226) {
                   var $shr230 = HEAPU32[$adler235_pre$s2] >>> 16;
                   _putShortMSB($0, $shr230);
                   var $and232 = HEAP32[$adler235_pre$s2] & 65535;
@@ -1469,52 +1604,70 @@ function _deflate($strm, $flush) {
                 break;
               }
               var $call = _crc32(0, 0, 0);
-              var $adler$s2 = ($strm + 48 | 0) >> 2;
+              var $adler = CHECK_OVERFLOW($strm + 48, 32, 0), $adler$s2 = $adler >> 2;
               HEAP32[$adler$s2] = $call;
-              var $pending$s2 = ($0 + 20 | 0) >> 2;
+              var $pending = CHECK_OVERFLOW($0 + 20, 32, 0), $pending$s2 = $pending >> 2;
               var $9 = HEAP32[$pending$s2];
-              var $inc = $9 + 1 | 0;
+              var $inc = CHECK_OVERFLOW($9 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc;
-              var $pending_buf$s2 = ($0 + 8 | 0) >> 2;
-              HEAP8[HEAP32[$pending_buf$s2] + $9 | 0] = 31;
+              var $pending_buf = CHECK_OVERFLOW($0 + 8, 32, 0), $pending_buf$s2 = $pending_buf >> 2;
+              var $10 = HEAP32[$pending_buf$s2];
+              var $arrayidx = CHECK_OVERFLOW($10 + $9, 32, 0);
+              HEAP8[$arrayidx] = 31;
               var $11 = HEAP32[$pending$s2];
-              var $inc29 = $11 + 1 | 0;
+              var $inc29 = CHECK_OVERFLOW($11 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc29;
-              HEAP8[HEAP32[$pending_buf$s2] + $11 | 0] = -117;
+              var $12 = HEAP32[$pending_buf$s2];
+              var $arrayidx31 = CHECK_OVERFLOW($12 + $11, 32, 0);
+              HEAP8[$arrayidx31] = -117;
               var $13 = HEAP32[$pending$s2];
-              var $inc33 = $13 + 1 | 0;
+              var $inc33 = CHECK_OVERFLOW($13 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc33;
-              HEAP8[HEAP32[$pending_buf$s2] + $13 | 0] = 8;
-              var $gzhead = $0 + 28 | 0, $gzhead$s2 = $gzhead >> 2;
-              var $15 = HEAPU32[$gzhead$s2], $15$s2 = $15 >> 2;
+              var $14 = HEAP32[$pending_buf$s2];
+              var $arrayidx35 = CHECK_OVERFLOW($14 + $13, 32, 0);
+              HEAP8[$arrayidx35] = 8;
+              var $gzhead = CHECK_OVERFLOW($0 + 28, 32, 0), $gzhead$s2 = $gzhead >> 2;
+              var $15 = HEAPU32[$gzhead$s2];
               if (($15 | 0) == 0) {
                 var $16 = HEAP32[$pending$s2];
-                var $inc39 = $16 + 1 | 0;
+                var $inc39 = CHECK_OVERFLOW($16 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc39;
-                HEAP8[HEAP32[$pending_buf$s2] + $16 | 0] = 0;
+                var $17 = HEAP32[$pending_buf$s2];
+                var $arrayidx41 = CHECK_OVERFLOW($17 + $16, 32, 0);
+                HEAP8[$arrayidx41] = 0;
                 var $18 = HEAP32[$pending$s2];
-                var $inc43 = $18 + 1 | 0;
+                var $inc43 = CHECK_OVERFLOW($18 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc43;
-                HEAP8[HEAP32[$pending_buf$s2] + $18 | 0] = 0;
+                var $19 = HEAP32[$pending_buf$s2];
+                var $arrayidx45 = CHECK_OVERFLOW($19 + $18, 32, 0);
+                HEAP8[$arrayidx45] = 0;
                 var $20 = HEAP32[$pending$s2];
-                var $inc47 = $20 + 1 | 0;
+                var $inc47 = CHECK_OVERFLOW($20 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc47;
-                HEAP8[HEAP32[$pending_buf$s2] + $20 | 0] = 0;
+                var $21 = HEAP32[$pending_buf$s2];
+                var $arrayidx49 = CHECK_OVERFLOW($21 + $20, 32, 0);
+                HEAP8[$arrayidx49] = 0;
                 var $22 = HEAP32[$pending$s2];
-                var $inc51 = $22 + 1 | 0;
+                var $inc51 = CHECK_OVERFLOW($22 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc51;
-                HEAP8[HEAP32[$pending_buf$s2] + $22 | 0] = 0;
+                var $23 = HEAP32[$pending_buf$s2];
+                var $arrayidx53 = CHECK_OVERFLOW($23 + $22, 32, 0);
+                HEAP8[$arrayidx53] = 0;
                 var $24 = HEAP32[$pending$s2];
-                var $inc55 = $24 + 1 | 0;
+                var $inc55 = CHECK_OVERFLOW($24 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc55;
-                HEAP8[HEAP32[$pending_buf$s2] + $24 | 0] = 0;
-                var $26 = HEAP32[$0$s2 + 33];
+                var $25 = HEAP32[$pending_buf$s2];
+                var $arrayidx57 = CHECK_OVERFLOW($25 + $24, 32, 0);
+                HEAP8[$arrayidx57] = 0;
+                var $level = CHECK_OVERFLOW($0 + 132, 32, 0);
+                var $26 = HEAP32[$level >> 2];
                 var $cmp58 = ($26 | 0) == 9;
                 do {
                   if ($cmp58) {
                     var $cond62 = 2;
                   } else {
-                    if ((HEAP32[$0$s2 + 34] | 0) > 1) {
+                    var $strategy = CHECK_OVERFLOW($0 + 136, 32, 0);
+                    if ((HEAP32[$strategy >> 2] | 0) > 1) {
                       var $cond62 = 4;
                       break;
                     }
@@ -1524,50 +1677,83 @@ function _deflate($strm, $flush) {
                 } while (0);
                 var $cond62;
                 var $28 = HEAP32[$pending$s2];
-                var $inc64 = $28 + 1 | 0;
+                var $inc64 = CHECK_OVERFLOW($28 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc64;
-                HEAP8[HEAP32[$pending_buf$s2] + $28 | 0] = $cond62;
+                var $29 = HEAP32[$pending_buf$s2];
+                var $arrayidx66 = CHECK_OVERFLOW($29 + $28, 32, 0);
+                HEAP8[$arrayidx66] = $cond62;
                 var $30 = HEAP32[$pending$s2];
-                var $inc68 = $30 + 1 | 0;
+                var $inc68 = CHECK_OVERFLOW($30 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc68;
-                HEAP8[HEAP32[$pending_buf$s2] + $30 | 0] = 3;
+                var $31 = HEAP32[$pending_buf$s2];
+                var $arrayidx70 = CHECK_OVERFLOW($31 + $30, 32, 0);
+                HEAP8[$arrayidx70] = 3;
                 HEAP32[$status$s2] = 113;
                 __label__ = 92;
                 break;
               }
-              var $cond76 = (HEAP32[$15$s2 + 11] | 0) != 0 ? 2 : 0;
-              var $cond80 = (HEAP32[$15$s2 + 4] | 0) == 0 ? 0 : 4;
-              var $cond85 = (HEAP32[$15$s2 + 7] | 0) == 0 ? 0 : 8;
-              var $cond90 = (HEAP32[$15$s2 + 9] | 0) == 0 ? 0 : 16;
-              var $add91 = $cond76 | (HEAP32[$15$s2] | 0) != 0 & 1 | $cond80 | $cond85 | $cond90;
+              var $text = CHECK_OVERFLOW($15, 32, 0);
+              var $cond73 = (HEAP32[$text >> 2] | 0) != 0 & 1;
+              var $hcrc = CHECK_OVERFLOW($15 + 44, 32, 0);
+              var $cond76 = (HEAP32[$hcrc >> 2] | 0) != 0 ? 2 : 0;
+              var $extra = CHECK_OVERFLOW($15 + 16, 32, 0);
+              var $cond80 = (HEAP32[$extra >> 2] | 0) == 0 ? 0 : 4;
+              var $name = CHECK_OVERFLOW($15 + 28, 32, 0);
+              var $cond85 = (HEAP32[$name >> 2] | 0) == 0 ? 0 : 8;
+              var $comment = CHECK_OVERFLOW($15 + 36, 32, 0);
+              var $cond90 = (HEAP32[$comment >> 2] | 0) == 0 ? 0 : 16;
+              var $add91 = $cond76 | $cond73 | $cond80 | $cond85 | $cond90;
               var $37 = HEAP32[$pending$s2];
-              var $inc94 = $37 + 1 | 0;
+              var $inc94 = CHECK_OVERFLOW($37 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc94;
-              HEAP8[HEAP32[$pending_buf$s2] + $37 | 0] = $add91;
-              var $conv98 = HEAP32[HEAP32[$gzhead$s2] + 4 >> 2] & 255;
+              var $38 = HEAP32[$pending_buf$s2];
+              var $arrayidx96 = CHECK_OVERFLOW($38 + $37, 32, 0);
+              HEAP8[$arrayidx96] = $add91;
+              var $39 = HEAP32[$gzhead$s2];
+              var $time = CHECK_OVERFLOW($39 + 4, 32, 0);
+              var $conv98 = HEAP32[$time >> 2] & 255;
               var $41 = HEAP32[$pending$s2];
-              var $inc100 = $41 + 1 | 0;
+              var $inc100 = CHECK_OVERFLOW($41 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc100;
-              HEAP8[HEAP32[$pending_buf$s2] + $41 | 0] = $conv98;
-              var $conv106 = HEAPU32[HEAP32[$gzhead$s2] + 4 >> 2] >>> 8 & 255;
+              var $42 = HEAP32[$pending_buf$s2];
+              var $arrayidx102 = CHECK_OVERFLOW($42 + $41, 32, 0);
+              HEAP8[$arrayidx102] = $conv98;
+              var $43 = HEAP32[$gzhead$s2];
+              var $time104 = CHECK_OVERFLOW($43 + 4, 32, 0);
+              var $conv106 = HEAPU32[$time104 >> 2] >>> 8 & 255;
               var $45 = HEAPU32[$pending$s2];
-              HEAP32[$pending$s2] = $45 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf$s2] + $45 | 0] = $conv106;
-              var $conv115 = HEAPU32[HEAP32[$gzhead$s2] + 4 >> 2] >>> 16 & 255;
+              var $inc108 = CHECK_OVERFLOW($45 + 1, 32, 0);
+              HEAP32[$pending$s2] = $inc108;
+              var $46 = HEAP32[$pending_buf$s2];
+              var $arrayidx110 = CHECK_OVERFLOW($46 + $45, 32, 0);
+              HEAP8[$arrayidx110] = $conv106;
+              var $47 = HEAP32[$gzhead$s2];
+              var $time112 = CHECK_OVERFLOW($47 + 4, 32, 0);
+              var $conv115 = HEAPU32[$time112 >> 2] >>> 16 & 255;
               var $49 = HEAPU32[$pending$s2];
-              HEAP32[$pending$s2] = $49 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf$s2] + $49 | 0] = $conv115;
-              var $conv124 = HEAPU32[HEAP32[$gzhead$s2] + 4 >> 2] >>> 24 & 255;
+              var $inc117 = CHECK_OVERFLOW($49 + 1, 32, 0);
+              HEAP32[$pending$s2] = $inc117;
+              var $50 = HEAP32[$pending_buf$s2];
+              var $arrayidx119 = CHECK_OVERFLOW($50 + $49, 32, 0);
+              HEAP8[$arrayidx119] = $conv115;
+              var $51 = HEAP32[$gzhead$s2];
+              var $time121 = CHECK_OVERFLOW($51 + 4, 32, 0);
+              var $conv124 = HEAPU32[$time121 >> 2] >>> 24 & 255;
               var $53 = HEAPU32[$pending$s2];
-              HEAP32[$pending$s2] = $53 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf$s2] + $53 | 0] = $conv124;
-              var $55 = HEAP32[$0$s2 + 33];
+              var $inc126 = CHECK_OVERFLOW($53 + 1, 32, 0);
+              HEAP32[$pending$s2] = $inc126;
+              var $54 = HEAP32[$pending_buf$s2];
+              var $arrayidx128 = CHECK_OVERFLOW($54 + $53, 32, 0);
+              HEAP8[$arrayidx128] = $conv124;
+              var $level129 = CHECK_OVERFLOW($0 + 132, 32, 0);
+              var $55 = HEAP32[$level129 >> 2];
               var $cmp130 = ($55 | 0) == 9;
               do {
                 if ($cmp130) {
                   var $cond144 = 2;
                 } else {
-                  if ((HEAP32[$0$s2 + 34] | 0) > 1) {
+                  var $strategy134 = CHECK_OVERFLOW($0 + 136, 32, 0);
+                  if ((HEAP32[$strategy134 >> 2] | 0) > 1) {
                     var $cond144 = 4;
                     break;
                   }
@@ -1577,38 +1763,55 @@ function _deflate($strm, $flush) {
               } while (0);
               var $cond144;
               var $57 = HEAP32[$pending$s2];
-              var $inc147 = $57 + 1 | 0;
+              var $inc147 = CHECK_OVERFLOW($57 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc147;
-              HEAP8[HEAP32[$pending_buf$s2] + $57 | 0] = $cond144;
-              var $conv152 = HEAP32[HEAP32[$gzhead$s2] + 12 >> 2] & 255;
+              var $58 = HEAP32[$pending_buf$s2];
+              var $arrayidx149 = CHECK_OVERFLOW($58 + $57, 32, 0);
+              HEAP8[$arrayidx149] = $cond144;
+              var $59 = HEAP32[$gzhead$s2];
+              var $os = CHECK_OVERFLOW($59 + 12, 32, 0);
+              var $conv152 = HEAP32[$os >> 2] & 255;
               var $61 = HEAP32[$pending$s2];
-              var $inc154 = $61 + 1 | 0;
+              var $inc154 = CHECK_OVERFLOW($61 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc154;
-              HEAP8[HEAP32[$pending_buf$s2] + $61 | 0] = $conv152;
+              var $62 = HEAP32[$pending_buf$s2];
+              var $arrayidx156 = CHECK_OVERFLOW($62 + $61, 32, 0);
+              HEAP8[$arrayidx156] = $conv152;
               var $63 = HEAPU32[$gzhead$s2];
-              if ((HEAP32[$63 + 16 >> 2] | 0) == 0) {
+              var $extra158 = CHECK_OVERFLOW($63 + 16, 32, 0);
+              if ((HEAP32[$extra158 >> 2] | 0) == 0) {
                 var $72 = $63;
               } else {
-                var $conv164 = HEAP32[$63 + 20 >> 2] & 255;
+                var $extra_len = CHECK_OVERFLOW($63 + 20, 32, 0);
+                var $conv164 = HEAP32[$extra_len >> 2] & 255;
                 var $66 = HEAP32[$pending$s2];
-                var $inc166 = $66 + 1 | 0;
+                var $inc166 = CHECK_OVERFLOW($66 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc166;
-                HEAP8[HEAP32[$pending_buf$s2] + $66 | 0] = $conv164;
-                var $conv173 = HEAPU32[HEAP32[$gzhead$s2] + 20 >> 2] >>> 8 & 255;
+                var $67 = HEAP32[$pending_buf$s2];
+                var $arrayidx168 = CHECK_OVERFLOW($67 + $66, 32, 0);
+                HEAP8[$arrayidx168] = $conv164;
+                var $68 = HEAP32[$gzhead$s2];
+                var $extra_len170 = CHECK_OVERFLOW($68 + 20, 32, 0);
+                var $conv173 = HEAPU32[$extra_len170 >> 2] >>> 8 & 255;
                 var $70 = HEAPU32[$pending$s2];
-                HEAP32[$pending$s2] = $70 + 1 | 0;
-                HEAP8[HEAP32[$pending_buf$s2] + $70 | 0] = $conv173;
+                var $inc175 = CHECK_OVERFLOW($70 + 1, 32, 0);
+                HEAP32[$pending$s2] = $inc175;
+                var $71 = HEAP32[$pending_buf$s2];
+                var $arrayidx177 = CHECK_OVERFLOW($71 + $70, 32, 0);
+                HEAP8[$arrayidx177] = $conv173;
                 var $72 = HEAP32[$gzhead$s2];
               }
               var $72;
-              if ((HEAP32[$72 + 44 >> 2] | 0) != 0) {
+              var $hcrc180 = CHECK_OVERFLOW($72 + 44, 32, 0);
+              if ((HEAP32[$hcrc180 >> 2] | 0) != 0) {
                 var $74 = HEAP32[$adler$s2];
                 var $75 = HEAP32[$pending_buf$s2];
                 var $76 = HEAP32[$pending$s2];
                 var $call186 = _crc32($74, $75, $76);
                 HEAP32[$adler$s2] = $call186;
               }
-              HEAP32[$0$s2 + 8] = 0;
+              var $gzindex = CHECK_OVERFLOW($0 + 32, 32, 0);
+              HEAP32[$gzindex >> 2] = 0;
               HEAP32[$status$s2] = 69;
               var $gzhead242_pre_phi = $gzhead, $gzhead242_pre_phi$s2 = $gzhead242_pre_phi >> 2;
               __label__ = 33;
@@ -1626,7 +1829,8 @@ function _deflate($strm, $flush) {
                 __label__ = 50;
                 break;
               }
-              var $gzhead242_pre_phi = $0 + 28 | 0, $gzhead242_pre_phi$s2 = $gzhead242_pre_phi >> 2;
+              var $gzhead242_pre = CHECK_OVERFLOW($0 + 28, 32, 0);
+              var $gzhead242_pre_phi = $gzhead242_pre, $gzhead242_pre_phi$s2 = $gzhead242_pre_phi >> 2;
               __label__ = 33;
               break;
             }
@@ -1635,35 +1839,40 @@ function _deflate($strm, $flush) {
             if (__label__ == 33) {
               var $gzhead242_pre_phi;
               var $85 = HEAPU32[$gzhead242_pre_phi$s2];
-              if ((HEAP32[$85 + 16 >> 2] | 0) == 0) {
+              var $extra243 = CHECK_OVERFLOW($85 + 16, 32, 0);
+              if ((HEAP32[$extra243 >> 2] | 0) == 0) {
                 HEAP32[$status$s2] = 73;
                 var $113 = $85;
                 __label__ = 52;
                 break;
               }
-              var $pending247$s2 = ($0 + 20 | 0) >> 2;
-              var $gzindex248$s2 = ($0 + 32 | 0) >> 2;
-              var $pending_buf_size = $0 + 12 | 0;
-              var $adler266$s2 = ($strm + 48 | 0) >> 2;
-              var $pending_buf267$s2 = ($0 + 8 | 0) >> 2;
-              var $beg_0 = HEAP32[$pending247$s2];
+              var $pending247 = CHECK_OVERFLOW($0 + 20, 32, 0), $pending247$s2 = $pending247 >> 2;
+              var $87 = HEAP32[$pending247$s2];
+              var $gzindex248 = CHECK_OVERFLOW($0 + 32, 32, 0), $gzindex248$s2 = $gzindex248 >> 2;
+              var $pending_buf_size = CHECK_OVERFLOW($0 + 12, 32, 0);
+              var $adler266 = CHECK_OVERFLOW($strm + 48, 32, 0), $adler266$s2 = $adler266 >> 2;
+              var $pending_buf267 = CHECK_OVERFLOW($0 + 8, 32, 0), $pending_buf267$s2 = $pending_buf267 >> 2;
+              var $beg_0 = $87;
               var $89 = HEAP32[$gzindex248$s2];
               var $88 = $85;
               while (1) {
                 var $88;
                 var $89;
                 var $beg_0;
-                if ($89 >>> 0 >= (HEAP32[$88 + 20 >> 2] & 65535) >>> 0) {
+                var $extra_len250 = CHECK_OVERFLOW($88 + 20, 32, 0);
+                if ($89 >>> 0 >= (HEAP32[$extra_len250 >> 2] & 65535) >>> 0) {
                   var $beg_2 = $beg_0;
                   var $105 = $88;
                   break;
                 }
                 var $91 = HEAPU32[$pending247$s2];
                 if (($91 | 0) == (HEAP32[$pending_buf_size >> 2] | 0)) {
-                  if ((HEAP32[$88 + 44 >> 2] | 0) != 0 & $91 >>> 0 > $beg_0 >>> 0) {
+                  var $hcrc259 = CHECK_OVERFLOW($88 + 44, 32, 0);
+                  if ((HEAP32[$hcrc259 >> 2] | 0) != 0 & $91 >>> 0 > $beg_0 >>> 0) {
                     var $94 = HEAP32[$adler266$s2];
-                    var $add_ptr = HEAP32[$pending_buf267$s2] + $beg_0 | 0;
-                    var $sub269 = $91 - $beg_0 | 0;
+                    var $95 = HEAP32[$pending_buf267$s2];
+                    var $add_ptr = CHECK_OVERFLOW($95 + $beg_0, 32, 0);
+                    var $sub269 = CHECK_OVERFLOW($91 - $beg_0, 32, 0);
                     var $call270 = _crc32($94, $add_ptr, $sub269);
                     HEAP32[$adler266$s2] = $call270;
                   }
@@ -1688,10 +1897,17 @@ function _deflate($strm, $flush) {
                 var $99;
                 var $100;
                 var $beg_1;
-                var $102 = HEAP8[HEAP32[$98 + 16 >> 2] + $99 | 0];
-                HEAP32[$pending247$s2] = $100 + 1 | 0;
-                HEAP8[HEAP32[$pending_buf267$s2] + $100 | 0] = $102;
-                var $inc290 = HEAP32[$gzindex248$s2] + 1 | 0;
+                var $extra283 = CHECK_OVERFLOW($98 + 16, 32, 0);
+                var $101 = HEAP32[$extra283 >> 2];
+                var $arrayidx284 = CHECK_OVERFLOW($101 + $99, 32, 0);
+                var $102 = HEAP8[$arrayidx284];
+                var $inc286 = CHECK_OVERFLOW($100 + 1, 32, 0);
+                HEAP32[$pending247$s2] = $inc286;
+                var $103 = HEAP32[$pending_buf267$s2];
+                var $arrayidx288 = CHECK_OVERFLOW($103 + $100, 32, 0);
+                HEAP8[$arrayidx288] = $102;
+                var $104 = HEAP32[$gzindex248$s2];
+                var $inc290 = CHECK_OVERFLOW($104 + 1, 32, 0);
                 HEAP32[$gzindex248$s2] = $inc290;
                 var $beg_0 = $beg_1;
                 var $89 = $inc290;
@@ -1699,7 +1915,8 @@ function _deflate($strm, $flush) {
               }
               var $105;
               var $beg_2;
-              var $tobool293 = (HEAP32[$105 + 44 >> 2] | 0) == 0;
+              var $hcrc292 = CHECK_OVERFLOW($105 + 44, 32, 0);
+              var $tobool293 = (HEAP32[$hcrc292 >> 2] | 0) == 0;
               do {
                 if ($tobool293) {
                   var $110 = $105;
@@ -1710,15 +1927,18 @@ function _deflate($strm, $flush) {
                     break;
                   }
                   var $108 = HEAP32[$adler266$s2];
-                  var $add_ptr301 = HEAP32[$pending_buf267$s2] + $beg_2 | 0;
-                  var $sub303 = $107 - $beg_2 | 0;
+                  var $109 = HEAP32[$pending_buf267$s2];
+                  var $add_ptr301 = CHECK_OVERFLOW($109 + $beg_2, 32, 0);
+                  var $sub303 = CHECK_OVERFLOW($107 - $beg_2, 32, 0);
                   var $call304 = _crc32($108, $add_ptr301, $sub303);
                   HEAP32[$adler266$s2] = $call304;
                   var $110 = HEAP32[$gzhead242_pre_phi$s2];
                 }
               } while (0);
               var $110;
-              if ((HEAP32[$gzindex248$s2] | 0) == (HEAP32[$110 + 20 >> 2] | 0)) {
+              var $111 = HEAP32[$gzindex248$s2];
+              var $extra_len309 = CHECK_OVERFLOW($110 + 20, 32, 0);
+              if (($111 | 0) == (HEAP32[$extra_len309 >> 2] | 0)) {
                 HEAP32[$gzindex248$s2] = 0;
                 HEAP32[$status$s2] = 73;
                 var $113 = $110;
@@ -1738,7 +1958,8 @@ function _deflate($strm, $flush) {
                 __label__ = 67;
                 break;
               }
-              var $113 = HEAP32[$0$s2 + 7];
+              var $gzhead324_phi_trans_insert = CHECK_OVERFLOW($0 + 28, 32, 0);
+              var $113 = HEAP32[$gzhead324_phi_trans_insert >> 2];
               __label__ = 52;
               break;
             }
@@ -1746,29 +1967,34 @@ function _deflate($strm, $flush) {
           do {
             if (__label__ == 52) {
               var $113;
-              var $gzhead324 = $0 + 28 | 0, $gzhead324$s2 = $gzhead324 >> 2;
-              if ((HEAP32[$113 + 28 >> 2] | 0) == 0) {
+              var $gzhead324 = CHECK_OVERFLOW($0 + 28, 32, 0), $gzhead324$s2 = $gzhead324 >> 2;
+              var $name325 = CHECK_OVERFLOW($113 + 28, 32, 0);
+              if ((HEAP32[$name325 >> 2] | 0) == 0) {
                 HEAP32[$status$s2] = 91;
                 var $gzhead403_pre_phi = $gzhead324, $gzhead403_pre_phi$s2 = $gzhead403_pre_phi >> 2;
                 __label__ = 69;
                 break;
               }
-              var $pending330$s2 = ($0 + 20 | 0) >> 2;
+              var $pending330 = CHECK_OVERFLOW($0 + 20, 32, 0), $pending330$s2 = $pending330 >> 2;
               var $115 = HEAP32[$pending330$s2];
-              var $pending_buf_size332 = $0 + 12 | 0;
-              var $adler344$s2 = ($strm + 48 | 0) >> 2;
-              var $pending_buf345$s2 = ($0 + 8 | 0) >> 2;
-              var $gzindex360$s2 = ($0 + 32 | 0) >> 2;
+              var $pending_buf_size332 = CHECK_OVERFLOW($0 + 12, 32, 0);
+              var $adler344 = CHECK_OVERFLOW($strm + 48, 32, 0), $adler344$s2 = $adler344 >> 2;
+              var $pending_buf345 = CHECK_OVERFLOW($0 + 8, 32, 0), $pending_buf345$s2 = $pending_buf345 >> 2;
+              var $gzindex360 = CHECK_OVERFLOW($0 + 32, 32, 0), $gzindex360$s2 = $gzindex360 >> 2;
               var $beg329_0 = $115;
               var $116 = $115;
               while (1) {
                 var $116;
                 var $beg329_0;
                 if (($116 | 0) == (HEAP32[$pending_buf_size332 >> 2] | 0)) {
-                  if ((HEAP32[HEAP32[$gzhead324$s2] + 44 >> 2] | 0) != 0 & $116 >>> 0 > $beg329_0 >>> 0) {
+                  var $118 = HEAP32[$gzhead324$s2];
+                  var $hcrc337 = CHECK_OVERFLOW($118 + 44, 32, 0);
+                  if ((HEAP32[$hcrc337 >> 2] | 0) != 0 & $116 >>> 0 > $beg329_0 >>> 0) {
                     var $120 = HEAP32[$adler344$s2];
-                    var $add_ptr346 = HEAP32[$pending_buf345$s2] + $beg329_0 | 0;
-                    var $call349 = _crc32($120, $add_ptr346, $116 - $beg329_0 | 0);
+                    var $121 = HEAP32[$pending_buf345$s2];
+                    var $add_ptr346 = CHECK_OVERFLOW($121 + $beg329_0, 32, 0);
+                    var $sub348 = CHECK_OVERFLOW($116 - $beg329_0, 32, 0);
+                    var $call349 = _crc32($120, $add_ptr346, $sub348);
                     HEAP32[$adler344$s2] = $call349;
                   }
                   _flush_pending($strm);
@@ -1787,12 +2013,19 @@ function _deflate($strm, $flush) {
                 var $124;
                 var $beg329_1;
                 var $125 = HEAP32[$gzindex360$s2];
-                var $inc361 = $125 + 1 | 0;
+                var $inc361 = CHECK_OVERFLOW($125 + 1, 32, 0);
                 HEAP32[$gzindex360$s2] = $inc361;
-                var $128 = HEAPU8[HEAP32[HEAP32[$gzhead324$s2] + 28 >> 2] + $125 | 0];
+                var $126 = HEAP32[$gzhead324$s2];
+                var $name363 = CHECK_OVERFLOW($126 + 28, 32, 0);
+                var $127 = HEAP32[$name363 >> 2];
+                var $arrayidx364 = CHECK_OVERFLOW($127 + $125, 32, 0);
+                var $128 = HEAPU8[$arrayidx364];
                 var $conv365 = $128 & 255;
-                HEAP32[$pending330$s2] = $124 + 1 | 0;
-                HEAP8[HEAP32[$pending_buf345$s2] + $124 | 0] = $128;
+                var $inc368 = CHECK_OVERFLOW($124 + 1, 32, 0);
+                HEAP32[$pending330$s2] = $inc368;
+                var $129 = HEAP32[$pending_buf345$s2];
+                var $arrayidx370 = CHECK_OVERFLOW($129 + $124, 32, 0);
+                HEAP8[$arrayidx370] = $128;
                 if ($128 << 24 >> 24 == 0) {
                   var $val_0 = $conv365;
                   var $beg329_2 = $beg329_1;
@@ -1803,7 +2036,9 @@ function _deflate($strm, $flush) {
               }
               var $beg329_2;
               var $val_0;
-              var $tobool375 = (HEAP32[HEAP32[$gzhead324$s2] + 44 >> 2] | 0) == 0;
+              var $130 = HEAP32[$gzhead324$s2];
+              var $hcrc374 = CHECK_OVERFLOW($130 + 44, 32, 0);
+              var $tobool375 = (HEAP32[$hcrc374 >> 2] | 0) == 0;
               do {
                 if (!$tobool375) {
                   var $132 = HEAPU32[$pending330$s2];
@@ -1811,8 +2046,9 @@ function _deflate($strm, $flush) {
                     break;
                   }
                   var $133 = HEAP32[$adler344$s2];
-                  var $add_ptr383 = HEAP32[$pending_buf345$s2] + $beg329_2 | 0;
-                  var $sub385 = $132 - $beg329_2 | 0;
+                  var $134 = HEAP32[$pending_buf345$s2];
+                  var $add_ptr383 = CHECK_OVERFLOW($134 + $beg329_2, 32, 0);
+                  var $sub385 = CHECK_OVERFLOW($132 - $beg329_2, 32, 0);
                   var $call386 = _crc32($133, $add_ptr383, $sub385);
                   HEAP32[$adler344$s2] = $call386;
                 }
@@ -1837,7 +2073,8 @@ function _deflate($strm, $flush) {
                 __label__ = 84;
                 break;
               }
-              var $gzhead403_pre_phi = $0 + 28 | 0, $gzhead403_pre_phi$s2 = $gzhead403_pre_phi >> 2;
+              var $gzhead403_pre = CHECK_OVERFLOW($0 + 28, 32, 0);
+              var $gzhead403_pre_phi = $gzhead403_pre, $gzhead403_pre_phi$s2 = $gzhead403_pre_phi >> 2;
               __label__ = 69;
               break;
             }
@@ -1845,28 +2082,34 @@ function _deflate($strm, $flush) {
           do {
             if (__label__ == 69) {
               var $gzhead403_pre_phi;
-              if ((HEAP32[HEAP32[$gzhead403_pre_phi$s2] + 36 >> 2] | 0) == 0) {
+              var $136 = HEAP32[$gzhead403_pre_phi$s2];
+              var $comment404 = CHECK_OVERFLOW($136 + 36, 32, 0);
+              if ((HEAP32[$comment404 >> 2] | 0) == 0) {
                 HEAP32[$status$s2] = 103;
                 var $gzhead485_pre_phi = $gzhead403_pre_phi;
                 __label__ = 86;
                 break;
               }
-              var $pending409$s2 = ($0 + 20 | 0) >> 2;
+              var $pending409 = CHECK_OVERFLOW($0 + 20, 32, 0), $pending409$s2 = $pending409 >> 2;
               var $138 = HEAP32[$pending409$s2];
-              var $pending_buf_size413 = $0 + 12 | 0;
-              var $adler425$s2 = ($strm + 48 | 0) >> 2;
-              var $pending_buf426$s2 = ($0 + 8 | 0) >> 2;
-              var $gzindex441 = $0 + 32 | 0;
+              var $pending_buf_size413 = CHECK_OVERFLOW($0 + 12, 32, 0);
+              var $adler425 = CHECK_OVERFLOW($strm + 48, 32, 0), $adler425$s2 = $adler425 >> 2;
+              var $pending_buf426 = CHECK_OVERFLOW($0 + 8, 32, 0), $pending_buf426$s2 = $pending_buf426 >> 2;
+              var $gzindex441 = CHECK_OVERFLOW($0 + 32, 32, 0);
               var $beg408_0 = $138;
               var $139 = $138;
               while (1) {
                 var $139;
                 var $beg408_0;
                 if (($139 | 0) == (HEAP32[$pending_buf_size413 >> 2] | 0)) {
-                  if ((HEAP32[HEAP32[$gzhead403_pre_phi$s2] + 44 >> 2] | 0) != 0 & $139 >>> 0 > $beg408_0 >>> 0) {
+                  var $141 = HEAP32[$gzhead403_pre_phi$s2];
+                  var $hcrc418 = CHECK_OVERFLOW($141 + 44, 32, 0);
+                  if ((HEAP32[$hcrc418 >> 2] | 0) != 0 & $139 >>> 0 > $beg408_0 >>> 0) {
                     var $143 = HEAP32[$adler425$s2];
-                    var $add_ptr427 = HEAP32[$pending_buf426$s2] + $beg408_0 | 0;
-                    var $call430 = _crc32($143, $add_ptr427, $139 - $beg408_0 | 0);
+                    var $144 = HEAP32[$pending_buf426$s2];
+                    var $add_ptr427 = CHECK_OVERFLOW($144 + $beg408_0, 32, 0);
+                    var $sub429 = CHECK_OVERFLOW($139 - $beg408_0, 32, 0);
+                    var $call430 = _crc32($143, $add_ptr427, $sub429);
                     HEAP32[$adler425$s2] = $call430;
                   }
                   _flush_pending($strm);
@@ -1885,12 +2128,19 @@ function _deflate($strm, $flush) {
                 var $147;
                 var $beg408_1;
                 var $148 = HEAP32[$gzindex441 >> 2];
-                var $inc442 = $148 + 1 | 0;
+                var $inc442 = CHECK_OVERFLOW($148 + 1, 32, 0);
                 HEAP32[$gzindex441 >> 2] = $inc442;
-                var $151 = HEAPU8[HEAP32[HEAP32[$gzhead403_pre_phi$s2] + 36 >> 2] + $148 | 0];
+                var $149 = HEAP32[$gzhead403_pre_phi$s2];
+                var $comment444 = CHECK_OVERFLOW($149 + 36, 32, 0);
+                var $150 = HEAP32[$comment444 >> 2];
+                var $arrayidx445 = CHECK_OVERFLOW($150 + $148, 32, 0);
+                var $151 = HEAPU8[$arrayidx445];
                 var $conv446 = $151 & 255;
-                HEAP32[$pending409$s2] = $147 + 1 | 0;
-                HEAP8[HEAP32[$pending_buf426$s2] + $147 | 0] = $151;
+                var $inc449 = CHECK_OVERFLOW($147 + 1, 32, 0);
+                HEAP32[$pending409$s2] = $inc449;
+                var $152 = HEAP32[$pending_buf426$s2];
+                var $arrayidx451 = CHECK_OVERFLOW($152 + $147, 32, 0);
+                HEAP8[$arrayidx451] = $151;
                 if ($151 << 24 >> 24 == 0) {
                   var $val410_0 = $conv446;
                   var $beg408_2 = $beg408_1;
@@ -1901,7 +2151,9 @@ function _deflate($strm, $flush) {
               }
               var $beg408_2;
               var $val410_0;
-              var $tobool458 = (HEAP32[HEAP32[$gzhead403_pre_phi$s2] + 44 >> 2] | 0) == 0;
+              var $153 = HEAP32[$gzhead403_pre_phi$s2];
+              var $hcrc457 = CHECK_OVERFLOW($153 + 44, 32, 0);
+              var $tobool458 = (HEAP32[$hcrc457 >> 2] | 0) == 0;
               do {
                 if (!$tobool458) {
                   var $155 = HEAPU32[$pending409$s2];
@@ -1909,8 +2161,9 @@ function _deflate($strm, $flush) {
                     break;
                   }
                   var $156 = HEAP32[$adler425$s2];
-                  var $add_ptr466 = HEAP32[$pending_buf426$s2] + $beg408_2 | 0;
-                  var $sub468 = $155 - $beg408_2 | 0;
+                  var $157 = HEAP32[$pending_buf426$s2];
+                  var $add_ptr466 = CHECK_OVERFLOW($157 + $beg408_2, 32, 0);
+                  var $sub468 = CHECK_OVERFLOW($155 - $beg408_2, 32, 0);
                   var $call469 = _crc32($156, $add_ptr466, $sub468);
                   HEAP32[$adler425$s2] = $call469;
                 }
@@ -1933,7 +2186,8 @@ function _deflate($strm, $flush) {
                 __label__ = 92;
                 break;
               }
-              var $gzhead485_pre_phi = $0 + 28 | 0;
+              var $gzhead485_pre = CHECK_OVERFLOW($0 + 28, 32, 0);
+              var $gzhead485_pre_phi = $gzhead485_pre;
               __label__ = 86;
               break;
             }
@@ -1941,14 +2195,17 @@ function _deflate($strm, $flush) {
           do {
             if (__label__ == 86) {
               var $gzhead485_pre_phi;
-              if ((HEAP32[HEAP32[$gzhead485_pre_phi >> 2] + 44 >> 2] | 0) == 0) {
+              var $158 = HEAP32[$gzhead485_pre_phi >> 2];
+              var $hcrc486 = CHECK_OVERFLOW($158 + 44, 32, 0);
+              if ((HEAP32[$hcrc486 >> 2] | 0) == 0) {
                 HEAP32[$status$s2] = 113;
               } else {
-                var $pending489$s2 = ($0 + 20 | 0) >> 2;
+                var $pending489 = CHECK_OVERFLOW($0 + 20, 32, 0), $pending489$s2 = $pending489 >> 2;
                 var $160 = HEAPU32[$pending489$s2];
-                var $pending_buf_size491 = $0 + 12 | 0;
+                var $add490 = CHECK_OVERFLOW($160 + 2, 32, 0);
+                var $pending_buf_size491 = CHECK_OVERFLOW($0 + 12, 32, 0);
                 var $161 = HEAPU32[$pending_buf_size491 >> 2];
-                if (($160 + 2 | 0) >>> 0 > $161 >>> 0) {
+                if ($add490 >>> 0 > $161 >>> 0) {
                   _flush_pending($strm);
                   var $163 = HEAP32[$pending489$s2];
                   var $162 = HEAP32[$pending_buf_size491 >> 2];
@@ -1958,29 +2215,37 @@ function _deflate($strm, $flush) {
                 }
                 var $162;
                 var $163;
-                if (($163 + 2 | 0) >>> 0 > $162 >>> 0) {
+                var $add497 = CHECK_OVERFLOW($163 + 2, 32, 0);
+                if ($add497 >>> 0 > $162 >>> 0) {
                   break;
                 }
-                var $adler502$s2 = ($strm + 48 | 0) >> 2;
+                var $adler502 = CHECK_OVERFLOW($strm + 48, 32, 0), $adler502$s2 = $adler502 >> 2;
                 var $conv504 = HEAP32[$adler502$s2] & 255;
-                HEAP32[$pending489$s2] = $163 + 1 | 0;
-                var $pending_buf507 = $0 + 8 | 0;
-                HEAP8[HEAP32[$pending_buf507 >> 2] + $163 | 0] = $conv504;
+                var $inc506 = CHECK_OVERFLOW($163 + 1, 32, 0);
+                HEAP32[$pending489$s2] = $inc506;
+                var $pending_buf507 = CHECK_OVERFLOW($0 + 8, 32, 0);
+                var $165 = HEAP32[$pending_buf507 >> 2];
+                var $arrayidx508 = CHECK_OVERFLOW($165 + $163, 32, 0);
+                HEAP8[$arrayidx508] = $conv504;
                 var $conv512 = HEAPU32[$adler502$s2] >>> 8 & 255;
                 var $167 = HEAPU32[$pending489$s2];
-                HEAP32[$pending489$s2] = $167 + 1 | 0;
-                HEAP8[HEAP32[$pending_buf507 >> 2] + $167 | 0] = $conv512;
+                var $inc514 = CHECK_OVERFLOW($167 + 1, 32, 0);
+                HEAP32[$pending489$s2] = $inc514;
+                var $168 = HEAP32[$pending_buf507 >> 2];
+                var $arrayidx516 = CHECK_OVERFLOW($168 + $167, 32, 0);
+                HEAP8[$arrayidx516] = $conv512;
                 var $call517 = _crc32(0, 0, 0);
                 HEAP32[$adler502$s2] = $call517;
                 HEAP32[$status$s2] = 113;
               }
             }
           } while (0);
-          var $pending525$s2 = ($0 + 20 | 0) >> 2;
+          var $pending525 = CHECK_OVERFLOW($0 + 20, 32, 0), $pending525$s2 = $pending525 >> 2;
           var $cmp526 = (HEAP32[$pending525$s2] | 0) == 0;
           do {
             if ($cmp526) {
-              var $171 = HEAP32[$strm$s2 + 1];
+              var $avail_in536 = CHECK_OVERFLOW($strm + 4, 32, 0);
+              var $171 = HEAP32[$avail_in536 >> 2];
               if (($171 | 0) != 0) {
                 var $172 = $171;
                 break;
@@ -1989,7 +2254,8 @@ function _deflate($strm, $flush) {
                 var $172 = $171;
                 break;
               }
-              HEAP32[$strm$s2 + 6] = STRING_TABLE.__str765 | 0;
+              var $msg546 = CHECK_OVERFLOW($strm + 24, 32, 0);
+              HEAP32[$msg546 >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str769, 32, 0);
               var $retval_0 = -5;
               break $return$$lor_lhs_false$2;
             }
@@ -1999,7 +2265,8 @@ function _deflate($strm, $flush) {
               var $retval_0 = 0;
               break $return$$lor_lhs_false$2;
             }
-            var $172 = HEAP32[$strm$s2 + 1];
+            var $avail_in553_phi_trans_insert = CHECK_OVERFLOW($strm + 4, 32, 0);
+            var $172 = HEAP32[$avail_in553_phi_trans_insert >> 2];
           } while (0);
           var $172;
           var $cmp550 = (HEAP32[$status$s2] | 0) == 666;
@@ -2010,7 +2277,8 @@ function _deflate($strm, $flush) {
                 __label__ = 103;
                 break;
               }
-              HEAP32[$strm$s2 + 6] = STRING_TABLE.__str765 | 0;
+              var $msg557 = CHECK_OVERFLOW($strm + 24, 32, 0);
+              HEAP32[$msg557 >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str769, 32, 0);
               var $retval_0 = -5;
               break $return$$lor_lhs_false$2;
             }
@@ -2023,7 +2291,8 @@ function _deflate($strm, $flush) {
           } while (0);
           do {
             if (__label__ == 103) {
-              if ((HEAP32[$0$s2 + 29] | 0) != 0) {
+              var $lookahead = CHECK_OVERFLOW($0 + 116, 32, 0);
+              if ((HEAP32[$lookahead >> 2] | 0) != 0) {
                 __label__ = 106;
                 break;
               }
@@ -2041,7 +2310,8 @@ function _deflate($strm, $flush) {
           } while (0);
           do {
             if (__label__ == 106) {
-              var $175 = HEAP32[$0$s2 + 34];
+              var $strategy573 = CHECK_OVERFLOW($0 + 136, 32, 0);
+              var $175 = HEAP32[$strategy573 >> 2];
               if ($175 == 2) {
                 var $call577 = _deflate_huff($0, $flush);
                 var $cond591 = $call577;
@@ -2049,12 +2319,16 @@ function _deflate($strm, $flush) {
                 var $call583 = _deflate_rle($0, $flush);
                 var $cond591 = $call583;
               } else {
-                var $177 = HEAP32[(_configuration_table + 8 >> 2) + (HEAP32[$0$s2 + 33] * 3 | 0)];
+                var $level585 = CHECK_OVERFLOW($0 + 132, 32, 0);
+                var $176 = HEAP32[$level585 >> 2];
+                var $func = CHECK_OVERFLOW(_configuration_table + $176 * 12 + 8, 32, 0);
+                var $177 = HEAP32[$func >> 2];
                 var $call587 = FUNCTION_TABLE[$177]($0, $flush);
                 var $cond591 = $call587;
               }
               var $cond591;
-              if (($cond591 - 2 | 0) >>> 0 < 2) {
+              var $cond591_off = CHECK_OVERFLOW($cond591 - 2, 32, 0);
+              if ($cond591_off >>> 0 < 2) {
                 HEAP32[$status$s2] = 666;
               } else {
                 __label__ = 112;
@@ -2078,17 +2352,25 @@ function _deflate($strm, $flush) {
                     if (($flush | 0) != 3) {
                       break;
                     }
-                    var $hash_size = $0 + 76 | 0;
-                    var $head = $0 + 68 | 0;
-                    HEAP16[HEAP32[$head >> 2] + (HEAP32[$hash_size >> 2] - 1 << 1) >> 1] = 0;
+                    var $hash_size = CHECK_OVERFLOW($0 + 76, 32, 0);
+                    var $182 = HEAP32[$hash_size >> 2];
+                    var $sub626 = CHECK_OVERFLOW($182 - 1, 32, 0);
+                    var $head = CHECK_OVERFLOW($0 + 68, 32, 0);
+                    var $183 = HEAP32[$head >> 2];
+                    var $arrayidx627 = CHECK_OVERFLOW(($sub626 << 1) + $183, 32, 0);
+                    HEAP16[$arrayidx627 >> 1] = 0;
                     var $185 = HEAP32[$head >> 2];
-                    var $mul = (HEAP32[$hash_size >> 2] << 1) - 2 | 0;
+                    var $sub630 = HEAP32[$hash_size >> 2] << 1;
+                    var $mul = CHECK_OVERFLOW($sub630 - 2, 32, 0);
                     _memset($185, 0, $mul, 1);
-                    if ((HEAP32[$0$s2 + 29] | 0) != 0) {
+                    var $lookahead631 = CHECK_OVERFLOW($0 + 116, 32, 0);
+                    if ((HEAP32[$lookahead631 >> 2] | 0) != 0) {
                       break;
                     }
-                    HEAP32[$0$s2 + 27] = 0;
-                    HEAP32[$0$s2 + 23] = 0;
+                    var $strstart635 = CHECK_OVERFLOW($0 + 108, 32, 0);
+                    HEAP32[$strstart635 >> 2] = 0;
+                    var $block_start = CHECK_OVERFLOW($0 + 92, 32, 0);
+                    HEAP32[$block_start >> 2] = 0;
                   }
                 } while (0);
                 _flush_pending($strm);
@@ -2107,51 +2389,74 @@ function _deflate($strm, $flush) {
             var $retval_0 = 0;
             break $return$$lor_lhs_false$2;
           }
-          var $wrap652$s2 = ($0 + 24 | 0) >> 2;
+          var $wrap652 = CHECK_OVERFLOW($0 + 24, 32, 0), $wrap652$s2 = $wrap652 >> 2;
           var $189 = HEAP32[$wrap652$s2];
           if (($189 | 0) < 1) {
             var $retval_0 = 1;
             break $return$$lor_lhs_false$2;
           }
-          var $adler661$s2 = ($strm + 48 | 0) >> 2;
+          var $cmp658 = ($189 | 0) == 2;
+          var $adler661 = CHECK_OVERFLOW($strm + 48, 32, 0), $adler661$s2 = $adler661 >> 2;
           var $190 = HEAPU32[$adler661$s2];
-          if (($189 | 0) == 2) {
+          if ($cmp658) {
             var $conv663 = $190 & 255;
             var $191 = HEAP32[$pending525$s2];
-            var $inc665 = $191 + 1 | 0;
+            var $inc665 = CHECK_OVERFLOW($191 + 1, 32, 0);
             HEAP32[$pending525$s2] = $inc665;
-            var $pending_buf666$s2 = ($0 + 8 | 0) >> 2;
-            HEAP8[HEAP32[$pending_buf666$s2] + $191 | 0] = $conv663;
+            var $pending_buf666 = CHECK_OVERFLOW($0 + 8, 32, 0), $pending_buf666$s2 = $pending_buf666 >> 2;
+            var $192 = HEAP32[$pending_buf666$s2];
+            var $arrayidx667 = CHECK_OVERFLOW($192 + $191, 32, 0);
+            HEAP8[$arrayidx667] = $conv663;
             var $conv671 = HEAPU32[$adler661$s2] >>> 8 & 255;
             var $194 = HEAPU32[$pending525$s2];
-            HEAP32[$pending525$s2] = $194 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf666$s2] + $194 | 0] = $conv671;
+            var $inc673 = CHECK_OVERFLOW($194 + 1, 32, 0);
+            HEAP32[$pending525$s2] = $inc673;
+            var $195 = HEAP32[$pending_buf666$s2];
+            var $arrayidx675 = CHECK_OVERFLOW($195 + $194, 32, 0);
+            HEAP8[$arrayidx675] = $conv671;
             var $conv679 = HEAPU32[$adler661$s2] >>> 16 & 255;
             var $197 = HEAPU32[$pending525$s2];
-            HEAP32[$pending525$s2] = $197 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf666$s2] + $197 | 0] = $conv679;
+            var $inc681 = CHECK_OVERFLOW($197 + 1, 32, 0);
+            HEAP32[$pending525$s2] = $inc681;
+            var $198 = HEAP32[$pending_buf666$s2];
+            var $arrayidx683 = CHECK_OVERFLOW($198 + $197, 32, 0);
+            HEAP8[$arrayidx683] = $conv679;
             var $conv687 = HEAPU32[$adler661$s2] >>> 24 & 255;
             var $200 = HEAPU32[$pending525$s2];
-            HEAP32[$pending525$s2] = $200 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf666$s2] + $200 | 0] = $conv687;
-            var $total_in$s2 = ($strm + 8 | 0) >> 2;
+            var $inc689 = CHECK_OVERFLOW($200 + 1, 32, 0);
+            HEAP32[$pending525$s2] = $inc689;
+            var $201 = HEAP32[$pending_buf666$s2];
+            var $arrayidx691 = CHECK_OVERFLOW($201 + $200, 32, 0);
+            HEAP8[$arrayidx691] = $conv687;
+            var $total_in = CHECK_OVERFLOW($strm + 8, 32, 0), $total_in$s2 = $total_in >> 2;
             var $conv693 = HEAP32[$total_in$s2] & 255;
             var $203 = HEAP32[$pending525$s2];
-            var $inc695 = $203 + 1 | 0;
+            var $inc695 = CHECK_OVERFLOW($203 + 1, 32, 0);
             HEAP32[$pending525$s2] = $inc695;
-            HEAP8[HEAP32[$pending_buf666$s2] + $203 | 0] = $conv693;
+            var $204 = HEAP32[$pending_buf666$s2];
+            var $arrayidx697 = CHECK_OVERFLOW($204 + $203, 32, 0);
+            HEAP8[$arrayidx697] = $conv693;
             var $conv701 = HEAPU32[$total_in$s2] >>> 8 & 255;
             var $206 = HEAPU32[$pending525$s2];
-            HEAP32[$pending525$s2] = $206 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf666$s2] + $206 | 0] = $conv701;
+            var $inc703 = CHECK_OVERFLOW($206 + 1, 32, 0);
+            HEAP32[$pending525$s2] = $inc703;
+            var $207 = HEAP32[$pending_buf666$s2];
+            var $arrayidx705 = CHECK_OVERFLOW($207 + $206, 32, 0);
+            HEAP8[$arrayidx705] = $conv701;
             var $conv709 = HEAPU32[$total_in$s2] >>> 16 & 255;
             var $209 = HEAPU32[$pending525$s2];
-            HEAP32[$pending525$s2] = $209 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf666$s2] + $209 | 0] = $conv709;
+            var $inc711 = CHECK_OVERFLOW($209 + 1, 32, 0);
+            HEAP32[$pending525$s2] = $inc711;
+            var $210 = HEAP32[$pending_buf666$s2];
+            var $arrayidx713 = CHECK_OVERFLOW($210 + $209, 32, 0);
+            HEAP8[$arrayidx713] = $conv709;
             var $conv717 = HEAPU32[$total_in$s2] >>> 24 & 255;
             var $212 = HEAPU32[$pending525$s2];
-            HEAP32[$pending525$s2] = $212 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf666$s2] + $212 | 0] = $conv717;
+            var $inc719 = CHECK_OVERFLOW($212 + 1, 32, 0);
+            HEAP32[$pending525$s2] = $inc719;
+            var $213 = HEAP32[$pending_buf666$s2];
+            var $arrayidx721 = CHECK_OVERFLOW($213 + $212, 32, 0);
+            HEAP8[$arrayidx721] = $conv717;
           } else {
             var $shr724 = $190 >>> 16;
             _putShortMSB($0, $shr724);
@@ -2161,14 +2466,15 @@ function _deflate($strm, $flush) {
           _flush_pending($strm);
           var $215 = HEAP32[$wrap652$s2];
           if (($215 | 0) > 0) {
-            var $sub733 = -$215 | 0;
+            var $sub733 = CHECK_OVERFLOW(-$215, 32, 0);
             HEAP32[$wrap652$s2] = $sub733;
           }
           var $retval_0 = (HEAP32[$pending525$s2] | 0) == 0 & 1;
           break $return$$lor_lhs_false$2;
         }
       } while (0);
-      HEAP32[$strm$s2 + 6] = STRING_TABLE.__str462 | 0;
+      var $msg = CHECK_OVERFLOW($strm + 24, 32, 0);
+      HEAP32[$msg >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str466, 32, 0);
       var $retval_0 = -2;
     }
   } while (0);
@@ -2182,16 +2488,21 @@ _deflate["X"] = 1;
 function _putShortMSB($s, $b) {
   var $pending$s2;
   var $conv = $b >>> 8 & 255;
-  var $pending$s2 = ($s + 20 | 0) >> 2;
+  var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
   var $0 = HEAPU32[$pending$s2];
-  HEAP32[$pending$s2] = $0 + 1 | 0;
-  var $pending_buf = $s + 8 | 0;
-  HEAP8[HEAP32[$pending_buf >> 2] + $0 | 0] = $conv;
+  var $inc = CHECK_OVERFLOW($0 + 1, 32, 0);
+  HEAP32[$pending$s2] = $inc;
+  var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0);
+  var $1 = HEAP32[$pending_buf >> 2];
+  var $arrayidx = CHECK_OVERFLOW($1 + $0, 32, 0);
+  HEAP8[$arrayidx] = $conv;
   var $conv1 = $b & 255;
   var $2 = HEAP32[$pending$s2];
-  var $inc3 = $2 + 1 | 0;
+  var $inc3 = CHECK_OVERFLOW($2 + 1, 32, 0);
   HEAP32[$pending$s2] = $inc3;
-  HEAP8[HEAP32[$pending_buf >> 2] + $2 | 0] = $conv1;
+  var $3 = HEAP32[$pending_buf >> 2];
+  var $arrayidx5 = CHECK_OVERFLOW($3 + $2, 32, 0);
+  HEAP8[$arrayidx5] = $conv1;
   return;
   return;
 }
@@ -2200,38 +2511,49 @@ function _flush_pending($strm) {
   var $next_out$s2;
   var $avail_out$s2;
   var $state$s2;
-  var $state$s2 = ($strm + 28 | 0) >> 2;
+  var $state = CHECK_OVERFLOW($strm + 28, 32, 0), $state$s2 = $state >> 2;
   var $0 = HEAPU32[$state$s2];
-  var $1 = HEAPU32[$0 + 20 >> 2];
-  var $avail_out$s2 = ($strm + 16 | 0) >> 2;
+  var $pending = CHECK_OVERFLOW($0 + 20, 32, 0);
+  var $1 = HEAPU32[$pending >> 2];
+  var $avail_out = CHECK_OVERFLOW($strm + 16, 32, 0), $avail_out$s2 = $avail_out >> 2;
   var $2 = HEAPU32[$avail_out$s2];
   var $len_0 = $1 >>> 0 > $2 >>> 0 ? $2 : $1;
   var $cmp2 = ($len_0 | 0) == 0;
   do {
     if (!$cmp2) {
-      var $next_out$s2 = ($strm + 12 | 0) >> 2;
+      var $next_out = CHECK_OVERFLOW($strm + 12, 32, 0), $next_out$s2 = $next_out >> 2;
       var $3 = HEAP32[$next_out$s2];
-      var $4 = HEAP32[$0 + 16 >> 2];
+      var $pending_out = CHECK_OVERFLOW($0 + 16, 32, 0);
+      var $4 = HEAP32[$pending_out >> 2];
       _memcpy($3, $4, $len_0, 1);
-      var $add_ptr = HEAP32[$next_out$s2] + $len_0 | 0;
+      var $5 = HEAP32[$next_out$s2];
+      var $add_ptr = CHECK_OVERFLOW($5 + $len_0, 32, 0);
       HEAP32[$next_out$s2] = $add_ptr;
-      var $pending_out8 = HEAP32[$state$s2] + 16 | 0;
-      var $add_ptr9 = HEAP32[$pending_out8 >> 2] + $len_0 | 0;
+      var $6 = HEAP32[$state$s2];
+      var $pending_out8 = CHECK_OVERFLOW($6 + 16, 32, 0);
+      var $7 = HEAP32[$pending_out8 >> 2];
+      var $add_ptr9 = CHECK_OVERFLOW($7 + $len_0, 32, 0);
       HEAP32[$pending_out8 >> 2] = $add_ptr9;
-      var $total_out = $strm + 20 | 0;
-      var $add = HEAP32[$total_out >> 2] + $len_0 | 0;
+      var $total_out = CHECK_OVERFLOW($strm + 20, 32, 0);
+      var $8 = HEAP32[$total_out >> 2];
+      var $add = CHECK_OVERFLOW($8 + $len_0, 32, 0);
       HEAP32[$total_out >> 2] = $add;
-      var $sub = HEAP32[$avail_out$s2] - $len_0 | 0;
+      var $9 = HEAP32[$avail_out$s2];
+      var $sub = CHECK_OVERFLOW($9 - $len_0, 32, 0);
       HEAP32[$avail_out$s2] = $sub;
-      var $pending12 = HEAP32[$state$s2] + 20 | 0;
-      var $sub13 = HEAP32[$pending12 >> 2] - $len_0 | 0;
+      var $10 = HEAP32[$state$s2];
+      var $pending12 = CHECK_OVERFLOW($10 + 20, 32, 0);
+      var $11 = HEAP32[$pending12 >> 2];
+      var $sub13 = CHECK_OVERFLOW($11 - $len_0, 32, 0);
       HEAP32[$pending12 >> 2] = $sub13;
       var $12 = HEAP32[$state$s2];
-      if ((HEAP32[$12 + 20 >> 2] | 0) != 0) {
+      var $pending15 = CHECK_OVERFLOW($12 + 20, 32, 0);
+      if ((HEAP32[$pending15 >> 2] | 0) != 0) {
         break;
       }
-      var $14 = HEAP32[$12 + 8 >> 2];
-      var $pending_out20 = $12 + 16 | 0;
+      var $pending_buf = CHECK_OVERFLOW($12 + 8, 32, 0);
+      var $14 = HEAP32[$pending_buf >> 2];
+      var $pending_out20 = CHECK_OVERFLOW($12 + 16, 32, 0);
       HEAP32[$pending_out20 >> 2] = $14;
     }
   } while (0);
@@ -2246,17 +2568,17 @@ function _deflate_huff($s, $flush) {
   var $window$s2;
   var $strstart$s2;
   var $lookahead$s2;
-  var $lookahead$s2 = ($s + 116 | 0) >> 2;
-  var $match_length = $s + 96 | 0;
-  var $strstart$s2 = ($s + 108 | 0) >> 2;
-  var $window$s2 = ($s + 56 | 0) >> 2;
-  var $last_lit$s2 = ($s + 5792 | 0) >> 2;
-  var $d_buf = $s + 5796 | 0;
-  var $l_buf = $s + 5784 | 0;
-  var $lit_bufsize = $s + 5788 | 0;
-  var $block_start$s2 = ($s + 92 | 0) >> 2;
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0), $lookahead$s2 = $lookahead >> 2;
+  var $match_length = CHECK_OVERFLOW($s + 96, 32, 0);
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0), $strstart$s2 = $strstart >> 2;
+  var $window = CHECK_OVERFLOW($s + 56, 32, 0), $window$s2 = $window >> 2;
+  var $last_lit = CHECK_OVERFLOW($s + 5792, 32, 0), $last_lit$s2 = $last_lit >> 2;
+  var $d_buf = CHECK_OVERFLOW($s + 5796, 32, 0);
+  var $l_buf = CHECK_OVERFLOW($s + 5784, 32, 0);
+  var $lit_bufsize = CHECK_OVERFLOW($s + 5788, 32, 0);
+  var $block_start = CHECK_OVERFLOW($s + 92, 32, 0), $block_start$s2 = $block_start >> 2;
   var $0 = $s;
-  var $strm$s2 = ($s | 0) >> 2;
+  var $strm = CHECK_OVERFLOW($s, 32, 0), $strm$s2 = $strm >> 2;
   $for_cond$8 : while (1) {
     var $cmp = (HEAP32[$lookahead$s2] | 0) == 0;
     do {
@@ -2271,12 +2593,15 @@ function _deflate_huff($s, $flush) {
         }
         var $21 = HEAP32[$block_start$s2];
         if (($21 | 0) > -1) {
-          var $cond44 = HEAP32[$window$s2] + $21 | 0;
+          var $22 = HEAP32[$window$s2];
+          var $arrayidx41 = CHECK_OVERFLOW($22 + $21, 32, 0);
+          var $cond44 = $arrayidx41;
         } else {
           var $cond44 = 0;
         }
         var $cond44;
-        var $sub47 = HEAP32[$strstart$s2] - $21 | 0;
+        var $23 = HEAP32[$strstart$s2];
+        var $sub47 = CHECK_OVERFLOW($23 - $21, 32, 0);
         var $cmp48 = ($flush | 0) == 4;
         var $conv49 = $cmp48 & 1;
         __tr_flush_block($0, $cond44, $sub47, $conv49);
@@ -2284,7 +2609,9 @@ function _deflate_huff($s, $flush) {
         HEAP32[$block_start$s2] = $24;
         var $25 = HEAP32[$strm$s2];
         _flush_pending($25);
-        if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+        var $26 = HEAP32[$strm$s2];
+        var $avail_out54 = CHECK_OVERFLOW($26 + 16, 32, 0);
+        if ((HEAP32[$avail_out54 >> 2] | 0) == 0) {
           var $cond60 = $cmp48 ? 2 : 0;
           var $retval_0 = $cond60;
           break $for_cond$8;
@@ -2295,37 +2622,56 @@ function _deflate_huff($s, $flush) {
       }
     } while (0);
     HEAP32[$match_length >> 2] = 0;
-    var $5 = HEAPU8[HEAP32[$window$s2] + HEAP32[$strstart$s2] | 0];
-    HEAP16[HEAP32[$d_buf >> 2] + (HEAP32[$last_lit$s2] << 1) >> 1] = 0;
+    var $3 = HEAP32[$strstart$s2];
+    var $4 = HEAP32[$window$s2];
+    var $arrayidx = CHECK_OVERFLOW($4 + $3, 32, 0);
+    var $5 = HEAPU8[$arrayidx];
+    var $6 = HEAP32[$last_lit$s2];
+    var $7 = HEAP32[$d_buf >> 2];
+    var $arrayidx8 = CHECK_OVERFLOW(($6 << 1) + $7, 32, 0);
+    HEAP16[$arrayidx8 >> 1] = 0;
     var $8 = HEAP32[$last_lit$s2];
-    var $inc = $8 + 1 | 0;
+    var $inc = CHECK_OVERFLOW($8 + 1, 32, 0);
     HEAP32[$last_lit$s2] = $inc;
-    HEAP8[HEAP32[$l_buf >> 2] + $8 | 0] = $5;
-    var $freq = (($5 & 255) << 2) + $s + 148 | 0;
-    var $inc12 = HEAP16[$freq >> 1] + 1 & 65535;
+    var $9 = HEAP32[$l_buf >> 2];
+    var $arrayidx10 = CHECK_OVERFLOW($9 + $8, 32, 0);
+    HEAP8[$arrayidx10] = $5;
+    var $idxprom = $5 & 255;
+    var $freq = CHECK_OVERFLOW(($idxprom << 2) + $s + 148, 32, 0);
+    var $10 = HEAP16[$freq >> 1];
+    var $inc12 = CHECK_OVERFLOW($10 + 1, 16, 0);
     HEAP16[$freq >> 1] = $inc12;
-    var $cmp14 = (HEAP32[$last_lit$s2] | 0) == (HEAP32[$lit_bufsize >> 2] - 1 | 0);
-    var $dec = HEAP32[$lookahead$s2] - 1 | 0;
+    var $11 = HEAP32[$last_lit$s2];
+    var $12 = HEAP32[$lit_bufsize >> 2];
+    var $sub = CHECK_OVERFLOW($12 - 1, 32, 0);
+    var $cmp14 = ($11 | 0) == ($sub | 0);
+    var $13 = HEAP32[$lookahead$s2];
+    var $dec = CHECK_OVERFLOW($13 - 1, 32, 0);
     HEAP32[$lookahead$s2] = $dec;
-    var $inc17 = HEAP32[$strstart$s2] + 1 | 0;
+    var $14 = HEAP32[$strstart$s2];
+    var $inc17 = CHECK_OVERFLOW($14 + 1, 32, 0);
     HEAP32[$strstart$s2] = $inc17;
     if (!$cmp14) {
       continue;
     }
     var $15 = HEAP32[$block_start$s2];
     if (($15 | 0) > -1) {
-      var $cond = HEAP32[$window$s2] + $15 | 0;
+      var $16 = HEAP32[$window$s2];
+      var $arrayidx23 = CHECK_OVERFLOW($16 + $15, 32, 0);
+      var $cond = $arrayidx23;
     } else {
       var $cond = 0;
     }
     var $cond;
-    var $sub26 = $inc17 - $15 | 0;
+    var $sub26 = CHECK_OVERFLOW($inc17 - $15, 32, 0);
     __tr_flush_block($0, $cond, $sub26, 0);
     var $17 = HEAP32[$strstart$s2];
     HEAP32[$block_start$s2] = $17;
     var $18 = HEAP32[$strm$s2];
     _flush_pending($18);
-    if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+    var $19 = HEAP32[$strm$s2];
+    var $avail_out = CHECK_OVERFLOW($19 + 16, 32, 0);
+    if ((HEAP32[$avail_out >> 2] | 0) == 0) {
       var $retval_0 = 0;
       break;
     }
@@ -2346,19 +2692,19 @@ function _deflate_rle($s, $flush) {
   var $match_length$s2;
   var $lookahead$s2;
   var __label__;
-  var $lookahead$s2 = ($s + 116 | 0) >> 2;
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0), $lookahead$s2 = $lookahead >> 2;
   var $cmp3 = ($flush | 0) == 0;
-  var $match_length$s2 = ($s + 96 | 0) >> 2;
-  var $strstart$s2 = ($s + 108 | 0) >> 2;
-  var $last_lit$s2 = ($s + 5792 | 0) >> 2;
-  var $d_buf = $s + 5796 | 0;
-  var $l_buf = $s + 5784 | 0;
-  var $freq113 = $s + 2440 | 0;
-  var $lit_bufsize = $s + 5788 | 0;
-  var $window$s2 = ($s + 56 | 0) >> 2;
-  var $block_start$s2 = ($s + 92 | 0) >> 2;
+  var $match_length = CHECK_OVERFLOW($s + 96, 32, 0), $match_length$s2 = $match_length >> 2;
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0), $strstart$s2 = $strstart >> 2;
+  var $last_lit = CHECK_OVERFLOW($s + 5792, 32, 0), $last_lit$s2 = $last_lit >> 2;
+  var $d_buf = CHECK_OVERFLOW($s + 5796, 32, 0);
+  var $l_buf = CHECK_OVERFLOW($s + 5784, 32, 0);
+  var $freq113 = CHECK_OVERFLOW($s + 2440, 32, 0);
+  var $lit_bufsize = CHECK_OVERFLOW($s + 5788, 32, 0);
+  var $window = CHECK_OVERFLOW($s + 56, 32, 0), $window$s2 = $window >> 2;
+  var $block_start = CHECK_OVERFLOW($s + 92, 32, 0), $block_start$s2 = $block_start >> 2;
   var $0 = $s;
-  var $strm$s2 = ($s | 0) >> 2;
+  var $strm = CHECK_OVERFLOW($s, 32, 0), $strm$s2 = $strm >> 2;
   $for_cond$27 : while (1) {
     var $1 = HEAPU32[$lookahead$s2];
     var $cmp = $1 >>> 0 < 258;
@@ -2388,12 +2734,15 @@ function _deflate_rle($s, $flush) {
       }
       var $49 = HEAP32[$block_start$s2];
       if (($49 | 0) > -1) {
-        var $cond182 = HEAP32[$window$s2] + $49 | 0;
+        var $50 = HEAP32[$window$s2];
+        var $arrayidx179 = CHECK_OVERFLOW($50 + $49, 32, 0);
+        var $cond182 = $arrayidx179;
       } else {
         var $cond182 = 0;
       }
       var $cond182;
-      var $sub185 = HEAP32[$strstart$s2] - $49 | 0;
+      var $51 = HEAP32[$strstart$s2];
+      var $sub185 = CHECK_OVERFLOW($51 - $49, 32, 0);
       var $cmp186 = ($flush | 0) == 4;
       var $conv187 = $cmp186 & 1;
       __tr_flush_block($0, $cond182, $sub185, $conv187);
@@ -2401,7 +2750,9 @@ function _deflate_rle($s, $flush) {
       HEAP32[$block_start$s2] = $52;
       var $53 = HEAP32[$strm$s2];
       _flush_pending($53);
-      if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+      var $54 = HEAP32[$strm$s2];
+      var $avail_out192 = CHECK_OVERFLOW($54 + 16, 32, 0);
+      if ((HEAP32[$avail_out192 >> 2] | 0) == 0) {
         var $cond198 = $cmp186 ? 2 : 0;
         var $retval_0 = $cond198;
         break $for_cond$27;
@@ -2420,63 +2771,70 @@ function _deflate_rle($s, $flush) {
           break;
         }
         var $5 = HEAPU32[$window$s2];
-        var $6 = HEAPU8[$5 + ($4 - 1) | 0];
-        if ($6 << 24 >> 24 != HEAP8[$5 + $4 | 0] << 24 >> 24) {
+        var $add_ptr_sum = CHECK_OVERFLOW($4 - 1, 32, 0);
+        var $add_ptr16 = CHECK_OVERFLOW($5 + $add_ptr_sum, 32, 0);
+        var $6 = HEAPU8[$add_ptr16];
+        var $incdec_ptr = CHECK_OVERFLOW($5 + $4, 32, 0);
+        if ($6 << 24 >> 24 != HEAP8[$incdec_ptr] << 24 >> 24) {
           var $30 = $4;
           __label__ = 22;
           break;
         }
-        if ($6 << 24 >> 24 != HEAP8[$4 + ($5 + 1) | 0] << 24 >> 24) {
+        var $incdec_ptr_sum = CHECK_OVERFLOW($4 + 1, 32, 0);
+        var $incdec_ptr21 = CHECK_OVERFLOW($5 + $incdec_ptr_sum, 32, 0);
+        if ($6 << 24 >> 24 != HEAP8[$incdec_ptr21] << 24 >> 24) {
           var $30 = $4;
           __label__ = 22;
           break;
         }
-        var $incdec_ptr26 = $4 + ($5 + 2) | 0;
+        var $incdec_ptr21_sum = CHECK_OVERFLOW($4 + 2, 32, 0);
+        var $incdec_ptr26 = CHECK_OVERFLOW($5 + $incdec_ptr21_sum, 32, 0);
         if ($6 << 24 >> 24 != HEAP8[$incdec_ptr26] << 24 >> 24) {
           var $30 = $4;
           __label__ = 22;
           break;
         }
-        var $add_ptr34 = $4 + ($5 + 258) | 0;
+        var $add_ptr_sum9 = CHECK_OVERFLOW($4 + 258, 32, 0);
+        var $add_ptr34 = CHECK_OVERFLOW($5 + $add_ptr_sum9, 32, 0);
         var $scan_0 = $incdec_ptr26;
         while (1) {
           var $scan_0;
-          var $incdec_ptr35 = $scan_0 + 1 | 0;
+          var $incdec_ptr35 = CHECK_OVERFLOW($scan_0 + 1, 32, 0);
           if ($6 << 24 >> 24 != HEAP8[$incdec_ptr35] << 24 >> 24) {
             var $scan_1 = $incdec_ptr35;
             break;
           }
-          var $incdec_ptr40 = $scan_0 + 2 | 0;
+          var $incdec_ptr40 = CHECK_OVERFLOW($scan_0 + 2, 32, 0);
           if ($6 << 24 >> 24 != HEAP8[$incdec_ptr40] << 24 >> 24) {
             var $scan_1 = $incdec_ptr40;
             break;
           }
-          var $incdec_ptr45 = $scan_0 + 3 | 0;
+          var $incdec_ptr45 = CHECK_OVERFLOW($scan_0 + 3, 32, 0);
           if ($6 << 24 >> 24 != HEAP8[$incdec_ptr45] << 24 >> 24) {
             var $scan_1 = $incdec_ptr45;
             break;
           }
-          var $incdec_ptr50 = $scan_0 + 4 | 0;
+          var $incdec_ptr50 = CHECK_OVERFLOW($scan_0 + 4, 32, 0);
           if ($6 << 24 >> 24 != HEAP8[$incdec_ptr50] << 24 >> 24) {
             var $scan_1 = $incdec_ptr50;
             break;
           }
-          var $incdec_ptr55 = $scan_0 + 5 | 0;
+          var $incdec_ptr55 = CHECK_OVERFLOW($scan_0 + 5, 32, 0);
           if ($6 << 24 >> 24 != HEAP8[$incdec_ptr55] << 24 >> 24) {
             var $scan_1 = $incdec_ptr55;
             break;
           }
-          var $incdec_ptr60 = $scan_0 + 6 | 0;
+          var $incdec_ptr60 = CHECK_OVERFLOW($scan_0 + 6, 32, 0);
           if ($6 << 24 >> 24 != HEAP8[$incdec_ptr60] << 24 >> 24) {
             var $scan_1 = $incdec_ptr60;
             break;
           }
-          var $incdec_ptr65 = $scan_0 + 7 | 0;
+          var $incdec_ptr65 = CHECK_OVERFLOW($scan_0 + 7, 32, 0);
           if ($6 << 24 >> 24 != HEAP8[$incdec_ptr65] << 24 >> 24) {
             var $scan_1 = $incdec_ptr65;
             break;
           }
-          var $incdec_ptr70 = $scan_0 + 8 | 0;
+          var $incdec_ptr70 = CHECK_OVERFLOW($scan_0 + 8, 32, 0);
           if (!($6 << 24 >> 24 == HEAP8[$incdec_ptr70] << 24 >> 24 & $incdec_ptr70 >>> 0 < $add_ptr34 >>> 0)) {
             var $scan_1 = $incdec_ptr70;
             break;
@@ -2484,7 +2842,9 @@ function _deflate_rle($s, $flush) {
           var $scan_0 = $incdec_ptr70;
         }
         var $scan_1;
-        var $sub = $scan_1 - $add_ptr34 + 258 | 0;
+        var $sub_ptr_lhs_cast = $add_ptr34;
+        var $sub_ptr_sub10 = CHECK_OVERFLOW($scan_1 - $sub_ptr_lhs_cast, 32, 0);
+        var $sub = CHECK_OVERFLOW($sub_ptr_sub10 + 258, 32, 0);
         var $storemerge = $sub >>> 0 > $3 >>> 0 ? $3 : $sub;
         HEAP32[$match_length$s2] = $storemerge;
         if ($storemerge >>> 0 <= 2) {
@@ -2492,24 +2852,39 @@ function _deflate_rle($s, $flush) {
           __label__ = 22;
           break;
         }
-        var $sub92 = $storemerge + 253 | 0;
+        var $sub92 = CHECK_OVERFLOW($storemerge + 253, 32, 0);
         var $conv93 = $sub92 & 255;
-        HEAP16[HEAP32[$d_buf >> 2] + (HEAP32[$last_lit$s2] << 1) >> 1] = 1;
+        var $18 = HEAP32[$last_lit$s2];
+        var $19 = HEAP32[$d_buf >> 2];
+        var $arrayidx = CHECK_OVERFLOW(($18 << 1) + $19, 32, 0);
+        HEAP16[$arrayidx >> 1] = 1;
         var $20 = HEAP32[$last_lit$s2];
-        var $inc = $20 + 1 | 0;
+        var $inc = CHECK_OVERFLOW($20 + 1, 32, 0);
         HEAP32[$last_lit$s2] = $inc;
-        HEAP8[HEAP32[$l_buf >> 2] + $20 | 0] = $conv93;
-        var $arrayidx96 = STRING_TABLE.__length_code + ($sub92 & 255) | 0;
-        var $freq = ((HEAPU8[$arrayidx96] & 255 | 256) + 1 << 2) + $s + 148 | 0;
-        var $inc100 = HEAP16[$freq >> 1] + 1 & 65535;
+        var $21 = HEAP32[$l_buf >> 2];
+        var $arrayidx95 = CHECK_OVERFLOW($21 + $20, 32, 0);
+        HEAP8[$arrayidx95] = $conv93;
+        var $idxprom = $sub92 & 255;
+        var $arrayidx96 = CHECK_OVERFLOW(STRING_TABLE.__length_code + $idxprom, 32, 0);
+        var $add8 = HEAPU8[$arrayidx96] & 255 | 256;
+        var $add98 = CHECK_OVERFLOW($add8 + 1, 32, 0);
+        var $freq = CHECK_OVERFLOW(($add98 << 2) + $s + 148, 32, 0);
+        var $23 = HEAP16[$freq >> 1];
+        var $inc100 = CHECK_OVERFLOW($23 + 1, 16, 0);
         HEAP16[$freq >> 1] = $inc100;
-        var $inc114 = HEAP16[$freq113 >> 1] + 1 & 65535;
+        var $24 = HEAP16[$freq113 >> 1];
+        var $inc114 = CHECK_OVERFLOW($24 + 1, 16, 0);
         HEAP16[$freq113 >> 1] = $inc114;
-        var $conv118 = (HEAP32[$last_lit$s2] | 0) == (HEAP32[$lit_bufsize >> 2] - 1 | 0) & 1;
+        var $25 = HEAP32[$last_lit$s2];
+        var $26 = HEAP32[$lit_bufsize >> 2];
+        var $sub116 = CHECK_OVERFLOW($26 - 1, 32, 0);
+        var $conv118 = ($25 | 0) == ($sub116 | 0) & 1;
         var $27 = HEAP32[$match_length$s2];
-        var $sub121 = HEAP32[$lookahead$s2] - $27 | 0;
+        var $28 = HEAP32[$lookahead$s2];
+        var $sub121 = CHECK_OVERFLOW($28 - $27, 32, 0);
         HEAP32[$lookahead$s2] = $sub121;
-        var $add124 = HEAP32[$strstart$s2] + $27 | 0;
+        var $29 = HEAP32[$strstart$s2];
+        var $add124 = CHECK_OVERFLOW($29 + $27, 32, 0);
         HEAP32[$strstart$s2] = $add124;
         HEAP32[$match_length$s2] = 0;
         var $bflush_0 = $conv118;
@@ -2520,19 +2895,33 @@ function _deflate_rle($s, $flush) {
     } while (0);
     if (__label__ == 22) {
       var $30;
-      var $32 = HEAPU8[HEAP32[$window$s2] + $30 | 0];
-      HEAP16[HEAP32[$d_buf >> 2] + (HEAP32[$last_lit$s2] << 1) >> 1] = 0;
+      var $31 = HEAP32[$window$s2];
+      var $arrayidx128 = CHECK_OVERFLOW($31 + $30, 32, 0);
+      var $32 = HEAPU8[$arrayidx128];
+      var $33 = HEAP32[$last_lit$s2];
+      var $34 = HEAP32[$d_buf >> 2];
+      var $arrayidx131 = CHECK_OVERFLOW(($33 << 1) + $34, 32, 0);
+      HEAP16[$arrayidx131 >> 1] = 0;
       var $35 = HEAP32[$last_lit$s2];
-      var $inc133 = $35 + 1 | 0;
+      var $inc133 = CHECK_OVERFLOW($35 + 1, 32, 0);
       HEAP32[$last_lit$s2] = $inc133;
-      HEAP8[HEAP32[$l_buf >> 2] + $35 | 0] = $32;
-      var $freq140 = (($32 & 255) << 2) + $s + 148 | 0;
-      var $inc141 = HEAP16[$freq140 >> 1] + 1 & 65535;
+      var $36 = HEAP32[$l_buf >> 2];
+      var $arrayidx135 = CHECK_OVERFLOW($36 + $35, 32, 0);
+      HEAP8[$arrayidx135] = $32;
+      var $idxprom136 = $32 & 255;
+      var $freq140 = CHECK_OVERFLOW(($idxprom136 << 2) + $s + 148, 32, 0);
+      var $37 = HEAP16[$freq140 >> 1];
+      var $inc141 = CHECK_OVERFLOW($37 + 1, 16, 0);
       HEAP16[$freq140 >> 1] = $inc141;
-      var $conv146 = (HEAP32[$last_lit$s2] | 0) == (HEAP32[$lit_bufsize >> 2] - 1 | 0) & 1;
-      var $dec148 = HEAP32[$lookahead$s2] - 1 | 0;
+      var $38 = HEAP32[$last_lit$s2];
+      var $39 = HEAP32[$lit_bufsize >> 2];
+      var $sub144 = CHECK_OVERFLOW($39 - 1, 32, 0);
+      var $conv146 = ($38 | 0) == ($sub144 | 0) & 1;
+      var $40 = HEAP32[$lookahead$s2];
+      var $dec148 = CHECK_OVERFLOW($40 - 1, 32, 0);
       HEAP32[$lookahead$s2] = $dec148;
-      var $inc150 = HEAP32[$strstart$s2] + 1 | 0;
+      var $41 = HEAP32[$strstart$s2];
+      var $inc150 = CHECK_OVERFLOW($41 + 1, 32, 0);
       HEAP32[$strstart$s2] = $inc150;
       var $bflush_0 = $conv146;
       var $42 = $inc150;
@@ -2544,18 +2933,22 @@ function _deflate_rle($s, $flush) {
     }
     var $43 = HEAP32[$block_start$s2];
     if (($43 | 0) > -1) {
-      var $cond161 = HEAP32[$window$s2] + $43 | 0;
+      var $44 = HEAP32[$window$s2];
+      var $arrayidx158 = CHECK_OVERFLOW($44 + $43, 32, 0);
+      var $cond161 = $arrayidx158;
     } else {
       var $cond161 = 0;
     }
     var $cond161;
-    var $sub164 = $42 - $43 | 0;
+    var $sub164 = CHECK_OVERFLOW($42 - $43, 32, 0);
     __tr_flush_block($0, $cond161, $sub164, 0);
     var $45 = HEAP32[$strstart$s2];
     HEAP32[$block_start$s2] = $45;
     var $46 = HEAP32[$strm$s2];
     _flush_pending($46);
-    if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+    var $47 = HEAP32[$strm$s2];
+    var $avail_out = CHECK_OVERFLOW($47 + 16, 32, 0);
+    if ((HEAP32[$avail_out >> 2] | 0) == 0) {
       var $retval_0 = 0;
       break;
     }
@@ -2573,103 +2966,126 @@ function _fill_window($s) {
   var $strstart$s2;
   var $lookahead$s2;
   var __label__;
-  var $w_size = $s + 44 | 0;
+  var $w_size = CHECK_OVERFLOW($s + 44, 32, 0);
   var $0 = HEAPU32[$w_size >> 2];
-  var $window_size = $s + 60 | 0;
-  var $lookahead$s2 = ($s + 116 | 0) >> 2;
-  var $strstart$s2 = ($s + 108 | 0) >> 2;
-  var $sub4 = $0 - 262 | 0;
-  var $strm = $s | 0;
-  var $window37$s2 = ($s + 56 | 0) >> 2;
-  var $ins_h = $s + 72 | 0;
-  var $hash_shift = $s + 88 | 0;
-  var $hash_mask = $s + 84 | 0;
-  var $match_start = $s + 112 | 0;
-  var $block_start = $s + 92 | 0;
-  var $hash_size = $s + 76 | 0;
-  var $head = $s + 68 | 0;
-  var $prev = $s + 64 | 0;
+  var $window_size = CHECK_OVERFLOW($s + 60, 32, 0);
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0), $lookahead$s2 = $lookahead >> 2;
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0), $strstart$s2 = $strstart >> 2;
+  var $sub4 = CHECK_OVERFLOW($0 - 262, 32, 0);
+  var $strm = CHECK_OVERFLOW($s, 32, 0);
+  var $window37 = CHECK_OVERFLOW($s + 56, 32, 0), $window37$s2 = $window37 >> 2;
+  var $ins_h = CHECK_OVERFLOW($s + 72, 32, 0);
+  var $hash_shift = CHECK_OVERFLOW($s + 88, 32, 0);
+  var $hash_mask = CHECK_OVERFLOW($s + 84, 32, 0);
+  var $match_start = CHECK_OVERFLOW($s + 112, 32, 0);
+  var $block_start = CHECK_OVERFLOW($s + 92, 32, 0);
+  var $hash_size = CHECK_OVERFLOW($s + 76, 32, 0);
+  var $head = CHECK_OVERFLOW($s + 68, 32, 0);
+  var $prev = CHECK_OVERFLOW($s + 64, 32, 0);
   var $2 = HEAP32[$lookahead$s2];
   var $1 = $0;
   $do_body$69 : while (1) {
     var $1;
     var $2;
+    var $3 = HEAP32[$window_size >> 2];
+    var $sub = CHECK_OVERFLOW($3 - $2, 32, 0);
     var $4 = HEAPU32[$strstart$s2];
-    var $sub1 = HEAP32[$window_size >> 2] - $2 - $4 | 0;
-    if ($4 >>> 0 < ($sub4 + $1 | 0) >>> 0) {
+    var $sub1 = CHECK_OVERFLOW($sub - $4, 32, 0);
+    var $add = CHECK_OVERFLOW($sub4 + $1, 32, 0);
+    if ($4 >>> 0 < $add >>> 0) {
       var $more_0 = $sub1;
     } else {
       var $5 = HEAPU32[$window37$s2];
-      var $add_ptr = $5 + $0 | 0;
+      var $add_ptr = CHECK_OVERFLOW($5 + $0, 32, 0);
       _memcpy($5, $add_ptr, $0, 1);
-      var $sub6 = HEAP32[$match_start >> 2] - $0 | 0;
+      var $6 = HEAP32[$match_start >> 2];
+      var $sub6 = CHECK_OVERFLOW($6 - $0, 32, 0);
       HEAP32[$match_start >> 2] = $sub6;
-      var $sub8 = HEAP32[$strstart$s2] - $0 | 0;
+      var $7 = HEAP32[$strstart$s2];
+      var $sub8 = CHECK_OVERFLOW($7 - $0, 32, 0);
       HEAP32[$strstart$s2] = $sub8;
-      var $sub9 = HEAP32[$block_start >> 2] - $0 | 0;
+      var $8 = HEAP32[$block_start >> 2];
+      var $sub9 = CHECK_OVERFLOW($8 - $0, 32, 0);
       HEAP32[$block_start >> 2] = $sub9;
       var $9 = HEAP32[$hash_size >> 2];
+      var $10 = HEAP32[$head >> 2];
+      var $arrayidx = CHECK_OVERFLOW(($9 << 1) + $10, 32, 0);
       var $n_0 = $9;
-      var $p_0 = ($9 << 1) + HEAP32[$head >> 2] | 0;
+      var $p_0 = $arrayidx;
       while (1) {
         var $p_0;
         var $n_0;
-        var $incdec_ptr = $p_0 - 2 | 0;
+        var $incdec_ptr = CHECK_OVERFLOW($p_0 - 2, 32, 0);
         var $conv = HEAPU16[$incdec_ptr >> 1] & 65535;
         if ($conv >>> 0 < $0 >>> 0) {
           var $cond = 0;
         } else {
-          var $cond = $conv - $0 & 65535;
+          var $sub13 = CHECK_OVERFLOW($conv - $0, 32, 0);
+          var $cond = $sub13 & 65535;
         }
         var $cond;
         HEAP16[$incdec_ptr >> 1] = $cond;
-        var $dec = $n_0 - 1 | 0;
+        var $dec = CHECK_OVERFLOW($n_0 - 1, 32, 0);
         if (($dec | 0) == 0) {
           break;
         }
         var $n_0 = $dec;
         var $p_0 = $incdec_ptr;
       }
+      var $12 = HEAP32[$prev >> 2];
+      var $arrayidx15 = CHECK_OVERFLOW(($0 << 1) + $12, 32, 0);
       var $n_1 = $0;
-      var $p_1 = ($0 << 1) + HEAP32[$prev >> 2] | 0;
+      var $p_1 = $arrayidx15;
       while (1) {
         var $p_1;
         var $n_1;
-        var $incdec_ptr17 = $p_1 - 2 | 0;
+        var $incdec_ptr17 = CHECK_OVERFLOW($p_1 - 2, 32, 0);
         var $conv18 = HEAPU16[$incdec_ptr17 >> 1] & 65535;
         if ($conv18 >>> 0 < $0 >>> 0) {
           var $cond25 = 0;
         } else {
-          var $cond25 = $conv18 - $0 & 65535;
+          var $sub22 = CHECK_OVERFLOW($conv18 - $0, 32, 0);
+          var $cond25 = $sub22 & 65535;
         }
         var $cond25;
         HEAP16[$incdec_ptr17 >> 1] = $cond25;
-        var $dec28 = $n_1 - 1 | 0;
+        var $dec28 = CHECK_OVERFLOW($n_1 - 1, 32, 0);
         if (($dec28 | 0) == 0) {
           break;
         }
         var $n_1 = $dec28;
         var $p_1 = $incdec_ptr17;
       }
-      var $more_0 = $sub1 + $0 | 0;
+      var $add31 = CHECK_OVERFLOW($sub1 + $0, 32, 0);
+      var $more_0 = $add31;
     }
     var $more_0;
     var $14 = HEAP32[$strm >> 2];
-    if ((HEAP32[$14 + 4 >> 2] | 0) == 0) {
+    var $avail_in = CHECK_OVERFLOW($14 + 4, 32, 0);
+    if ((HEAP32[$avail_in >> 2] | 0) == 0) {
       break;
     }
-    var $add_ptr41 = HEAP32[$window37$s2] + HEAP32[$lookahead$s2] + HEAP32[$strstart$s2] | 0;
+    var $16 = HEAP32[$window37$s2];
+    var $17 = HEAP32[$strstart$s2];
+    var $18 = HEAP32[$lookahead$s2];
+    var $add_ptr39_sum = CHECK_OVERFLOW($18 + $17, 32, 0);
+    var $add_ptr41 = CHECK_OVERFLOW($16 + $add_ptr39_sum, 32, 0);
     var $call = _read_buf($14, $add_ptr41, $more_0);
-    var $add43 = HEAP32[$lookahead$s2] + $call | 0;
+    var $19 = HEAP32[$lookahead$s2];
+    var $add43 = CHECK_OVERFLOW($19 + $call, 32, 0);
     HEAP32[$lookahead$s2] = $add43;
     var $cmp45 = $add43 >>> 0 > 2;
     do {
       if ($cmp45) {
         var $20 = HEAPU32[$strstart$s2];
         var $21 = HEAPU32[$window37$s2];
-        var $conv51 = HEAPU8[$21 + $20 | 0] & 255;
+        var $arrayidx50 = CHECK_OVERFLOW($21 + $20, 32, 0);
+        var $conv51 = HEAPU8[$arrayidx50] & 255;
         HEAP32[$ins_h >> 2] = $conv51;
-        var $and = (HEAPU8[$20 + ($21 + 1) | 0] & 255 ^ $conv51 << HEAP32[$hash_shift >> 2]) & HEAP32[$hash_mask >> 2];
+        var $shl = $conv51 << HEAP32[$hash_shift >> 2];
+        var $add54 = CHECK_OVERFLOW($20 + 1, 32, 0);
+        var $arrayidx56 = CHECK_OVERFLOW($21 + $add54, 32, 0);
+        var $and = (HEAPU8[$arrayidx56] & 255 ^ $shl) & HEAP32[$hash_mask >> 2];
         HEAP32[$ins_h >> 2] = $and;
         if ($add43 >>> 0 < 262) {
           __label__ = 14;
@@ -2683,7 +3099,9 @@ function _fill_window($s) {
     } while (0);
     do {
       if (__label__ == 14) {
-        if ((HEAP32[HEAP32[$strm >> 2] + 4 >> 2] | 0) == 0) {
+        var $26 = HEAP32[$strm >> 2];
+        var $avail_in65 = CHECK_OVERFLOW($26 + 4, 32, 0);
+        if ((HEAP32[$avail_in65 >> 2] | 0) == 0) {
           break;
         }
         var $2 = $add43;
@@ -2691,32 +3109,36 @@ function _fill_window($s) {
         continue $do_body$69;
       }
     } while (0);
-    var $high_water$s2 = ($s + 5824 | 0) >> 2;
+    var $high_water = CHECK_OVERFLOW($s + 5824, 32, 0), $high_water$s2 = $high_water >> 2;
     var $28 = HEAPU32[$high_water$s2];
     var $29 = HEAPU32[$window_size >> 2];
     if ($28 >>> 0 >= $29 >>> 0) {
       break;
     }
-    var $add75 = $add43 + HEAP32[$strstart$s2] | 0;
+    var $30 = HEAP32[$strstart$s2];
+    var $add75 = CHECK_OVERFLOW($add43 + $30, 32, 0);
     if ($28 >>> 0 < $add75 >>> 0) {
-      var $sub81 = $29 - $add75 | 0;
+      var $sub81 = CHECK_OVERFLOW($29 - $add75, 32, 0);
       var $init_0 = $sub81 >>> 0 > 258 ? 258 : $sub81;
-      var $add_ptr87 = HEAP32[$window37$s2] + $add75 | 0;
+      var $31 = HEAP32[$window37$s2];
+      var $add_ptr87 = CHECK_OVERFLOW($31 + $add75, 32, 0);
       _memset($add_ptr87, 0, $init_0, 1);
-      var $add88 = $init_0 + $add75 | 0;
+      var $add88 = CHECK_OVERFLOW($init_0 + $add75, 32, 0);
       HEAP32[$high_water$s2] = $add88;
       break;
     }
-    var $add91 = $add75 + 258 | 0;
+    var $add91 = CHECK_OVERFLOW($add75 + 258, 32, 0);
     if ($28 >>> 0 >= $add91 >>> 0) {
       break;
     }
-    var $sub97 = $add91 - $28 | 0;
-    var $sub100 = $29 - $28 | 0;
+    var $sub97 = CHECK_OVERFLOW($add91 - $28, 32, 0);
+    var $sub100 = CHECK_OVERFLOW($29 - $28, 32, 0);
     var $init_1 = $sub97 >>> 0 > $sub100 >>> 0 ? $sub100 : $sub97;
-    var $add_ptr110 = HEAP32[$window37$s2] + $28 | 0;
+    var $32 = HEAP32[$window37$s2];
+    var $add_ptr110 = CHECK_OVERFLOW($32 + $28, 32, 0);
     _memset($add_ptr110, 0, $init_1, 1);
-    var $add112 = HEAP32[$high_water$s2] + $init_1 | 0;
+    var $33 = HEAP32[$high_water$s2];
+    var $add112 = CHECK_OVERFLOW($33 + $init_1, 32, 0);
     HEAP32[$high_water$s2] = $add112;
     break;
   }
@@ -2727,38 +3149,47 @@ function _fill_window($s) {
 _fill_window["X"] = 1;
 
 function _read_buf($strm, $buf, $size) {
-  var $avail_in = $strm + 4 | 0;
+  var $avail_in = CHECK_OVERFLOW($strm + 4, 32, 0);
   var $0 = HEAPU32[$avail_in >> 2];
   var $len_0 = $0 >>> 0 > $size >>> 0 ? $size : $0;
   if (($len_0 | 0) == 0) {
     var $retval_0 = 0;
   } else {
-    HEAP32[$avail_in >> 2] = $0 - $len_0 | 0;
-    var $2 = HEAP32[HEAP32[$strm + 28 >> 2] + 24 >> 2];
+    var $sub = CHECK_OVERFLOW($0 - $len_0, 32, 0);
+    HEAP32[$avail_in >> 2] = $sub;
+    var $state = CHECK_OVERFLOW($strm + 28, 32, 0);
+    var $1 = HEAP32[$state >> 2];
+    var $wrap = CHECK_OVERFLOW($1 + 24, 32, 0);
+    var $2 = HEAP32[$wrap >> 2];
     if ($2 == 1) {
-      var $adler = $strm + 48 | 0;
+      var $adler = CHECK_OVERFLOW($strm + 48, 32, 0);
       var $3 = HEAP32[$adler >> 2];
-      var $4 = HEAP32[$strm >> 2];
+      var $next_in = CHECK_OVERFLOW($strm, 32, 0);
+      var $4 = HEAP32[$next_in >> 2];
       var $call = _adler32($3, $4, $len_0);
       HEAP32[$adler >> 2] = $call;
       var $7 = $4;
     } else if ($2 == 2) {
-      var $adler12 = $strm + 48 | 0;
+      var $adler12 = CHECK_OVERFLOW($strm + 48, 32, 0);
       var $5 = HEAP32[$adler12 >> 2];
-      var $6 = HEAP32[$strm >> 2];
+      var $next_in13 = CHECK_OVERFLOW($strm, 32, 0);
+      var $6 = HEAP32[$next_in13 >> 2];
       var $call14 = _crc32($5, $6, $len_0);
       HEAP32[$adler12 >> 2] = $call14;
       var $7 = $6;
     } else {
-      var $7 = HEAP32[$strm >> 2];
+      var $next_in18_phi_trans_insert = CHECK_OVERFLOW($strm, 32, 0);
+      var $7 = HEAP32[$next_in18_phi_trans_insert >> 2];
     }
     var $7;
-    var $next_in18 = $strm | 0;
+    var $next_in18 = CHECK_OVERFLOW($strm, 32, 0);
     _memcpy($buf, $7, $len_0, 1);
-    var $add_ptr = HEAP32[$next_in18 >> 2] + $len_0 | 0;
+    var $8 = HEAP32[$next_in18 >> 2];
+    var $add_ptr = CHECK_OVERFLOW($8 + $len_0, 32, 0);
     HEAP32[$next_in18 >> 2] = $add_ptr;
-    var $total_in = $strm + 8 | 0;
-    var $add = HEAP32[$total_in >> 2] + $len_0 | 0;
+    var $total_in = CHECK_OVERFLOW($strm + 8, 32, 0);
+    var $9 = HEAP32[$total_in >> 2];
+    var $add = CHECK_OVERFLOW($9 + $len_0, 32, 0);
     HEAP32[$total_in >> 2] = $add;
     var $retval_0 = $len_0;
   }
@@ -2773,15 +3204,17 @@ function _deflate_stored($s, $flush) {
   var $block_start$s2;
   var $strstart$s2;
   var $lookahead$s2;
-  var $sub = HEAP32[$s + 12 >> 2] - 5 | 0;
+  var $pending_buf_size = CHECK_OVERFLOW($s + 12, 32, 0);
+  var $0 = HEAP32[$pending_buf_size >> 2];
+  var $sub = CHECK_OVERFLOW($0 - 5, 32, 0);
   var $max_block_size_0_ph = $sub >>> 0 < 65535 ? $sub : 65535;
-  var $lookahead$s2 = ($s + 116 | 0) >> 2;
-  var $strstart$s2 = ($s + 108 | 0) >> 2;
-  var $block_start$s2 = ($s + 92 | 0) >> 2;
-  var $w_size = $s + 44 | 0;
-  var $window50$s2 = ($s + 56 | 0) >> 2;
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0), $lookahead$s2 = $lookahead >> 2;
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0), $strstart$s2 = $strstart >> 2;
+  var $block_start = CHECK_OVERFLOW($s + 92, 32, 0), $block_start$s2 = $block_start >> 2;
+  var $w_size = CHECK_OVERFLOW($s + 44, 32, 0);
+  var $window50 = CHECK_OVERFLOW($s + 56, 32, 0), $window50$s2 = $window50 >> 2;
   var $1 = $s;
-  var $strm60$s2 = ($s | 0) >> 2;
+  var $strm60 = CHECK_OVERFLOW($s, 32, 0), $strm60$s2 = $strm60 >> 2;
   $for_cond$109 : while (1) {
     var $2 = HEAPU32[$lookahead$s2];
     var $cmp3 = $2 >>> 0 < 2;
@@ -2799,12 +3232,15 @@ function _deflate_stored($s, $flush) {
         }
         var $22 = HEAP32[$block_start$s2];
         if (($22 | 0) > -1) {
-          var $cond75 = HEAP32[$window50$s2] + $22 | 0;
+          var $23 = HEAP32[$window50$s2];
+          var $arrayidx72 = CHECK_OVERFLOW($23 + $22, 32, 0);
+          var $cond75 = $arrayidx72;
         } else {
           var $cond75 = 0;
         }
         var $cond75;
-        var $sub78 = HEAP32[$strstart$s2] - $22 | 0;
+        var $24 = HEAP32[$strstart$s2];
+        var $sub78 = CHECK_OVERFLOW($24 - $22, 32, 0);
         var $cmp79 = ($flush | 0) == 4;
         var $conv = $cmp79 & 1;
         __tr_flush_block($1, $cond75, $sub78, $conv);
@@ -2812,7 +3248,9 @@ function _deflate_stored($s, $flush) {
         HEAP32[$block_start$s2] = $25;
         var $26 = HEAP32[$strm60$s2];
         _flush_pending($26);
-        if ((HEAP32[HEAP32[$strm60$s2] + 16 >> 2] | 0) == 0) {
+        var $27 = HEAP32[$strm60$s2];
+        var $avail_out84 = CHECK_OVERFLOW($27 + 16, 32, 0);
+        if ((HEAP32[$avail_out84 >> 2] | 0) == 0) {
           var $cond90 = $cmp79 ? 2 : 0;
           var $retval_0 = $cond90;
           break $for_cond$109;
@@ -2825,20 +3263,23 @@ function _deflate_stored($s, $flush) {
       }
     } while (0);
     var $6;
-    var $add = HEAP32[$strstart$s2] + $6 | 0;
+    var $7 = HEAP32[$strstart$s2];
+    var $add = CHECK_OVERFLOW($7 + $6, 32, 0);
     HEAP32[$strstart$s2] = $add;
     HEAP32[$lookahead$s2] = 0;
     var $8 = HEAPU32[$block_start$s2];
-    var $add17 = $8 + $max_block_size_0_ph | 0;
+    var $add17 = CHECK_OVERFLOW($8 + $max_block_size_0_ph, 32, 0);
     if (($add | 0) != 0 & $add >>> 0 < $add17 >>> 0) {
       var $15 = $add;
       var $14 = $8;
     } else {
-      var $sub24 = $add - $add17 | 0;
+      var $sub24 = CHECK_OVERFLOW($add - $add17, 32, 0);
       HEAP32[$lookahead$s2] = $sub24;
       HEAP32[$strstart$s2] = $add17;
       if (($8 | 0) > -1) {
-        var $cond = HEAP32[$window50$s2] + $8 | 0;
+        var $9 = HEAP32[$window50$s2];
+        var $arrayidx = CHECK_OVERFLOW($9 + $8, 32, 0);
+        var $cond = $arrayidx;
       } else {
         var $cond = 0;
       }
@@ -2848,7 +3289,9 @@ function _deflate_stored($s, $flush) {
       HEAP32[$block_start$s2] = $10;
       var $11 = HEAP32[$strm60$s2];
       _flush_pending($11);
-      if ((HEAP32[HEAP32[$strm60$s2] + 16 >> 2] | 0) == 0) {
+      var $12 = HEAP32[$strm60$s2];
+      var $avail_out = CHECK_OVERFLOW($12 + 16, 32, 0);
+      if ((HEAP32[$avail_out >> 2] | 0) == 0) {
         var $retval_0 = 0;
         break;
       }
@@ -2857,12 +3300,16 @@ function _deflate_stored($s, $flush) {
     }
     var $14;
     var $15;
-    var $sub42 = $15 - $14 | 0;
-    if ($sub42 >>> 0 < (HEAP32[$w_size >> 2] - 262 | 0) >>> 0) {
+    var $sub42 = CHECK_OVERFLOW($15 - $14, 32, 0);
+    var $16 = HEAP32[$w_size >> 2];
+    var $sub43 = CHECK_OVERFLOW($16 - 262, 32, 0);
+    if ($sub42 >>> 0 < $sub43 >>> 0) {
       continue;
     }
     if (($14 | 0) > -1) {
-      var $cond54 = HEAP32[$window50$s2] + $14 | 0;
+      var $17 = HEAP32[$window50$s2];
+      var $arrayidx51 = CHECK_OVERFLOW($17 + $14, 32, 0);
+      var $cond54 = $arrayidx51;
     } else {
       var $cond54 = 0;
     }
@@ -2872,7 +3319,9 @@ function _deflate_stored($s, $flush) {
     HEAP32[$block_start$s2] = $18;
     var $19 = HEAP32[$strm60$s2];
     _flush_pending($19);
-    if ((HEAP32[HEAP32[$strm60$s2] + 16 >> 2] | 0) == 0) {
+    var $20 = HEAP32[$strm60$s2];
+    var $avail_out62 = CHECK_OVERFLOW($20 + 16, 32, 0);
+    if ((HEAP32[$avail_out62 >> 2] | 0) == 0) {
       var $retval_0 = 0;
       break;
     }
@@ -2885,30 +3334,51 @@ function _deflate_stored($s, $flush) {
 _deflate_stored["X"] = 1;
 
 function _longest_match($s, $cur_match) {
-  var $s$s2 = $s >> 2;
-  var $0 = HEAPU32[$s$s2 + 31];
-  var $1 = HEAPU32[$s$s2 + 14];
-  var $2 = HEAPU32[$s$s2 + 27];
-  var $add_ptr = $1 + $2 | 0;
-  var $3 = HEAPU32[$s$s2 + 30];
-  var $4 = HEAPU32[$s$s2 + 36];
-  var $sub = HEAP32[$s$s2 + 11] - 262 | 0;
-  var $sub6_ = $2 >>> 0 > $sub >>> 0 ? $2 - $sub | 0 : 0;
-  var $6 = HEAP32[$s$s2 + 16];
-  var $7 = HEAP32[$s$s2 + 13];
-  var $add_ptr11 = $2 + ($1 + 258) | 0;
-  var $chain_length_0 = $3 >>> 0 < HEAPU32[$s$s2 + 35] >>> 0 ? $0 : $0 >>> 2;
-  var $11 = HEAPU32[$s$s2 + 29];
+  var $max_chain_length = CHECK_OVERFLOW($s + 124, 32, 0);
+  var $0 = HEAPU32[$max_chain_length >> 2];
+  var $window = CHECK_OVERFLOW($s + 56, 32, 0);
+  var $1 = HEAPU32[$window >> 2];
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0);
+  var $2 = HEAPU32[$strstart >> 2];
+  var $add_ptr = CHECK_OVERFLOW($1 + $2, 32, 0);
+  var $prev_length = CHECK_OVERFLOW($s + 120, 32, 0);
+  var $3 = HEAPU32[$prev_length >> 2];
+  var $nice_match1 = CHECK_OVERFLOW($s + 144, 32, 0);
+  var $4 = HEAPU32[$nice_match1 >> 2];
+  var $w_size = CHECK_OVERFLOW($s + 44, 32, 0);
+  var $5 = HEAP32[$w_size >> 2];
+  var $sub = CHECK_OVERFLOW($5 - 262, 32, 0);
+  var $sub6 = CHECK_OVERFLOW($2 - $sub, 32, 0);
+  var $sub6_ = $2 >>> 0 > $sub >>> 0 ? $sub6 : 0;
+  var $prev7 = CHECK_OVERFLOW($s + 64, 32, 0);
+  var $6 = HEAP32[$prev7 >> 2];
+  var $w_mask = CHECK_OVERFLOW($s + 52, 32, 0);
+  var $7 = HEAP32[$w_mask >> 2];
+  var $add_ptr10_sum = CHECK_OVERFLOW($2 + 258, 32, 0);
+  var $add_ptr11 = CHECK_OVERFLOW($1 + $add_ptr10_sum, 32, 0);
+  var $sub12 = CHECK_OVERFLOW($2 - 1, 32, 0);
+  var $add_ptr_sum = CHECK_OVERFLOW($sub12 + $3, 32, 0);
+  var $arrayidx = CHECK_OVERFLOW($1 + $add_ptr_sum, 32, 0);
+  var $8 = HEAP8[$arrayidx];
+  var $add_ptr_sum8 = CHECK_OVERFLOW($3 + $2, 32, 0);
+  var $arrayidx13 = CHECK_OVERFLOW($1 + $add_ptr_sum8, 32, 0);
+  var $9 = HEAP8[$arrayidx13];
+  var $good_match = CHECK_OVERFLOW($s + 140, 32, 0);
+  var $chain_length_0 = $3 >>> 0 < HEAPU32[$good_match >> 2] >>> 0 ? $0 : $0 >>> 2;
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0);
+  var $11 = HEAPU32[$lookahead >> 2];
   var $nice_match_0_ph = $4 >>> 0 > $11 >>> 0 ? $11 : $4;
-  var $match_start = $s + 112 | 0;
-  var $arrayidx39 = $2 + ($1 + 1) | 0;
-  var $add_ptr45 = $2 + ($1 + 2) | 0;
+  var $match_start = CHECK_OVERFLOW($s + 112, 32, 0);
+  var $add_ptr_sum13 = CHECK_OVERFLOW($2 + 1, 32, 0);
+  var $arrayidx39 = CHECK_OVERFLOW($1 + $add_ptr_sum13, 32, 0);
+  var $add_ptr_sum14 = CHECK_OVERFLOW($2 + 2, 32, 0);
+  var $add_ptr45 = CHECK_OVERFLOW($1 + $add_ptr_sum14, 32, 0);
   var $sub_ptr_lhs_cast = $add_ptr11;
-  var $sub113 = $2 + 257 | 0;
-  var $scan_end_0 = HEAP8[$1 + $3 + $2 | 0];
+  var $sub113 = CHECK_OVERFLOW($2 + 257, 32, 0);
+  var $scan_end_0 = $9;
   var $cur_match_addr_0 = $cur_match;
   var $chain_length_1 = $chain_length_0;
-  var $scan_end1_0 = HEAP8[$1 + ($2 - 1) + $3 | 0];
+  var $scan_end1_0 = $8;
   var $best_len_0 = $3;
   $do_body$101 : while (1) {
     var $best_len_0;
@@ -2916,11 +3386,16 @@ function _longest_match($s, $cur_match) {
     var $chain_length_1;
     var $cur_match_addr_0;
     var $scan_end_0;
-    var $add_ptr21 = $1 + $cur_match_addr_0 | 0;
-    var $cmp24 = HEAP8[$1 + $cur_match_addr_0 + $best_len_0 | 0] << 24 >> 24 == $scan_end_0 << 24 >> 24;
+    var $add_ptr21 = CHECK_OVERFLOW($1 + $cur_match_addr_0, 32, 0);
+    var $add_ptr21_sum = CHECK_OVERFLOW($cur_match_addr_0 + $best_len_0, 32, 0);
+    var $arrayidx22 = CHECK_OVERFLOW($1 + $add_ptr21_sum, 32, 0);
+    var $cmp24 = HEAP8[$arrayidx22] << 24 >> 24 == $scan_end_0 << 24 >> 24;
     do {
       if ($cmp24) {
-        if (HEAP8[$1 + ($best_len_0 - 1) + $cur_match_addr_0 | 0] << 24 >> 24 != $scan_end1_0 << 24 >> 24) {
+        var $sub26 = CHECK_OVERFLOW($best_len_0 - 1, 32, 0);
+        var $add_ptr21_sum9 = CHECK_OVERFLOW($sub26 + $cur_match_addr_0, 32, 0);
+        var $arrayidx27 = CHECK_OVERFLOW($1 + $add_ptr21_sum9, 32, 0);
+        if (HEAP8[$arrayidx27] << 24 >> 24 != $scan_end1_0 << 24 >> 24) {
           var $scan_end_1 = $scan_end_0;
           var $scan_end1_1 = $scan_end1_0;
           var $best_len_1 = $best_len_0;
@@ -2932,55 +3407,74 @@ function _longest_match($s, $cur_match) {
           var $best_len_1 = $best_len_0;
           break;
         }
-        if (HEAP8[$cur_match_addr_0 + ($1 + 1) | 0] << 24 >> 24 != HEAP8[$arrayidx39] << 24 >> 24) {
+        var $add_ptr21_sum10 = CHECK_OVERFLOW($cur_match_addr_0 + 1, 32, 0);
+        var $incdec_ptr = CHECK_OVERFLOW($1 + $add_ptr21_sum10, 32, 0);
+        if (HEAP8[$incdec_ptr] << 24 >> 24 != HEAP8[$arrayidx39] << 24 >> 24) {
           var $scan_end_1 = $scan_end_0;
           var $scan_end1_1 = $scan_end1_0;
           var $best_len_1 = $best_len_0;
           break;
         }
+        var $incdec_ptr_sum = CHECK_OVERFLOW($cur_match_addr_0 + 2, 32, 0);
+        var $incdec_ptr46 = CHECK_OVERFLOW($1 + $incdec_ptr_sum, 32, 0);
         var $scan_1 = $add_ptr45;
-        var $match_0 = $cur_match_addr_0 + ($1 + 2) | 0;
+        var $match_0 = $incdec_ptr46;
         while (1) {
           var $match_0;
           var $scan_1;
-          var $incdec_ptr48 = $scan_1 + 1 | 0;
-          if (HEAP8[$incdec_ptr48] << 24 >> 24 != HEAP8[$match_0 + 1 | 0] << 24 >> 24) {
+          var $incdec_ptr48 = CHECK_OVERFLOW($scan_1 + 1, 32, 0);
+          var $18 = HEAP8[$incdec_ptr48];
+          var $incdec_ptr50 = CHECK_OVERFLOW($match_0 + 1, 32, 0);
+          if ($18 << 24 >> 24 != HEAP8[$incdec_ptr50] << 24 >> 24) {
             var $scan_2 = $incdec_ptr48;
             break;
           }
-          var $incdec_ptr54 = $scan_1 + 2 | 0;
-          if (HEAP8[$incdec_ptr54] << 24 >> 24 != HEAP8[$match_0 + 2 | 0] << 24 >> 24) {
+          var $incdec_ptr54 = CHECK_OVERFLOW($scan_1 + 2, 32, 0);
+          var $20 = HEAP8[$incdec_ptr54];
+          var $incdec_ptr56 = CHECK_OVERFLOW($match_0 + 2, 32, 0);
+          if ($20 << 24 >> 24 != HEAP8[$incdec_ptr56] << 24 >> 24) {
             var $scan_2 = $incdec_ptr54;
             break;
           }
-          var $incdec_ptr61 = $scan_1 + 3 | 0;
-          if (HEAP8[$incdec_ptr61] << 24 >> 24 != HEAP8[$match_0 + 3 | 0] << 24 >> 24) {
+          var $incdec_ptr61 = CHECK_OVERFLOW($scan_1 + 3, 32, 0);
+          var $22 = HEAP8[$incdec_ptr61];
+          var $incdec_ptr63 = CHECK_OVERFLOW($match_0 + 3, 32, 0);
+          if ($22 << 24 >> 24 != HEAP8[$incdec_ptr63] << 24 >> 24) {
             var $scan_2 = $incdec_ptr61;
             break;
           }
-          var $incdec_ptr68 = $scan_1 + 4 | 0;
-          if (HEAP8[$incdec_ptr68] << 24 >> 24 != HEAP8[$match_0 + 4 | 0] << 24 >> 24) {
+          var $incdec_ptr68 = CHECK_OVERFLOW($scan_1 + 4, 32, 0);
+          var $24 = HEAP8[$incdec_ptr68];
+          var $incdec_ptr70 = CHECK_OVERFLOW($match_0 + 4, 32, 0);
+          if ($24 << 24 >> 24 != HEAP8[$incdec_ptr70] << 24 >> 24) {
             var $scan_2 = $incdec_ptr68;
             break;
           }
-          var $incdec_ptr75 = $scan_1 + 5 | 0;
-          if (HEAP8[$incdec_ptr75] << 24 >> 24 != HEAP8[$match_0 + 5 | 0] << 24 >> 24) {
+          var $incdec_ptr75 = CHECK_OVERFLOW($scan_1 + 5, 32, 0);
+          var $26 = HEAP8[$incdec_ptr75];
+          var $incdec_ptr77 = CHECK_OVERFLOW($match_0 + 5, 32, 0);
+          if ($26 << 24 >> 24 != HEAP8[$incdec_ptr77] << 24 >> 24) {
             var $scan_2 = $incdec_ptr75;
             break;
           }
-          var $incdec_ptr82 = $scan_1 + 6 | 0;
-          if (HEAP8[$incdec_ptr82] << 24 >> 24 != HEAP8[$match_0 + 6 | 0] << 24 >> 24) {
+          var $incdec_ptr82 = CHECK_OVERFLOW($scan_1 + 6, 32, 0);
+          var $28 = HEAP8[$incdec_ptr82];
+          var $incdec_ptr84 = CHECK_OVERFLOW($match_0 + 6, 32, 0);
+          if ($28 << 24 >> 24 != HEAP8[$incdec_ptr84] << 24 >> 24) {
             var $scan_2 = $incdec_ptr82;
             break;
           }
-          var $incdec_ptr89 = $scan_1 + 7 | 0;
-          if (HEAP8[$incdec_ptr89] << 24 >> 24 != HEAP8[$match_0 + 7 | 0] << 24 >> 24) {
+          var $incdec_ptr89 = CHECK_OVERFLOW($scan_1 + 7, 32, 0);
+          var $30 = HEAP8[$incdec_ptr89];
+          var $incdec_ptr91 = CHECK_OVERFLOW($match_0 + 7, 32, 0);
+          if ($30 << 24 >> 24 != HEAP8[$incdec_ptr91] << 24 >> 24) {
             var $scan_2 = $incdec_ptr89;
             break;
           }
-          var $incdec_ptr96 = $scan_1 + 8 | 0;
-          var $incdec_ptr98 = $match_0 + 8 | 0;
-          if (!(HEAP8[$incdec_ptr96] << 24 >> 24 == HEAP8[$incdec_ptr98] << 24 >> 24 & $incdec_ptr96 >>> 0 < $add_ptr11 >>> 0)) {
+          var $incdec_ptr96 = CHECK_OVERFLOW($scan_1 + 8, 32, 0);
+          var $32 = HEAP8[$incdec_ptr96];
+          var $incdec_ptr98 = CHECK_OVERFLOW($match_0 + 8, 32, 0);
+          if (!($32 << 24 >> 24 == HEAP8[$incdec_ptr98] << 24 >> 24 & $incdec_ptr96 >>> 0 < $add_ptr11 >>> 0)) {
             var $scan_2 = $incdec_ptr96;
             break;
           }
@@ -2988,8 +3482,8 @@ function _longest_match($s, $cur_match) {
           var $match_0 = $incdec_ptr98;
         }
         var $scan_2;
-        var $sub_ptr_sub11 = $scan_2 - $sub_ptr_lhs_cast | 0;
-        var $sub104 = $sub_ptr_sub11 + 258 | 0;
+        var $sub_ptr_sub11 = CHECK_OVERFLOW($scan_2 - $sub_ptr_lhs_cast, 32, 0);
+        var $sub104 = CHECK_OVERFLOW($sub_ptr_sub11 + 258, 32, 0);
         if (($sub104 | 0) <= ($best_len_0 | 0)) {
           var $scan_end_1 = $scan_end_0;
           var $scan_end1_1 = $scan_end1_0;
@@ -3001,8 +3495,13 @@ function _longest_match($s, $cur_match) {
           var $best_len_2 = $sub104;
           break $do_body$101;
         }
-        var $scan_end_1 = HEAP8[$1 + $sub104 + $2 | 0];
-        var $scan_end1_1 = HEAP8[$1 + $sub113 + $sub_ptr_sub11 | 0];
+        var $add_ptr105_sum = CHECK_OVERFLOW($sub113 + $sub_ptr_sub11, 32, 0);
+        var $arrayidx114 = CHECK_OVERFLOW($1 + $add_ptr105_sum, 32, 0);
+        var $34 = HEAP8[$arrayidx114];
+        var $add_ptr105_sum12 = CHECK_OVERFLOW($sub104 + $2, 32, 0);
+        var $arrayidx115 = CHECK_OVERFLOW($1 + $add_ptr105_sum12, 32, 0);
+        var $scan_end_1 = HEAP8[$arrayidx115];
+        var $scan_end1_1 = $34;
         var $best_len_1 = $sub104;
       } else {
         var $scan_end_1 = $scan_end_0;
@@ -3013,12 +3512,14 @@ function _longest_match($s, $cur_match) {
     var $best_len_1;
     var $scan_end1_1;
     var $scan_end_1;
-    var $conv119 = HEAPU16[$6 + (($cur_match_addr_0 & $7) << 1) >> 1] & 65535;
+    var $and = $cur_match_addr_0 & $7;
+    var $arrayidx118 = CHECK_OVERFLOW(($and << 1) + $6, 32, 0);
+    var $conv119 = HEAPU16[$arrayidx118 >> 1] & 65535;
     if ($conv119 >>> 0 <= $sub6_ >>> 0) {
       var $best_len_2 = $best_len_1;
       break;
     }
-    var $dec = $chain_length_1 - 1 | 0;
+    var $dec = CHECK_OVERFLOW($chain_length_1 - 1, 32, 0);
     if (($dec | 0) == 0) {
       var $best_len_2 = $best_len_1;
       break;
@@ -3050,27 +3551,27 @@ function _deflate_fast($s, $flush) {
   var $ins_h$s2;
   var $lookahead$s2;
   var __label__;
-  var $lookahead$s2 = ($s + 116 | 0) >> 2;
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0), $lookahead$s2 = $lookahead >> 2;
   var $cmp3 = ($flush | 0) == 0;
-  var $ins_h$s2 = ($s + 72 | 0) >> 2;
-  var $hash_shift$s2 = ($s + 88 | 0) >> 2;
-  var $strstart$s2 = ($s + 108 | 0) >> 2;
-  var $window$s2 = ($s + 56 | 0) >> 2;
-  var $hash_mask$s2 = ($s + 84 | 0) >> 2;
-  var $head$s2 = ($s + 68 | 0) >> 2;
-  var $w_mask = $s + 52 | 0;
-  var $prev = $s + 64 | 0;
-  var $w_size = $s + 44 | 0;
-  var $match_length$s2 = ($s + 96 | 0) >> 2;
-  var $match_start = $s + 112 | 0;
-  var $last_lit$s2 = ($s + 5792 | 0) >> 2;
-  var $d_buf = $s + 5796 | 0;
-  var $l_buf = $s + 5784 | 0;
-  var $lit_bufsize = $s + 5788 | 0;
-  var $max_lazy_match = $s + 128 | 0;
-  var $block_start$s2 = ($s + 92 | 0) >> 2;
+  var $ins_h = CHECK_OVERFLOW($s + 72, 32, 0), $ins_h$s2 = $ins_h >> 2;
+  var $hash_shift = CHECK_OVERFLOW($s + 88, 32, 0), $hash_shift$s2 = $hash_shift >> 2;
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0), $strstart$s2 = $strstart >> 2;
+  var $window = CHECK_OVERFLOW($s + 56, 32, 0), $window$s2 = $window >> 2;
+  var $hash_mask = CHECK_OVERFLOW($s + 84, 32, 0), $hash_mask$s2 = $hash_mask >> 2;
+  var $head = CHECK_OVERFLOW($s + 68, 32, 0), $head$s2 = $head >> 2;
+  var $w_mask = CHECK_OVERFLOW($s + 52, 32, 0);
+  var $prev = CHECK_OVERFLOW($s + 64, 32, 0);
+  var $w_size = CHECK_OVERFLOW($s + 44, 32, 0);
+  var $match_length = CHECK_OVERFLOW($s + 96, 32, 0), $match_length$s2 = $match_length >> 2;
+  var $match_start = CHECK_OVERFLOW($s + 112, 32, 0);
+  var $last_lit = CHECK_OVERFLOW($s + 5792, 32, 0), $last_lit$s2 = $last_lit >> 2;
+  var $d_buf = CHECK_OVERFLOW($s + 5796, 32, 0);
+  var $l_buf = CHECK_OVERFLOW($s + 5784, 32, 0);
+  var $lit_bufsize = CHECK_OVERFLOW($s + 5788, 32, 0);
+  var $max_lazy_match = CHECK_OVERFLOW($s + 128, 32, 0);
+  var $block_start = CHECK_OVERFLOW($s + 92, 32, 0), $block_start$s2 = $block_start >> 2;
   var $0 = $s;
-  var $strm$s2 = ($s | 0) >> 2;
+  var $strm = CHECK_OVERFLOW($s, 32, 0), $strm$s2 = $strm >> 2;
   $for_cond$2 : while (1) {
     var $cmp = HEAPU32[$lookahead$s2] >>> 0 < 262;
     do {
@@ -3084,12 +3585,15 @@ function _deflate_fast($s, $flush) {
         if (($2 | 0) == 0) {
           var $73 = HEAP32[$block_start$s2];
           if (($73 | 0) > -1) {
-            var $cond198 = HEAP32[$window$s2] + $73 | 0;
+            var $74 = HEAP32[$window$s2];
+            var $arrayidx195 = CHECK_OVERFLOW($74 + $73, 32, 0);
+            var $cond198 = $arrayidx195;
           } else {
             var $cond198 = 0;
           }
           var $cond198;
-          var $sub201 = HEAP32[$strstart$s2] - $73 | 0;
+          var $75 = HEAP32[$strstart$s2];
+          var $sub201 = CHECK_OVERFLOW($75 - $73, 32, 0);
           var $cmp202 = ($flush | 0) == 4;
           var $conv203 = $cmp202 & 1;
           __tr_flush_block($0, $cond198, $sub201, $conv203);
@@ -3097,7 +3601,9 @@ function _deflate_fast($s, $flush) {
           HEAP32[$block_start$s2] = $76;
           var $77 = HEAP32[$strm$s2];
           _flush_pending($77);
-          if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+          var $78 = HEAP32[$strm$s2];
+          var $avail_out208 = CHECK_OVERFLOW($78 + 16, 32, 0);
+          if ((HEAP32[$avail_out208 >> 2] | 0) == 0) {
             var $cond214 = $cmp202 ? 2 : 0;
             var $retval_0 = $cond214;
             break $for_cond$2;
@@ -3119,18 +3625,35 @@ function _deflate_fast($s, $flush) {
     } while (0);
     do {
       if (__label__ == 5) {
+        var $shl = HEAP32[$ins_h$s2] << HEAP32[$hash_shift$s2];
         var $5 = HEAPU32[$strstart$s2];
-        var $and = (HEAPU8[HEAP32[$window$s2] + $5 + 2 | 0] & 255 ^ HEAP32[$ins_h$s2] << HEAP32[$hash_shift$s2]) & HEAP32[$hash_mask$s2];
+        var $add = CHECK_OVERFLOW($5 + 2, 32, 0);
+        var $6 = HEAP32[$window$s2];
+        var $arrayidx = CHECK_OVERFLOW($6 + $add, 32, 0);
+        var $and = (HEAPU8[$arrayidx] & 255 ^ $shl) & HEAP32[$hash_mask$s2];
         HEAP32[$ins_h$s2] = $and;
-        var $10 = HEAPU16[HEAP32[$head$s2] + ($and << 1) >> 1];
-        HEAP16[HEAP32[$prev >> 2] + ((HEAP32[$w_mask >> 2] & $5) << 1) >> 1] = $10;
+        var $9 = HEAP32[$head$s2];
+        var $arrayidx15 = CHECK_OVERFLOW(($and << 1) + $9, 32, 0);
+        var $10 = HEAPU16[$arrayidx15 >> 1];
+        var $and17 = HEAP32[$w_mask >> 2] & $5;
+        var $12 = HEAP32[$prev >> 2];
+        var $arrayidx18 = CHECK_OVERFLOW(($and17 << 1) + $12, 32, 0);
+        HEAP16[$arrayidx18 >> 1] = $10;
         var $conv19 = $10 & 65535;
-        HEAP16[HEAP32[$head$s2] + (HEAP32[$ins_h$s2] << 1) >> 1] = HEAP32[$strstart$s2] & 65535;
+        var $conv21 = HEAP32[$strstart$s2] & 65535;
+        var $14 = HEAP32[$ins_h$s2];
+        var $15 = HEAP32[$head$s2];
+        var $arrayidx24 = CHECK_OVERFLOW(($14 << 1) + $15, 32, 0);
+        HEAP16[$arrayidx24 >> 1] = $conv21;
         if ($10 << 16 >> 16 == 0) {
           __label__ = 8;
           break;
         }
-        if ((HEAP32[$strstart$s2] - $conv19 | 0) >>> 0 > (HEAP32[$w_size >> 2] - 262 | 0) >>> 0) {
+        var $16 = HEAP32[$strstart$s2];
+        var $sub = CHECK_OVERFLOW($16 - $conv19, 32, 0);
+        var $17 = HEAP32[$w_size >> 2];
+        var $sub30 = CHECK_OVERFLOW($17 - 262, 32, 0);
+        if ($sub >>> 0 > $sub30 >>> 0) {
           __label__ = 8;
           break;
         }
@@ -3146,80 +3669,137 @@ function _deflate_fast($s, $flush) {
     }
     var $18;
     if ($18 >>> 0 > 2) {
-      var $sub40 = $18 + 253 | 0;
-      var $conv44 = HEAP32[$strstart$s2] - HEAP32[$match_start >> 2] & 65535;
-      HEAP16[HEAP32[$d_buf >> 2] + (HEAP32[$last_lit$s2] << 1) >> 1] = $conv44;
+      var $sub40 = CHECK_OVERFLOW($18 + 253, 32, 0);
+      var $conv41 = $sub40 & 255;
+      var $19 = HEAP32[$strstart$s2];
+      var $20 = HEAP32[$match_start >> 2];
+      var $sub43 = CHECK_OVERFLOW($19 - $20, 32, 0);
+      var $conv44 = $sub43 & 65535;
+      var $21 = HEAP32[$last_lit$s2];
+      var $22 = HEAP32[$d_buf >> 2];
+      var $arrayidx45 = CHECK_OVERFLOW(($21 << 1) + $22, 32, 0);
+      HEAP16[$arrayidx45 >> 1] = $conv44;
       var $23 = HEAP32[$last_lit$s2];
-      var $inc = $23 + 1 | 0;
+      var $inc = CHECK_OVERFLOW($23 + 1, 32, 0);
       HEAP32[$last_lit$s2] = $inc;
-      HEAP8[HEAP32[$l_buf >> 2] + $23 | 0] = $sub40 & 255;
-      var $dec = $conv44 - 1 & 65535;
-      var $arrayidx48 = STRING_TABLE.__length_code + ($sub40 & 255) | 0;
-      var $freq = ((HEAPU8[$arrayidx48] & 255 | 256) + 1 << 2) + $s + 148 | 0;
-      var $inc53 = HEAP16[$freq >> 1] + 1 & 65535;
+      var $24 = HEAP32[$l_buf >> 2];
+      var $arrayidx47 = CHECK_OVERFLOW($24 + $23, 32, 0);
+      HEAP8[$arrayidx47] = $conv41;
+      var $dec = CHECK_OVERFLOW($conv44 - 1, 16, 0);
+      var $idxprom = $sub40 & 255;
+      var $arrayidx48 = CHECK_OVERFLOW(STRING_TABLE.__length_code + $idxprom, 32, 0);
+      var $add501 = HEAPU8[$arrayidx48] & 255 | 256;
+      var $add51 = CHECK_OVERFLOW($add501 + 1, 32, 0);
+      var $freq = CHECK_OVERFLOW(($add51 << 2) + $s + 148, 32, 0);
+      var $26 = HEAP16[$freq >> 1];
+      var $inc53 = CHECK_OVERFLOW($26 + 1, 16, 0);
       HEAP16[$freq >> 1] = $inc53;
       var $conv54 = $dec & 65535;
       if (($dec & 65535) < 256) {
         var $conv54_pn = $conv54;
       } else {
-        var $conv54_pn = ($conv54 >>> 7) + 256 | 0;
+        var $shr2 = $conv54 >>> 7;
+        var $add61 = CHECK_OVERFLOW($shr2 + 256, 32, 0);
+        var $conv54_pn = $add61;
       }
       var $conv54_pn;
-      var $cond_in_in = STRING_TABLE.__dist_code + $conv54_pn | 0;
-      var $freq66 = ((HEAPU8[$cond_in_in] & 255) << 2) + $s + 2440 | 0;
-      var $inc67 = HEAP16[$freq66 >> 1] + 1 & 65535;
+      var $cond_in_in = CHECK_OVERFLOW(STRING_TABLE.__dist_code + $conv54_pn, 32, 0);
+      var $cond = HEAPU8[$cond_in_in] & 255;
+      var $freq66 = CHECK_OVERFLOW(($cond << 2) + $s + 2440, 32, 0);
+      var $27 = HEAP16[$freq66 >> 1];
+      var $inc67 = CHECK_OVERFLOW($27 + 1, 16, 0);
       HEAP16[$freq66 >> 1] = $inc67;
-      var $conv71 = (HEAP32[$last_lit$s2] | 0) == (HEAP32[$lit_bufsize >> 2] - 1 | 0) & 1;
+      var $28 = HEAP32[$last_lit$s2];
+      var $29 = HEAP32[$lit_bufsize >> 2];
+      var $sub69 = CHECK_OVERFLOW($29 - 1, 32, 0);
+      var $conv71 = ($28 | 0) == ($sub69 | 0) & 1;
       var $30 = HEAPU32[$match_length$s2];
-      var $sub74 = HEAP32[$lookahead$s2] - $30 | 0;
+      var $31 = HEAP32[$lookahead$s2];
+      var $sub74 = CHECK_OVERFLOW($31 - $30, 32, 0);
       HEAP32[$lookahead$s2] = $sub74;
       if ($30 >>> 0 <= HEAPU32[$max_lazy_match >> 2] >>> 0 & $sub74 >>> 0 > 2) {
-        HEAP32[$match_length$s2] = $30 - 1 | 0;
+        var $dec84 = CHECK_OVERFLOW($30 - 1, 32, 0);
+        HEAP32[$match_length$s2] = $dec84;
         while (1) {
           var $33 = HEAPU32[$strstart$s2];
-          var $inc86 = $33 + 1 | 0;
+          var $inc86 = CHECK_OVERFLOW($33 + 1, 32, 0);
           HEAP32[$strstart$s2] = $inc86;
-          var $and97 = (HEAPU8[HEAP32[$window$s2] + $33 + 3 | 0] & 255 ^ HEAP32[$ins_h$s2] << HEAP32[$hash_shift$s2]) & HEAP32[$hash_mask$s2];
+          var $shl89 = HEAP32[$ins_h$s2] << HEAP32[$hash_shift$s2];
+          var $add91 = CHECK_OVERFLOW($33 + 3, 32, 0);
+          var $36 = HEAP32[$window$s2];
+          var $arrayidx93 = CHECK_OVERFLOW($36 + $add91, 32, 0);
+          var $and97 = (HEAPU8[$arrayidx93] & 255 ^ $shl89) & HEAP32[$hash_mask$s2];
           HEAP32[$ins_h$s2] = $and97;
-          var $40 = HEAP16[HEAP32[$head$s2] + ($and97 << 1) >> 1];
-          HEAP16[HEAP32[$prev >> 2] + ((HEAP32[$w_mask >> 2] & $inc86) << 1) >> 1] = $40;
-          HEAP16[HEAP32[$head$s2] + (HEAP32[$ins_h$s2] << 1) >> 1] = HEAP32[$strstart$s2] & 65535;
-          var $dec114 = HEAP32[$match_length$s2] - 1 | 0;
+          var $39 = HEAP32[$head$s2];
+          var $arrayidx101 = CHECK_OVERFLOW(($and97 << 1) + $39, 32, 0);
+          var $40 = HEAP16[$arrayidx101 >> 1];
+          var $and104 = HEAP32[$w_mask >> 2] & $inc86;
+          var $42 = HEAP32[$prev >> 2];
+          var $arrayidx106 = CHECK_OVERFLOW(($and104 << 1) + $42, 32, 0);
+          HEAP16[$arrayidx106 >> 1] = $40;
+          var $conv109 = HEAP32[$strstart$s2] & 65535;
+          var $44 = HEAP32[$ins_h$s2];
+          var $45 = HEAP32[$head$s2];
+          var $arrayidx112 = CHECK_OVERFLOW(($44 << 1) + $45, 32, 0);
+          HEAP16[$arrayidx112 >> 1] = $conv109;
+          var $46 = HEAP32[$match_length$s2];
+          var $dec114 = CHECK_OVERFLOW($46 - 1, 32, 0);
           HEAP32[$match_length$s2] = $dec114;
           if (($dec114 | 0) == 0) {
             break;
           }
         }
-        var $inc118 = HEAP32[$strstart$s2] + 1 | 0;
+        var $47 = HEAP32[$strstart$s2];
+        var $inc118 = CHECK_OVERFLOW($47 + 1, 32, 0);
         HEAP32[$strstart$s2] = $inc118;
         var $bflush_0 = $conv71;
         var $66 = $inc118;
       } else {
-        var $add121 = HEAP32[$strstart$s2] + $30 | 0;
+        var $48 = HEAP32[$strstart$s2];
+        var $add121 = CHECK_OVERFLOW($48 + $30, 32, 0);
         HEAP32[$strstart$s2] = $add121;
         HEAP32[$match_length$s2] = 0;
         var $49 = HEAPU32[$window$s2];
-        var $conv126 = HEAPU8[$49 + $add121 | 0] & 255;
+        var $arrayidx125 = CHECK_OVERFLOW($49 + $add121, 32, 0);
+        var $conv126 = HEAPU8[$arrayidx125] & 255;
         HEAP32[$ins_h$s2] = $conv126;
-        var $and138 = (HEAPU8[$add121 + ($49 + 1) | 0] & 255 ^ $conv126 << HEAP32[$hash_shift$s2]) & HEAP32[$hash_mask$s2];
+        var $shl130 = $conv126 << HEAP32[$hash_shift$s2];
+        var $add132 = CHECK_OVERFLOW($add121 + 1, 32, 0);
+        var $arrayidx134 = CHECK_OVERFLOW($49 + $add132, 32, 0);
+        var $and138 = (HEAPU8[$arrayidx134] & 255 ^ $shl130) & HEAP32[$hash_mask$s2];
         HEAP32[$ins_h$s2] = $and138;
         var $bflush_0 = $conv71;
         var $66 = $add121;
       }
     } else {
-      var $56 = HEAPU8[HEAP32[$window$s2] + HEAP32[$strstart$s2] | 0];
-      HEAP16[HEAP32[$d_buf >> 2] + (HEAP32[$last_lit$s2] << 1) >> 1] = 0;
+      var $54 = HEAP32[$strstart$s2];
+      var $55 = HEAP32[$window$s2];
+      var $arrayidx144 = CHECK_OVERFLOW($55 + $54, 32, 0);
+      var $56 = HEAPU8[$arrayidx144];
+      var $57 = HEAP32[$last_lit$s2];
+      var $58 = HEAP32[$d_buf >> 2];
+      var $arrayidx147 = CHECK_OVERFLOW(($57 << 1) + $58, 32, 0);
+      HEAP16[$arrayidx147 >> 1] = 0;
       var $59 = HEAP32[$last_lit$s2];
-      var $inc149 = $59 + 1 | 0;
+      var $inc149 = CHECK_OVERFLOW($59 + 1, 32, 0);
       HEAP32[$last_lit$s2] = $inc149;
-      HEAP8[HEAP32[$l_buf >> 2] + $59 | 0] = $56;
-      var $freq156 = (($56 & 255) << 2) + $s + 148 | 0;
-      var $inc157 = HEAP16[$freq156 >> 1] + 1 & 65535;
+      var $60 = HEAP32[$l_buf >> 2];
+      var $arrayidx151 = CHECK_OVERFLOW($60 + $59, 32, 0);
+      HEAP8[$arrayidx151] = $56;
+      var $idxprom152 = $56 & 255;
+      var $freq156 = CHECK_OVERFLOW(($idxprom152 << 2) + $s + 148, 32, 0);
+      var $61 = HEAP16[$freq156 >> 1];
+      var $inc157 = CHECK_OVERFLOW($61 + 1, 16, 0);
       HEAP16[$freq156 >> 1] = $inc157;
-      var $conv162 = (HEAP32[$last_lit$s2] | 0) == (HEAP32[$lit_bufsize >> 2] - 1 | 0) & 1;
-      var $dec164 = HEAP32[$lookahead$s2] - 1 | 0;
+      var $62 = HEAP32[$last_lit$s2];
+      var $63 = HEAP32[$lit_bufsize >> 2];
+      var $sub160 = CHECK_OVERFLOW($63 - 1, 32, 0);
+      var $conv162 = ($62 | 0) == ($sub160 | 0) & 1;
+      var $64 = HEAP32[$lookahead$s2];
+      var $dec164 = CHECK_OVERFLOW($64 - 1, 32, 0);
       HEAP32[$lookahead$s2] = $dec164;
-      var $inc166 = HEAP32[$strstart$s2] + 1 | 0;
+      var $65 = HEAP32[$strstart$s2];
+      var $inc166 = CHECK_OVERFLOW($65 + 1, 32, 0);
       HEAP32[$strstart$s2] = $inc166;
       var $bflush_0 = $conv162;
       var $66 = $inc166;
@@ -3231,18 +3811,22 @@ function _deflate_fast($s, $flush) {
     }
     var $67 = HEAP32[$block_start$s2];
     if (($67 | 0) > -1) {
-      var $cond177 = HEAP32[$window$s2] + $67 | 0;
+      var $68 = HEAP32[$window$s2];
+      var $arrayidx174 = CHECK_OVERFLOW($68 + $67, 32, 0);
+      var $cond177 = $arrayidx174;
     } else {
       var $cond177 = 0;
     }
     var $cond177;
-    var $sub180 = $66 - $67 | 0;
+    var $sub180 = CHECK_OVERFLOW($66 - $67, 32, 0);
     __tr_flush_block($0, $cond177, $sub180, 0);
     var $69 = HEAP32[$strstart$s2];
     HEAP32[$block_start$s2] = $69;
     var $70 = HEAP32[$strm$s2];
     _flush_pending($70);
-    if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+    var $71 = HEAP32[$strm$s2];
+    var $avail_out = CHECK_OVERFLOW($71 + 16, 32, 0);
+    if ((HEAP32[$avail_out >> 2] | 0) == 0) {
       var $retval_0 = 0;
       break;
     }
@@ -3271,31 +3855,31 @@ function _deflate_slow($s, $flush) {
   var $ins_h$s2;
   var $lookahead$s2;
   var __label__;
-  var $lookahead$s2 = ($s + 116 | 0) >> 2;
+  var $lookahead = CHECK_OVERFLOW($s + 116, 32, 0), $lookahead$s2 = $lookahead >> 2;
   var $cmp3 = ($flush | 0) == 0;
-  var $ins_h$s2 = ($s + 72 | 0) >> 2;
-  var $hash_shift = $s + 88 | 0;
-  var $strstart$s2 = ($s + 108 | 0) >> 2;
-  var $window$s2 = ($s + 56 | 0) >> 2;
-  var $hash_mask = $s + 84 | 0;
-  var $head$s2 = ($s + 68 | 0) >> 2;
-  var $w_mask = $s + 52 | 0;
-  var $prev = $s + 64 | 0;
-  var $match_length$s2 = ($s + 96 | 0) >> 2;
-  var $prev_length$s2 = ($s + 120 | 0) >> 2;
-  var $match_start$s2 = ($s + 112 | 0) >> 2;
-  var $prev_match$s2 = ($s + 100 | 0) >> 2;
-  var $last_lit$s2 = ($s + 5792 | 0) >> 2;
-  var $d_buf$s2 = ($s + 5796 | 0) >> 2;
-  var $l_buf$s2 = ($s + 5784 | 0) >> 2;
-  var $lit_bufsize = $s + 5788 | 0;
-  var $match_available$s2 = ($s + 104 | 0) >> 2;
-  var $block_start$s2 = ($s + 92 | 0) >> 2;
+  var $ins_h = CHECK_OVERFLOW($s + 72, 32, 0), $ins_h$s2 = $ins_h >> 2;
+  var $hash_shift = CHECK_OVERFLOW($s + 88, 32, 0);
+  var $strstart = CHECK_OVERFLOW($s + 108, 32, 0), $strstart$s2 = $strstart >> 2;
+  var $window = CHECK_OVERFLOW($s + 56, 32, 0), $window$s2 = $window >> 2;
+  var $hash_mask = CHECK_OVERFLOW($s + 84, 32, 0);
+  var $head = CHECK_OVERFLOW($s + 68, 32, 0), $head$s2 = $head >> 2;
+  var $w_mask = CHECK_OVERFLOW($s + 52, 32, 0);
+  var $prev = CHECK_OVERFLOW($s + 64, 32, 0);
+  var $match_length = CHECK_OVERFLOW($s + 96, 32, 0), $match_length$s2 = $match_length >> 2;
+  var $prev_length = CHECK_OVERFLOW($s + 120, 32, 0), $prev_length$s2 = $prev_length >> 2;
+  var $match_start = CHECK_OVERFLOW($s + 112, 32, 0), $match_start$s2 = $match_start >> 2;
+  var $prev_match = CHECK_OVERFLOW($s + 100, 32, 0), $prev_match$s2 = $prev_match >> 2;
+  var $last_lit = CHECK_OVERFLOW($s + 5792, 32, 0), $last_lit$s2 = $last_lit >> 2;
+  var $d_buf = CHECK_OVERFLOW($s + 5796, 32, 0), $d_buf$s2 = $d_buf >> 2;
+  var $l_buf = CHECK_OVERFLOW($s + 5784, 32, 0), $l_buf$s2 = $l_buf >> 2;
+  var $lit_bufsize = CHECK_OVERFLOW($s + 5788, 32, 0);
+  var $match_available = CHECK_OVERFLOW($s + 104, 32, 0), $match_available$s2 = $match_available >> 2;
+  var $block_start = CHECK_OVERFLOW($s + 92, 32, 0), $block_start$s2 = $block_start >> 2;
   var $0 = $s;
-  var $strm$s2 = ($s | 0) >> 2;
-  var $max_lazy_match = $s + 128 | 0;
-  var $w_size = $s + 44 | 0;
-  var $strategy = $s + 136 | 0;
+  var $strm = CHECK_OVERFLOW($s, 32, 0), $strm$s2 = $strm >> 2;
+  var $max_lazy_match = CHECK_OVERFLOW($s + 128, 32, 0);
+  var $w_size = CHECK_OVERFLOW($s + 44, 32, 0);
+  var $strategy = CHECK_OVERFLOW($s + 136, 32, 0);
   $for_condthread_pre_split$42 : while (1) {
     var $1 = HEAP32[$lookahead$s2];
     while (1) {
@@ -3324,25 +3908,39 @@ function _deflate_slow($s, $flush) {
             break;
           }
           if ((HEAP32[$match_available$s2] | 0) != 0) {
-            var $90 = HEAPU8[HEAP32[$window$s2] + (HEAP32[$strstart$s2] - 1) | 0];
-            HEAP16[HEAP32[$d_buf$s2] + (HEAP32[$last_lit$s2] << 1) >> 1] = 0;
+            var $88 = HEAP32[$strstart$s2];
+            var $sub240 = CHECK_OVERFLOW($88 - 1, 32, 0);
+            var $89 = HEAP32[$window$s2];
+            var $arrayidx242 = CHECK_OVERFLOW($89 + $sub240, 32, 0);
+            var $90 = HEAPU8[$arrayidx242];
+            var $91 = HEAP32[$last_lit$s2];
+            var $92 = HEAP32[$d_buf$s2];
+            var $arrayidx245 = CHECK_OVERFLOW(($91 << 1) + $92, 32, 0);
+            HEAP16[$arrayidx245 >> 1] = 0;
             var $93 = HEAP32[$last_lit$s2];
-            var $inc247 = $93 + 1 | 0;
+            var $inc247 = CHECK_OVERFLOW($93 + 1, 32, 0);
             HEAP32[$last_lit$s2] = $inc247;
-            HEAP8[HEAP32[$l_buf$s2] + $93 | 0] = $90;
-            var $freq254 = (($90 & 255) << 2) + $s + 148 | 0;
-            var $inc255 = HEAP16[$freq254 >> 1] + 1 & 65535;
+            var $94 = HEAP32[$l_buf$s2];
+            var $arrayidx249 = CHECK_OVERFLOW($94 + $93, 32, 0);
+            HEAP8[$arrayidx249] = $90;
+            var $idxprom250 = $90 & 255;
+            var $freq254 = CHECK_OVERFLOW(($idxprom250 << 2) + $s + 148, 32, 0);
+            var $95 = HEAP16[$freq254 >> 1];
+            var $inc255 = CHECK_OVERFLOW($95 + 1, 16, 0);
             HEAP16[$freq254 >> 1] = $inc255;
             HEAP32[$match_available$s2] = 0;
           }
           var $96 = HEAPU32[$block_start$s2];
           if (($96 | 0) > -1) {
-            var $cond272 = HEAP32[$window$s2] + $96 | 0;
+            var $97 = HEAP32[$window$s2];
+            var $arrayidx269 = CHECK_OVERFLOW($97 + $96, 32, 0);
+            var $cond272 = $arrayidx269;
           } else {
             var $cond272 = 0;
           }
           var $cond272;
-          var $sub275 = HEAP32[$strstart$s2] - $96 | 0;
+          var $98 = HEAP32[$strstart$s2];
+          var $sub275 = CHECK_OVERFLOW($98 - $96, 32, 0);
           var $cmp276 = ($flush | 0) == 4;
           var $conv277 = $cmp276 & 1;
           __tr_flush_block($0, $cond272, $sub275, $conv277);
@@ -3350,7 +3948,9 @@ function _deflate_slow($s, $flush) {
           HEAP32[$block_start$s2] = $99;
           var $100 = HEAP32[$strm$s2];
           _flush_pending($100);
-          if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+          var $101 = HEAP32[$strm$s2];
+          var $avail_out282 = CHECK_OVERFLOW($101 + 16, 32, 0);
+          if ((HEAP32[$avail_out282 >> 2] | 0) == 0) {
             var $cond288 = $cmp276 ? 2 : 0;
             var $retval_0 = $cond288;
             break $for_condthread_pre_split$42;
@@ -3364,13 +3964,26 @@ function _deflate_slow($s, $flush) {
       } while (0);
       do {
         if (__label__ == 7) {
+          var $shl = HEAP32[$ins_h$s2] << HEAP32[$hash_shift >> 2];
           var $7 = HEAPU32[$strstart$s2];
-          var $and = (HEAPU8[HEAP32[$window$s2] + $7 + 2 | 0] & 255 ^ HEAP32[$ins_h$s2] << HEAP32[$hash_shift >> 2]) & HEAP32[$hash_mask >> 2];
+          var $add = CHECK_OVERFLOW($7 + 2, 32, 0);
+          var $8 = HEAP32[$window$s2];
+          var $arrayidx = CHECK_OVERFLOW($8 + $add, 32, 0);
+          var $and = (HEAPU8[$arrayidx] & 255 ^ $shl) & HEAP32[$hash_mask >> 2];
           HEAP32[$ins_h$s2] = $and;
-          var $12 = HEAPU16[HEAP32[$head$s2] + ($and << 1) >> 1];
-          HEAP16[HEAP32[$prev >> 2] + ((HEAP32[$w_mask >> 2] & $7) << 1) >> 1] = $12;
+          var $11 = HEAP32[$head$s2];
+          var $arrayidx15 = CHECK_OVERFLOW(($and << 1) + $11, 32, 0);
+          var $12 = HEAPU16[$arrayidx15 >> 1];
+          var $and17 = HEAP32[$w_mask >> 2] & $7;
+          var $14 = HEAP32[$prev >> 2];
+          var $arrayidx18 = CHECK_OVERFLOW(($and17 << 1) + $14, 32, 0);
+          HEAP16[$arrayidx18 >> 1] = $12;
           var $conv19 = $12 & 65535;
-          HEAP16[HEAP32[$head$s2] + (HEAP32[$ins_h$s2] << 1) >> 1] = HEAP32[$strstart$s2] & 65535;
+          var $conv21 = HEAP32[$strstart$s2] & 65535;
+          var $16 = HEAP32[$ins_h$s2];
+          var $17 = HEAP32[$head$s2];
+          var $arrayidx24 = CHECK_OVERFLOW(($16 << 1) + $17, 32, 0);
+          HEAP16[$arrayidx24 >> 1] = $conv21;
           var $18 = HEAPU32[$match_length$s2];
           HEAP32[$prev_length$s2] = $18;
           var $19 = HEAP32[$match_start$s2];
@@ -3387,7 +4000,11 @@ function _deflate_slow($s, $flush) {
             __label__ = 16;
             break;
           }
-          if ((HEAP32[$strstart$s2] - $conv19 | 0) >>> 0 > (HEAP32[$w_size >> 2] - 262 | 0) >>> 0) {
+          var $21 = HEAP32[$strstart$s2];
+          var $sub = CHECK_OVERFLOW($21 - $conv19, 32, 0);
+          var $22 = HEAP32[$w_size >> 2];
+          var $sub35 = CHECK_OVERFLOW($22 - 262, 32, 0);
+          if ($sub >>> 0 > $sub35 >>> 0) {
             var $26 = 2;
             __label__ = 15;
             break;
@@ -3405,7 +4022,10 @@ function _deflate_slow($s, $flush) {
               __label__ = 15;
               break;
             }
-            if ((HEAP32[$strstart$s2] - HEAP32[$match_start$s2] | 0) >>> 0 <= 4096) {
+            var $24 = HEAP32[$strstart$s2];
+            var $25 = HEAP32[$match_start$s2];
+            var $sub52 = CHECK_OVERFLOW($24 - $25, 32, 0);
+            if ($sub52 >>> 0 <= 4096) {
               var $26 = 3;
               __label__ = 15;
               break;
@@ -3429,41 +4049,64 @@ function _deflate_slow($s, $flush) {
       }
       if ((HEAP32[$match_available$s2] | 0) == 0) {
         HEAP32[$match_available$s2] = 1;
-        var $inc230 = HEAP32[$strstart$s2] + 1 | 0;
+        var $85 = HEAP32[$strstart$s2];
+        var $inc230 = CHECK_OVERFLOW($85 + 1, 32, 0);
         HEAP32[$strstart$s2] = $inc230;
-        var $dec232 = HEAP32[$lookahead$s2] - 1 | 0;
+        var $86 = HEAP32[$lookahead$s2];
+        var $dec232 = CHECK_OVERFLOW($86 - 1, 32, 0);
         HEAP32[$lookahead$s2] = $dec232;
         var $1 = $dec232;
       } else {
-        var $68 = HEAPU8[HEAP32[$window$s2] + (HEAP32[$strstart$s2] - 1) | 0];
-        HEAP16[HEAP32[$d_buf$s2] + (HEAP32[$last_lit$s2] << 1) >> 1] = 0;
+        var $66 = HEAP32[$strstart$s2];
+        var $sub177 = CHECK_OVERFLOW($66 - 1, 32, 0);
+        var $67 = HEAP32[$window$s2];
+        var $arrayidx179 = CHECK_OVERFLOW($67 + $sub177, 32, 0);
+        var $68 = HEAPU8[$arrayidx179];
+        var $69 = HEAP32[$last_lit$s2];
+        var $70 = HEAP32[$d_buf$s2];
+        var $arrayidx182 = CHECK_OVERFLOW(($69 << 1) + $70, 32, 0);
+        HEAP16[$arrayidx182 >> 1] = 0;
         var $71 = HEAP32[$last_lit$s2];
-        var $inc184 = $71 + 1 | 0;
+        var $inc184 = CHECK_OVERFLOW($71 + 1, 32, 0);
         HEAP32[$last_lit$s2] = $inc184;
-        HEAP8[HEAP32[$l_buf$s2] + $71 | 0] = $68;
-        var $freq191 = (($68 & 255) << 2) + $s + 148 | 0;
-        var $inc192 = HEAP16[$freq191 >> 1] + 1 & 65535;
+        var $72 = HEAP32[$l_buf$s2];
+        var $arrayidx186 = CHECK_OVERFLOW($72 + $71, 32, 0);
+        HEAP8[$arrayidx186] = $68;
+        var $idxprom187 = $68 & 255;
+        var $freq191 = CHECK_OVERFLOW(($idxprom187 << 2) + $s + 148, 32, 0);
+        var $73 = HEAP16[$freq191 >> 1];
+        var $inc192 = CHECK_OVERFLOW($73 + 1, 16, 0);
         HEAP16[$freq191 >> 1] = $inc192;
-        if ((HEAP32[$last_lit$s2] | 0) == (HEAP32[$lit_bufsize >> 2] - 1 | 0)) {
+        var $74 = HEAP32[$last_lit$s2];
+        var $75 = HEAP32[$lit_bufsize >> 2];
+        var $sub195 = CHECK_OVERFLOW($75 - 1, 32, 0);
+        if (($74 | 0) == ($sub195 | 0)) {
           var $76 = HEAP32[$block_start$s2];
           if (($76 | 0) > -1) {
-            var $cond209 = HEAP32[$window$s2] + $76 | 0;
+            var $77 = HEAP32[$window$s2];
+            var $arrayidx206 = CHECK_OVERFLOW($77 + $76, 32, 0);
+            var $cond209 = $arrayidx206;
           } else {
             var $cond209 = 0;
           }
           var $cond209;
-          var $sub212 = HEAP32[$strstart$s2] - $76 | 0;
+          var $78 = HEAP32[$strstart$s2];
+          var $sub212 = CHECK_OVERFLOW($78 - $76, 32, 0);
           __tr_flush_block($0, $cond209, $sub212, 0);
           var $79 = HEAP32[$strstart$s2];
           HEAP32[$block_start$s2] = $79;
           var $80 = HEAP32[$strm$s2];
           _flush_pending($80);
         }
-        var $inc218 = HEAP32[$strstart$s2] + 1 | 0;
+        var $81 = HEAP32[$strstart$s2];
+        var $inc218 = CHECK_OVERFLOW($81 + 1, 32, 0);
         HEAP32[$strstart$s2] = $inc218;
-        var $dec220 = HEAP32[$lookahead$s2] - 1 | 0;
+        var $82 = HEAP32[$lookahead$s2];
+        var $dec220 = CHECK_OVERFLOW($82 - 1, 32, 0);
         HEAP32[$lookahead$s2] = $dec220;
-        if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+        var $83 = HEAP32[$strm$s2];
+        var $avail_out222 = CHECK_OVERFLOW($83 + 16, 32, 0);
+        if ((HEAP32[$avail_out222 >> 2] | 0) == 0) {
           var $retval_0 = 0;
           break $for_condthread_pre_split$42;
         }
@@ -3471,55 +4114,90 @@ function _deflate_slow($s, $flush) {
       }
     }
     var $29 = HEAPU32[$strstart$s2];
-    var $sub71 = $29 - 3 + HEAP32[$lookahead$s2] | 0;
-    var $sub73 = $28 + 253 | 0;
-    var $conv79 = $29 + 65535 - HEAP32[$prev_match$s2] & 65535;
-    HEAP16[HEAP32[$d_buf$s2] + (HEAP32[$last_lit$s2] << 1) >> 1] = $conv79;
+    var $30 = HEAP32[$lookahead$s2];
+    var $add70 = CHECK_OVERFLOW($29 - 3, 32, 0);
+    var $sub71 = CHECK_OVERFLOW($add70 + $30, 32, 0);
+    var $sub73 = CHECK_OVERFLOW($28 + 253, 32, 0);
+    var $conv74 = $sub73 & 255;
+    var $31 = HEAP32[$prev_match$s2];
+    var $sub76 = CHECK_OVERFLOW($29 + 65535, 32, 0);
+    var $sub78 = CHECK_OVERFLOW($sub76 - $31, 32, 0);
+    var $conv79 = $sub78 & 65535;
+    var $32 = HEAP32[$last_lit$s2];
+    var $33 = HEAP32[$d_buf$s2];
+    var $arrayidx80 = CHECK_OVERFLOW(($32 << 1) + $33, 32, 0);
+    HEAP16[$arrayidx80 >> 1] = $conv79;
     var $34 = HEAP32[$last_lit$s2];
-    var $inc = $34 + 1 | 0;
+    var $inc = CHECK_OVERFLOW($34 + 1, 32, 0);
     HEAP32[$last_lit$s2] = $inc;
-    HEAP8[HEAP32[$l_buf$s2] + $34 | 0] = $sub73 & 255;
-    var $dec = $conv79 - 1 & 65535;
-    var $arrayidx83 = STRING_TABLE.__length_code + ($sub73 & 255) | 0;
-    var $freq = ((HEAPU8[$arrayidx83] & 255 | 256) + 1 << 2) + $s + 148 | 0;
-    var $inc88 = HEAP16[$freq >> 1] + 1 & 65535;
+    var $35 = HEAP32[$l_buf$s2];
+    var $arrayidx82 = CHECK_OVERFLOW($35 + $34, 32, 0);
+    HEAP8[$arrayidx82] = $conv74;
+    var $dec = CHECK_OVERFLOW($conv79 - 1, 16, 0);
+    var $idxprom = $sub73 & 255;
+    var $arrayidx83 = CHECK_OVERFLOW(STRING_TABLE.__length_code + $idxprom, 32, 0);
+    var $add851 = HEAPU8[$arrayidx83] & 255 | 256;
+    var $add86 = CHECK_OVERFLOW($add851 + 1, 32, 0);
+    var $freq = CHECK_OVERFLOW(($add86 << 2) + $s + 148, 32, 0);
+    var $37 = HEAP16[$freq >> 1];
+    var $inc88 = CHECK_OVERFLOW($37 + 1, 16, 0);
     HEAP16[$freq >> 1] = $inc88;
     var $conv89 = $dec & 65535;
     if (($dec & 65535) < 256) {
       var $conv89_pn = $conv89;
     } else {
-      var $conv89_pn = ($conv89 >>> 7) + 256 | 0;
+      var $shr2 = $conv89 >>> 7;
+      var $add96 = CHECK_OVERFLOW($shr2 + 256, 32, 0);
+      var $conv89_pn = $add96;
     }
     var $conv89_pn;
-    var $cond_in_in = STRING_TABLE.__dist_code + $conv89_pn | 0;
-    var $freq101 = ((HEAPU8[$cond_in_in] & 255) << 2) + $s + 2440 | 0;
-    var $inc102 = HEAP16[$freq101 >> 1] + 1 & 65535;
+    var $cond_in_in = CHECK_OVERFLOW(STRING_TABLE.__dist_code + $conv89_pn, 32, 0);
+    var $cond = HEAPU8[$cond_in_in] & 255;
+    var $freq101 = CHECK_OVERFLOW(($cond << 2) + $s + 2440, 32, 0);
+    var $38 = HEAP16[$freq101 >> 1];
+    var $inc102 = CHECK_OVERFLOW($38 + 1, 16, 0);
     HEAP16[$freq101 >> 1] = $inc102;
     var $39 = HEAP32[$last_lit$s2];
-    var $sub104 = HEAP32[$lit_bufsize >> 2] - 1 | 0;
+    var $40 = HEAP32[$lit_bufsize >> 2];
+    var $sub104 = CHECK_OVERFLOW($40 - 1, 32, 0);
     var $41 = HEAP32[$prev_length$s2];
-    var $sub110 = 1 - $41 + HEAP32[$lookahead$s2] | 0;
+    var $42 = HEAP32[$lookahead$s2];
+    var $sub108_neg = CHECK_OVERFLOW(1 - $41, 32, 0);
+    var $sub110 = CHECK_OVERFLOW($sub108_neg + $42, 32, 0);
     HEAP32[$lookahead$s2] = $sub110;
-    var $sub112 = $41 - 2 | 0;
+    var $sub112 = CHECK_OVERFLOW($41 - 2, 32, 0);
     HEAP32[$prev_length$s2] = $sub112;
     var $43 = $sub112;
     while (1) {
       var $43;
       var $44 = HEAPU32[$strstart$s2];
-      var $inc114 = $44 + 1 | 0;
+      var $inc114 = CHECK_OVERFLOW($44 + 1, 32, 0);
       HEAP32[$strstart$s2] = $inc114;
       if ($inc114 >>> 0 > $sub71 >>> 0) {
         var $57 = $43;
       } else {
-        var $and128 = (HEAPU8[HEAP32[$window$s2] + $44 + 3 | 0] & 255 ^ HEAP32[$ins_h$s2] << HEAP32[$hash_shift >> 2]) & HEAP32[$hash_mask >> 2];
+        var $shl120 = HEAP32[$ins_h$s2] << HEAP32[$hash_shift >> 2];
+        var $add122 = CHECK_OVERFLOW($44 + 3, 32, 0);
+        var $47 = HEAP32[$window$s2];
+        var $arrayidx124 = CHECK_OVERFLOW($47 + $add122, 32, 0);
+        var $and128 = (HEAPU8[$arrayidx124] & 255 ^ $shl120) & HEAP32[$hash_mask >> 2];
         HEAP32[$ins_h$s2] = $and128;
-        var $51 = HEAP16[HEAP32[$head$s2] + ($and128 << 1) >> 1];
-        HEAP16[HEAP32[$prev >> 2] + ((HEAP32[$w_mask >> 2] & $inc114) << 1) >> 1] = $51;
-        HEAP16[HEAP32[$head$s2] + (HEAP32[$ins_h$s2] << 1) >> 1] = HEAP32[$strstart$s2] & 65535;
+        var $50 = HEAP32[$head$s2];
+        var $arrayidx132 = CHECK_OVERFLOW(($and128 << 1) + $50, 32, 0);
+        var $51 = HEAP16[$arrayidx132 >> 1];
+        var $and135 = HEAP32[$w_mask >> 2] & $inc114;
+        var $53 = HEAP32[$prev >> 2];
+        var $arrayidx137 = CHECK_OVERFLOW(($and135 << 1) + $53, 32, 0);
+        HEAP16[$arrayidx137 >> 1] = $51;
+        var $conv140 = HEAP32[$strstart$s2] & 65535;
+        var $55 = HEAP32[$ins_h$s2];
+        var $56 = HEAP32[$head$s2];
+        var $arrayidx143 = CHECK_OVERFLOW(($55 << 1) + $56, 32, 0);
+        HEAP16[$arrayidx143 >> 1] = $conv140;
         var $57 = HEAP32[$prev_length$s2];
       }
       var $57;
-      var $dec146 = $57 - 1 | 0;
+      var $dec146 = CHECK_OVERFLOW($57 - 1, 32, 0);
       HEAP32[$prev_length$s2] = $dec146;
       if (($dec146 | 0) == 0) {
         break;
@@ -3529,25 +4207,30 @@ function _deflate_slow($s, $flush) {
     var $cmp105 = ($39 | 0) == ($sub104 | 0);
     HEAP32[$match_available$s2] = 0;
     HEAP32[$match_length$s2] = 2;
-    var $inc151 = HEAP32[$strstart$s2] + 1 | 0;
+    var $58 = HEAP32[$strstart$s2];
+    var $inc151 = CHECK_OVERFLOW($58 + 1, 32, 0);
     HEAP32[$strstart$s2] = $inc151;
     if (!$cmp105) {
       continue;
     }
     var $59 = HEAP32[$block_start$s2];
     if (($59 | 0) > -1) {
-      var $cond161 = HEAP32[$window$s2] + $59 | 0;
+      var $60 = HEAP32[$window$s2];
+      var $arrayidx158 = CHECK_OVERFLOW($60 + $59, 32, 0);
+      var $cond161 = $arrayidx158;
     } else {
       var $cond161 = 0;
     }
     var $cond161;
-    var $sub164 = $inc151 - $59 | 0;
+    var $sub164 = CHECK_OVERFLOW($inc151 - $59, 32, 0);
     __tr_flush_block($0, $cond161, $sub164, 0);
     var $61 = HEAP32[$strstart$s2];
     HEAP32[$block_start$s2] = $61;
     var $62 = HEAP32[$strm$s2];
     _flush_pending($62);
-    if ((HEAP32[HEAP32[$strm$s2] + 16 >> 2] | 0) == 0) {
+    var $63 = HEAP32[$strm$s2];
+    var $avail_out = CHECK_OVERFLOW($63 + 16, 32, 0);
+    if ((HEAP32[$avail_out >> 2] | 0) == 0) {
       var $retval_0 = 0;
       break;
     }
@@ -3560,53 +4243,58 @@ function _deflate_slow($s, $flush) {
 _deflate_slow["X"] = 1;
 
 function _inflateReset($strm) {
-  var $strm$s2 = $strm >> 2;
   var $cmp = ($strm | 0) == 0;
   do {
     if ($cmp) {
       var $retval_0 = -2;
     } else {
-      var $0 = HEAP32[$strm$s2 + 7];
+      var $state1 = CHECK_OVERFLOW($strm + 28, 32, 0);
+      var $0 = HEAP32[$state1 >> 2];
       if (($0 | 0) == 0) {
         var $retval_0 = -2;
         break;
       }
-      var $1 = $0 + 28 | 0;
+      var $1 = CHECK_OVERFLOW($0 + 28, 32, 0);
       HEAP32[$1 >> 2] = 0;
-      HEAP32[$strm$s2 + 5] = 0;
-      HEAP32[$strm$s2 + 2] = 0;
-      HEAP32[$strm$s2 + 6] = 0;
-      HEAP32[$strm$s2 + 12] = 1;
-      var $mode = $0 | 0;
+      var $total_out = CHECK_OVERFLOW($strm + 20, 32, 0);
+      HEAP32[$total_out >> 2] = 0;
+      var $total_in = CHECK_OVERFLOW($strm + 8, 32, 0);
+      HEAP32[$total_in >> 2] = 0;
+      var $msg = CHECK_OVERFLOW($strm + 24, 32, 0);
+      HEAP32[$msg >> 2] = 0;
+      var $adler = CHECK_OVERFLOW($strm + 48, 32, 0);
+      HEAP32[$adler >> 2] = 1;
+      var $mode = CHECK_OVERFLOW($0, 32, 0);
       HEAP32[$mode >> 2] = 0;
-      var $2 = $0 + 4 | 0;
+      var $2 = CHECK_OVERFLOW($0 + 4, 32, 0);
       HEAP32[$2 >> 2] = 0;
-      var $3 = $0 + 12 | 0;
+      var $3 = CHECK_OVERFLOW($0 + 12, 32, 0);
       HEAP32[$3 >> 2] = 0;
-      var $4 = $0 + 20 | 0;
+      var $4 = CHECK_OVERFLOW($0 + 20, 32, 0);
       HEAP32[$4 >> 2] = 32768;
-      var $5 = $0 + 32 | 0;
+      var $5 = CHECK_OVERFLOW($0 + 32, 32, 0);
       HEAP32[$5 >> 2] = 0;
-      var $6 = $0 + 40 | 0;
+      var $6 = CHECK_OVERFLOW($0 + 40, 32, 0);
       HEAP32[$6 >> 2] = 0;
-      var $7 = $0 + 44 | 0;
+      var $7 = CHECK_OVERFLOW($0 + 44, 32, 0);
       HEAP32[$7 >> 2] = 0;
-      var $8 = $0 + 48 | 0;
+      var $8 = CHECK_OVERFLOW($0 + 48, 32, 0);
       HEAP32[$8 >> 2] = 0;
-      var $9 = $0 + 56 | 0;
+      var $9 = CHECK_OVERFLOW($0 + 56, 32, 0);
       HEAP32[$9 >> 2] = 0;
-      var $10 = $0 + 60 | 0;
+      var $10 = CHECK_OVERFLOW($0 + 60, 32, 0);
       HEAP32[$10 >> 2] = 0;
-      var $11 = $0 + 108 | 0;
-      var $arraydecay_c = $0 + 1328 | 0;
+      var $codes = CHECK_OVERFLOW($0 + 1328, 32, 0);
+      var $11 = CHECK_OVERFLOW($0 + 108, 32, 0);
+      var $arraydecay_c = $codes;
       HEAP32[$11 >> 2] = $arraydecay_c;
-      var $12 = $0 + 80 | 0;
+      var $12 = CHECK_OVERFLOW($0 + 80, 32, 0);
       HEAP32[$12 >> 2] = $arraydecay_c;
-      var $13 = $0 + 76 | 0;
+      var $13 = CHECK_OVERFLOW($0 + 76, 32, 0);
       HEAP32[$13 >> 2] = $arraydecay_c;
-      var $14 = $0 + 7104 | 0;
+      var $14 = CHECK_OVERFLOW($0 + 7104, 32, 0);
       HEAP32[$14 >> 2] = 1;
-      var $15 = $0 + 7108 | 0;
+      var $15 = CHECK_OVERFLOW($0 + 7108, 32, 0);
       HEAP32[$15 >> 2] = -1;
       var $retval_0 = 0;
     }
@@ -3624,28 +4312,31 @@ function _inflateReset2($strm) {
     if ($cmp) {
       var $retval_0 = -2;
     } else {
-      var $0 = HEAP32[$strm + 28 >> 2];
+      var $state1 = CHECK_OVERFLOW($strm + 28, 32, 0);
+      var $0 = HEAP32[$state1 >> 2];
       if (($0 | 0) == 0) {
         var $retval_0 = -2;
         break;
       }
-      var $window = $0 + 52 | 0;
+      var $window = CHECK_OVERFLOW($0 + 52, 32, 0);
       var $2 = HEAP32[$window >> 2];
       var $cmp15 = ($2 | 0) == 0;
-      var $_pre = $0 + 36 | 0;
+      var $_pre = CHECK_OVERFLOW($0 + 36, 32, 0);
       do {
         if (!$cmp15) {
           if ((HEAP32[$_pre >> 2] | 0) == 15) {
             break;
           }
-          var $4 = HEAP32[$strm + 36 >> 2];
-          var $5 = HEAP32[$strm + 40 >> 2];
+          var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0);
+          var $4 = HEAP32[$zfree >> 2];
+          var $opaque = CHECK_OVERFLOW($strm + 40, 32, 0);
+          var $5 = HEAP32[$opaque >> 2];
           FUNCTION_TABLE[$4]($5, $2);
-          var $6 = $window | 0;
+          var $6 = CHECK_OVERFLOW($window, 32, 0);
           HEAP32[$6 >> 2] = 0;
         }
       } while (0);
-      var $7 = $0 + 8 | 0;
+      var $7 = CHECK_OVERFLOW($0 + 8, 32, 0);
       HEAP32[$7 >> 2] = 1;
       HEAP32[$_pre >> 2] = 15;
       var $call = _inflateReset($strm);
@@ -3664,22 +4355,24 @@ function _inflateInit2_($strm) {
     if ($cmp7) {
       var $retval_0 = -2;
     } else {
-      HEAP32[$strm + 24 >> 2] = 0;
-      var $zalloc = $strm + 32 | 0;
+      var $msg = CHECK_OVERFLOW($strm + 24, 32, 0);
+      HEAP32[$msg >> 2] = 0;
+      var $zalloc = CHECK_OVERFLOW($strm + 32, 32, 0);
       var $0 = HEAP32[$zalloc >> 2];
       if (($0 | 0) == 0) {
         HEAP32[$zalloc >> 2] = 2;
-        HEAP32[$strm + 40 >> 2] = 0;
+        var $opaque = CHECK_OVERFLOW($strm + 40, 32, 0);
+        HEAP32[$opaque >> 2] = 0;
         var $1 = 2;
       } else {
         var $1 = $0;
       }
       var $1;
-      var $zfree$s2 = ($strm + 36 | 0) >> 2;
+      var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0), $zfree$s2 = $zfree >> 2;
       if ((HEAP32[$zfree$s2] | 0) == 0) {
         HEAP32[$zfree$s2] = 4;
       }
-      var $opaque22 = $strm + 40 | 0;
+      var $opaque22 = CHECK_OVERFLOW($strm + 40, 32, 0);
       var $3 = HEAP32[$opaque22 >> 2];
       var $call = FUNCTION_TABLE[$1]($3, 1, 7116);
       if (($call | 0) == 0) {
@@ -3687,9 +4380,10 @@ function _inflateInit2_($strm) {
         break;
       }
       var $4 = $call;
-      var $state27 = $strm + 28 | 0;
+      var $state27 = CHECK_OVERFLOW($strm + 28, 32, 0);
       HEAP32[$state27 >> 2] = $4;
-      var $5 = $call + 52 | 0;
+      var $window = CHECK_OVERFLOW($call + 52, 32, 0);
+      var $5 = $window;
       HEAP32[$5 >> 2] = 0;
       var $call28 = _inflateReset2($strm);
       if (($call28 | 0) == 0) {
@@ -3715,8 +4409,6 @@ function _inflateInit_($strm) {
 }
 
 function _inflate($strm) {
-  var $78$s2;
-  var $40$s1;
   var $39$s2;
   var $37$s2;
   var $36$s2;
@@ -3750,27 +4442,29 @@ function _inflate($strm) {
     if ($cmp) {
       var $retval_0 = -2;
     } else {
-      var $0 = HEAP32[$strm + 28 >> 2];
+      var $state1 = CHECK_OVERFLOW($strm + 28, 32, 0);
+      var $0 = HEAP32[$state1 >> 2];
       if (($0 | 0) == 0) {
         var $retval_0 = -2;
         break;
       }
-      var $next_out$s2 = ($strm + 12 | 0) >> 2;
+      var $next_out = CHECK_OVERFLOW($strm + 12, 32, 0), $next_out$s2 = $next_out >> 2;
       var $1 = HEAP32[$next_out$s2];
       if (($1 | 0) == 0) {
         var $retval_0 = -2;
         break;
       }
-      var $next_in$s2 = ($strm | 0) >> 2;
+      var $next_in = CHECK_OVERFLOW($strm, 32, 0), $next_in$s2 = $next_in >> 2;
       var $2 = HEAP32[$next_in$s2];
       if (($2 | 0) == 0) {
-        if ((HEAP32[$strm + 4 >> 2] | 0) != 0) {
+        var $avail_in = CHECK_OVERFLOW($strm + 4, 32, 0);
+        if ((HEAP32[$avail_in >> 2] | 0) != 0) {
           var $retval_0 = -2;
           break;
         }
       }
       var $4 = $0;
-      var $mode$s2 = ($0 | 0) >> 2;
+      var $mode = CHECK_OVERFLOW($0, 32, 0), $mode$s2 = $mode >> 2;
       var $5 = HEAP32[$mode$s2];
       if (($5 | 0) == 11) {
         HEAP32[$mode$s2] = 12;
@@ -3785,64 +4479,73 @@ function _inflate($strm) {
       var $6;
       var $7;
       var $8;
-      var $avail_out$s2 = ($strm + 16 | 0) >> 2;
+      var $avail_out = CHECK_OVERFLOW($strm + 16, 32, 0), $avail_out$s2 = $avail_out >> 2;
       var $9 = HEAP32[$avail_out$s2];
-      var $avail_in15$s2 = ($strm + 4 | 0) >> 2;
+      var $avail_in15 = CHECK_OVERFLOW($strm + 4, 32, 0), $avail_in15$s2 = $avail_in15 >> 2;
       var $10 = HEAPU32[$avail_in15$s2];
-      var $11$s2 = ($0 + 56 | 0) >> 2;
-      var $13$s2 = ($0 + 60 | 0) >> 2;
-      var $15$s2 = ($0 + 8 | 0) >> 2;
-      var $16$s2 = ($0 + 24 | 0) >> 2;
-      var $arrayidx = $hbuf | 0;
-      var $arrayidx40 = $hbuf + 1 | 0;
-      var $17$s2 = ($0 + 16 | 0) >> 2;
-      var $18$s2 = ($0 + 32 | 0) >> 2;
-      var $msg$s2 = ($strm + 24 | 0) >> 2;
-      var $19 = $0 + 36 | 0;
-      var $20 = $0 + 20 | 0;
-      var $adler$s2 = ($strm + 48 | 0) >> 2;
-      var $21$s2 = ($0 + 64 | 0) >> 2;
-      var $22 = $0 + 12 | 0;
-      var $23$s2 = ($0 + 4 | 0) >> 2;
-      var $24$s2 = ($0 + 7108 | 0) >> 2;
-      var $25 = $0 + 84 | 0, $25$s2 = $25 >> 2;
-      var $26 = $0 + 76 | 0;
-      var $27$s2 = ($0 + 72 | 0) >> 2;
-      var $28 = $0 + 7112 | 0;
-      var $29$s2 = ($0 + 68 | 0) >> 2;
-      var $30 = $0 + 44 | 0;
-      var $31 = $0 + 7104 | 0;
-      var $32 = $0 + 48 | 0;
-      var $33 = $0 + 52 | 0;
-      var $34 = $0 + 40 | 0;
-      var $total_out$s2 = ($strm + 20 | 0) >> 2;
-      var $35$s2 = ($0 + 28 | 0) >> 2;
-      var $arrayidx199 = $hbuf + 2 | 0;
-      var $arrayidx202 = $hbuf + 3 | 0;
-      var $36$s2 = ($0 + 96 | 0) >> 2;
-      var $37$s2 = ($0 + 100 | 0) >> 2;
-      var $38 = $0 + 92 | 0;
-      var $39$s2 = ($0 + 104 | 0) >> 2;
-      var $lens = $0 + 112 | 0;
-      var $40$s1 = $lens >> 1;
-      var $next861 = $0 + 108 | 0;
+      var $11 = CHECK_OVERFLOW($0 + 56, 32, 0), $11$s2 = $11 >> 2;
+      var $12 = HEAP32[$11$s2];
+      var $13 = CHECK_OVERFLOW($0 + 60, 32, 0), $13$s2 = $13 >> 2;
+      var $14 = HEAP32[$13$s2];
+      var $15 = CHECK_OVERFLOW($0 + 8, 32, 0), $15$s2 = $15 >> 2;
+      var $16 = CHECK_OVERFLOW($0 + 24, 32, 0), $16$s2 = $16 >> 2;
+      var $arrayidx = CHECK_OVERFLOW($hbuf, 32, 0);
+      var $arrayidx40 = CHECK_OVERFLOW($hbuf + 1, 32, 0);
+      var $17 = CHECK_OVERFLOW($0 + 16, 32, 0), $17$s2 = $17 >> 2;
+      var $head = CHECK_OVERFLOW($0 + 32, 32, 0);
+      var $18$s2 = $head >> 2;
+      var $msg = CHECK_OVERFLOW($strm + 24, 32, 0), $msg$s2 = $msg >> 2;
+      var $19 = CHECK_OVERFLOW($0 + 36, 32, 0);
+      var $20 = CHECK_OVERFLOW($0 + 20, 32, 0);
+      var $adler = CHECK_OVERFLOW($strm + 48, 32, 0), $adler$s2 = $adler >> 2;
+      var $21 = CHECK_OVERFLOW($0 + 64, 32, 0), $21$s2 = $21 >> 2;
+      var $22 = CHECK_OVERFLOW($0 + 12, 32, 0);
+      var $23 = CHECK_OVERFLOW($0 + 4, 32, 0), $23$s2 = $23 >> 2;
+      var $24 = CHECK_OVERFLOW($0 + 7108, 32, 0), $24$s2 = $24 >> 2;
+      var $25 = CHECK_OVERFLOW($0 + 84, 32, 0), $25$s2 = $25 >> 2;
+      var $lencode1215 = CHECK_OVERFLOW($0 + 76, 32, 0);
+      var $26 = $lencode1215;
+      var $27 = CHECK_OVERFLOW($0 + 72, 32, 0), $27$s2 = $27 >> 2;
+      var $28 = CHECK_OVERFLOW($0 + 7112, 32, 0);
+      var $29 = CHECK_OVERFLOW($0 + 68, 32, 0), $29$s2 = $29 >> 2;
+      var $30 = CHECK_OVERFLOW($0 + 44, 32, 0);
+      var $31 = CHECK_OVERFLOW($0 + 7104, 32, 0);
+      var $32 = CHECK_OVERFLOW($0 + 48, 32, 0);
+      var $window = CHECK_OVERFLOW($0 + 52, 32, 0);
+      var $33 = $window;
+      var $34 = CHECK_OVERFLOW($0 + 40, 32, 0);
+      var $total_out = CHECK_OVERFLOW($strm + 20, 32, 0), $total_out$s2 = $total_out >> 2;
+      var $35 = CHECK_OVERFLOW($0 + 28, 32, 0), $35$s2 = $35 >> 2;
+      var $arrayidx199 = CHECK_OVERFLOW($hbuf + 2, 32, 0);
+      var $arrayidx202 = CHECK_OVERFLOW($hbuf + 3, 32, 0);
+      var $36 = CHECK_OVERFLOW($0 + 96, 32, 0), $36$s2 = $36 >> 2;
+      var $37 = CHECK_OVERFLOW($0 + 100, 32, 0), $37$s2 = $37 >> 2;
+      var $38 = CHECK_OVERFLOW($0 + 92, 32, 0);
+      var $39 = CHECK_OVERFLOW($0 + 104, 32, 0), $39$s2 = $39 >> 2;
+      var $lens = CHECK_OVERFLOW($0 + 112, 32, 0);
+      var $40 = $lens;
+      var $codes = CHECK_OVERFLOW($0 + 1328, 32, 0);
+      var $next861 = CHECK_OVERFLOW($0 + 108, 32, 0);
       var $41 = $next861;
-      var $42 = $next861 | 0;
-      var $arraydecay860_c = $0 + 1328 | 0;
-      var $43 = $0 + 76 | 0;
+      var $42 = CHECK_OVERFLOW($next861, 32, 0);
+      var $arraydecay860_c = $codes;
+      var $43 = CHECK_OVERFLOW($0 + 76, 32, 0);
       var $arraydecay864 = $lens;
-      var $arraydecay867 = $0 + 752 | 0;
-      var $44 = $0 + 624 | 0;
-      var $45 = $0 + 80 | 0;
-      var $46 = $0 + 88 | 0;
-      var $47 = $0 + 80 | 0;
+      var $work = CHECK_OVERFLOW($0 + 752, 32, 0);
+      var $arraydecay867 = $work;
+      var $arrayidx1128 = CHECK_OVERFLOW($0 + 624, 32, 0);
+      var $44 = $arrayidx1128;
+      var $45 = CHECK_OVERFLOW($0 + 80, 32, 0);
+      var $46 = CHECK_OVERFLOW($0 + 88, 32, 0);
+      var $distcode1395 = CHECK_OVERFLOW($0 + 80, 32, 0);
+      var $47 = $distcode1395;
       var $ret_0 = 0;
       var $next_0 = $7;
       var $put_0 = $8;
       var $have_0 = $10;
       var $left_0 = $9;
-      var $hold_0 = HEAP32[$11$s2];
-      var $bits_0 = HEAP32[$13$s2];
+      var $hold_0 = $12;
+      var $bits_0 = $14;
       var $out_0 = $9;
       var $48 = $6;
       $for_cond$12 : while (1) {
@@ -3892,11 +4595,15 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add = ((HEAPU8[$next_1] & 255) << $bits_1) + $hold_1 | 0;
-              var $next_1 = $next_1 + 1 | 0;
-              var $have_1 = $have_1 - 1 | 0;
+              var $dec = CHECK_OVERFLOW($have_1 - 1, 32, 0);
+              var $incdec_ptr = CHECK_OVERFLOW($next_1 + 1, 32, 0);
+              var $shl = (HEAPU8[$next_1] & 255) << $bits_1;
+              var $add = CHECK_OVERFLOW($shl + $hold_1, 32, 0);
+              var $add29 = CHECK_OVERFLOW($bits_1 + 8, 32, 0);
+              var $next_1 = $incdec_ptr;
+              var $have_1 = $dec;
               var $hold_1 = $add;
-              var $bits_1 = $bits_1 + 8 | 0;
+              var $bits_1 = $add29;
             }
             if (($49 & 2 | 0) != 0 & ($hold_1 | 0) == 35615) {
               var $call = _crc32(0, 0, 0);
@@ -3923,7 +4630,7 @@ function _inflate($strm) {
             if (($52 | 0) == 0) {
               var $53 = $49;
             } else {
-              var $done = $52 + 48 | 0;
+              var $done = CHECK_OVERFLOW($52 + 48, 32, 0);
               HEAP32[$done >> 2] = -1;
               var $53 = HEAP32[$15$s2];
             }
@@ -3931,13 +4638,14 @@ function _inflate($strm) {
             var $tobool56 = ($53 & 1 | 0) == 0;
             do {
               if (!$tobool56) {
-                if ((((($hold_1 << 8 & 65280) + ($hold_1 >>> 8) | 0) >>> 0) % 31 | 0) != 0) {
+                var $add61 = CHECK_OVERFLOW(($hold_1 << 8 & 65280) + ($hold_1 >>> 8), 32, 0);
+                if ((($add61 >>> 0) % 31 | 0) != 0) {
                   break;
                 }
                 if (($hold_1 & 15 | 0) == 8) {
                   var $shr74 = $hold_1 >>> 4;
-                  var $sub = $bits_1 - 4 | 0;
-                  var $add77 = ($shr74 & 15) + 8 | 0;
+                  var $sub = CHECK_OVERFLOW($bits_1 - 4, 32, 0);
+                  var $add77 = CHECK_OVERFLOW(($shr74 & 15) + 8, 32, 0);
                   var $54 = HEAPU32[$19 >> 2];
                   var $cmp78 = ($54 | 0) == 0;
                   do {
@@ -3945,7 +4653,7 @@ function _inflate($strm) {
                       if ($add77 >>> 0 <= $54 >>> 0) {
                         break;
                       }
-                      HEAP32[$msg$s2] = STRING_TABLE.__str317 | 0;
+                      HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str319, 32, 0);
                       HEAP32[$mode$s2] = 29;
                       var $ret_0_be = $ret_0;
                       var $next_0_be = $next_1;
@@ -3976,7 +4684,7 @@ function _inflate($strm) {
                   __label__ = 265;
                   break $return_loopexit24$$sw_bb$$while_cond100$$while_cond163$$while_cond214$$sw_bb260$$sw_bb317$$for_cond_sw_bb373_crit_edge$$sw_bb433$$sw_bb496$$while_cond551$$sw_bb588$$sw_bb614$$do_body680$$sw_bb726$$sw_bb728$$while_cond754$$while_cond809$$while_cond877_preheader$$sw_bb1176$$sw_bb1178$$for_cond_sw_bb1344_crit_edge$$for_cond1390_preheader$$for_cond_sw_bb1505_crit_edge$$sw_bb1549$$sw_bb1614$$sw_bb1624$$sw_bb1700$$do_body1745_loopexit25$14;
                 }
-                HEAP32[$msg$s2] = STRING_TABLE.__str216 | 0;
+                HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str218, 32, 0);
                 HEAP32[$mode$s2] = 29;
                 var $ret_0_be = $ret_0;
                 var $next_0_be = $next_1;
@@ -3990,7 +4698,7 @@ function _inflate($strm) {
                 break $return_loopexit24$$sw_bb$$while_cond100$$while_cond163$$while_cond214$$sw_bb260$$sw_bb317$$for_cond_sw_bb373_crit_edge$$sw_bb433$$sw_bb496$$while_cond551$$sw_bb588$$sw_bb614$$do_body680$$sw_bb726$$sw_bb728$$while_cond754$$while_cond809$$while_cond877_preheader$$sw_bb1176$$sw_bb1178$$for_cond_sw_bb1344_crit_edge$$for_cond1390_preheader$$for_cond_sw_bb1505_crit_edge$$sw_bb1549$$sw_bb1614$$sw_bb1624$$sw_bb1700$$do_body1745_loopexit25$14;
               }
             } while (0);
-            HEAP32[$msg$s2] = STRING_TABLE.__str115 | 0;
+            HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str117, 32, 0);
             HEAP32[$mode$s2] = 29;
             var $ret_0_be = $ret_0;
             var $next_0_be = $next_1;
@@ -4024,15 +4732,19 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add113 = ((HEAPU8[$next_2] & 255) << $bits_2) + $hold_2 | 0;
-              var $next_2 = $next_2 + 1 | 0;
-              var $have_2 = $have_2 - 1 | 0;
+              var $dec109 = CHECK_OVERFLOW($have_2 - 1, 32, 0);
+              var $incdec_ptr110 = CHECK_OVERFLOW($next_2 + 1, 32, 0);
+              var $shl112 = (HEAPU8[$next_2] & 255) << $bits_2;
+              var $add113 = CHECK_OVERFLOW($shl112 + $hold_2, 32, 0);
+              var $add114 = CHECK_OVERFLOW($bits_2 + 8, 32, 0);
+              var $next_2 = $incdec_ptr110;
+              var $have_2 = $dec109;
               var $hold_2 = $add113;
-              var $bits_2 = $bits_2 + 8 | 0;
+              var $bits_2 = $add114;
             }
             HEAP32[$17$s2] = $hold_2;
             if (($hold_2 & 255 | 0) != 8) {
-              HEAP32[$msg$s2] = STRING_TABLE.__str216 | 0;
+              HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str218, 32, 0);
               HEAP32[$mode$s2] = 29;
               var $ret_0_be = $ret_0;
               var $next_0_be = $next_2;
@@ -4050,7 +4762,9 @@ function _inflate($strm) {
               if (($58 | 0) == 0) {
                 var $59 = $hold_2;
               } else {
-                HEAP32[($58 | 0) >> 2] = $hold_2 >>> 8 & 1;
+                var $and139 = $hold_2 >>> 8 & 1;
+                var $text = CHECK_OVERFLOW($58, 32, 0);
+                HEAP32[$text >> 2] = $and139;
                 var $59 = HEAP32[$17$s2];
               }
               var $59;
@@ -4069,7 +4783,7 @@ function _inflate($strm) {
               __label__ = 43;
               break;
             }
-            HEAP32[$msg$s2] = STRING_TABLE.__str418 | 0;
+            HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str420, 32, 0);
             HEAP32[$mode$s2] = 29;
             var $ret_0_be = $ret_0;
             var $next_0_be = $next_2;
@@ -4147,11 +4861,15 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add564 = ((HEAPU8[$next_18] & 255) << $bits_14) + $hold_14 | 0;
-              var $next_18 = $next_18 + 1 | 0;
-              var $have_18 = $have_18 - 1 | 0;
+              var $dec560 = CHECK_OVERFLOW($have_18 - 1, 32, 0);
+              var $incdec_ptr561 = CHECK_OVERFLOW($next_18 + 1, 32, 0);
+              var $shl563 = (HEAPU8[$next_18] & 255) << $bits_14;
+              var $add564 = CHECK_OVERFLOW($shl563 + $hold_14, 32, 0);
+              var $add565 = CHECK_OVERFLOW($bits_14 + 8, 32, 0);
+              var $next_18 = $incdec_ptr561;
+              var $have_18 = $dec560;
               var $hold_14 = $add564;
-              var $bits_14 = $bits_14 + 8 | 0;
+              var $bits_14 = $add565;
             }
             var $add581 = _llvm_bswap_i32($hold_14);
             HEAP32[$16$s2] = $add581;
@@ -4177,10 +4895,12 @@ function _inflate($strm) {
             __label__ = 122;
           } else if ($48 == 13) {
             var $and681 = $bits_0 & 7;
+            var $shr682 = $hold_0 >>> ($and681 >>> 0);
+            var $sub684 = CHECK_OVERFLOW($bits_0 - $and681, 32, 0);
             var $next_23 = $next_0;
             var $have_23 = $have_0;
-            var $hold_19 = $hold_0 >>> ($and681 >>> 0);
-            var $bits_19 = $bits_0 - $and681 | 0;
+            var $hold_19 = $shr682;
+            var $bits_19 = $sub684;
             while (1) {
               var $bits_19;
               var $hold_19;
@@ -4198,11 +4918,15 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add701 = ((HEAPU8[$next_23] & 255) << $bits_19) + $hold_19 | 0;
-              var $next_23 = $next_23 + 1 | 0;
-              var $have_23 = $have_23 - 1 | 0;
+              var $dec697 = CHECK_OVERFLOW($have_23 - 1, 32, 0);
+              var $incdec_ptr698 = CHECK_OVERFLOW($next_23 + 1, 32, 0);
+              var $shl700 = (HEAPU8[$next_23] & 255) << $bits_19;
+              var $add701 = CHECK_OVERFLOW($shl700 + $hold_19, 32, 0);
+              var $add702 = CHECK_OVERFLOW($bits_19 + 8, 32, 0);
+              var $next_23 = $incdec_ptr698;
+              var $have_23 = $dec697;
               var $hold_19 = $add701;
-              var $bits_19 = $bits_19 + 8 | 0;
+              var $bits_19 = $add702;
             }
             var $and708 = $hold_19 & 65535;
             if (($and708 | 0) == ($hold_19 >>> 16 ^ 65535 | 0)) {
@@ -4215,7 +4939,7 @@ function _inflate($strm) {
               __label__ = 140;
               break;
             }
-            HEAP32[$msg$s2] = STRING_TABLE.__str721 | 0;
+            HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str723, 32, 0);
             HEAP32[$mode$s2] = 29;
             var $ret_0_be = $ret_0;
             var $next_0_be = $next_23;
@@ -4261,21 +4985,26 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add767 = ((HEAPU8[$next_26] & 255) << $bits_22) + $hold_22 | 0;
-              var $next_26 = $next_26 + 1 | 0;
-              var $have_26 = $have_26 - 1 | 0;
+              var $dec763 = CHECK_OVERFLOW($have_26 - 1, 32, 0);
+              var $incdec_ptr764 = CHECK_OVERFLOW($next_26 + 1, 32, 0);
+              var $shl766 = (HEAPU8[$next_26] & 255) << $bits_22;
+              var $add767 = CHECK_OVERFLOW($shl766 + $hold_22, 32, 0);
+              var $add768 = CHECK_OVERFLOW($bits_22 + 8, 32, 0);
+              var $next_26 = $incdec_ptr764;
+              var $have_26 = $dec763;
               var $hold_22 = $add767;
-              var $bits_22 = $bits_22 + 8 | 0;
+              var $bits_22 = $add768;
             }
-            var $add775 = ($hold_22 & 31) + 257 | 0;
+            var $add775 = CHECK_OVERFLOW(($hold_22 & 31) + 257, 32, 0);
             HEAP32[$36$s2] = $add775;
-            var $add782 = ($hold_22 >>> 5 & 31) + 1 | 0;
+            var $add782 = CHECK_OVERFLOW(($hold_22 >>> 5 & 31) + 1, 32, 0);
             HEAP32[$37$s2] = $add782;
-            HEAP32[$38 >> 2] = ($hold_22 >>> 10 & 15) + 4 | 0;
+            var $add789 = CHECK_OVERFLOW(($hold_22 >>> 10 & 15) + 4, 32, 0);
+            HEAP32[$38 >> 2] = $add789;
             var $shr791 = $hold_22 >>> 14;
-            var $sub792 = $bits_22 - 14 | 0;
+            var $sub792 = CHECK_OVERFLOW($bits_22 - 14, 32, 0);
             if ($add775 >>> 0 > 286 | $add782 >>> 0 > 30) {
-              HEAP32[$msg$s2] = STRING_TABLE.__str822 | 0;
+              HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str824, 32, 0);
               HEAP32[$mode$s2] = 29;
               var $ret_0_be = $ret_0;
               var $next_0_be = $next_26;
@@ -4365,13 +5094,16 @@ function _inflate($strm) {
               var $out_4 = $out_0;
               break $for_cond$12;
             }
-            HEAP8[$put_0] = HEAP32[$21$s2] & 255;
+            var $conv1620 = HEAP32[$21$s2] & 255;
+            var $incdec_ptr1621 = CHECK_OVERFLOW($put_0 + 1, 32, 0);
+            HEAP8[$put_0] = $conv1620;
+            var $dec1622 = CHECK_OVERFLOW($left_0 - 1, 32, 0);
             HEAP32[$mode$s2] = 20;
             var $ret_0_be = $ret_0;
             var $next_0_be = $next_0;
-            var $put_0_be = $put_0 + 1 | 0;
+            var $put_0_be = $incdec_ptr1621;
             var $have_0_be = $have_0;
-            var $left_0_be = $left_0 - 1 | 0;
+            var $left_0_be = $dec1622;
             var $hold_0_be = $hold_0;
             var $bits_0_be = $bits_0;
             var $out_0_be = $out_0;
@@ -4402,21 +5134,29 @@ function _inflate($strm) {
                     var $out_4 = $out_0;
                     break $for_cond$12;
                   }
-                  var $add1642 = ((HEAPU8[$next_52] & 255) << $bits_48) + $hold_48 | 0;
-                  var $next_52 = $next_52 + 1 | 0;
-                  var $have_52 = $have_52 - 1 | 0;
+                  var $dec1638 = CHECK_OVERFLOW($have_52 - 1, 32, 0);
+                  var $incdec_ptr1639 = CHECK_OVERFLOW($next_52 + 1, 32, 0);
+                  var $shl1641 = (HEAPU8[$next_52] & 255) << $bits_48;
+                  var $add1642 = CHECK_OVERFLOW($shl1641 + $hold_48, 32, 0);
+                  var $add1643 = CHECK_OVERFLOW($bits_48 + 8, 32, 0);
+                  var $next_52 = $incdec_ptr1639;
+                  var $have_52 = $dec1638;
                   var $hold_48 = $add1642;
-                  var $bits_48 = $bits_48 + 8 | 0;
+                  var $bits_48 = $add1643;
                 }
-                var $sub1649 = $out_0 - $left_0 | 0;
-                var $add1650 = HEAP32[$total_out$s2] + $sub1649 | 0;
+                var $sub1649 = CHECK_OVERFLOW($out_0 - $left_0, 32, 0);
+                var $188 = HEAP32[$total_out$s2];
+                var $add1650 = CHECK_OVERFLOW($188 + $sub1649, 32, 0);
                 HEAP32[$total_out$s2] = $add1650;
-                var $add1651 = HEAP32[$35$s2] + $sub1649 | 0;
+                var $189 = HEAP32[$35$s2];
+                var $add1651 = CHECK_OVERFLOW($189 + $sub1649, 32, 0);
                 HEAP32[$35$s2] = $add1651;
                 if (($out_0 | 0) != ($left_0 | 0)) {
+                  var $tobool1655 = (HEAP32[$17$s2] | 0) == 0;
                   var $191 = HEAP32[$16$s2];
-                  var $add_ptr1659 = $put_0 + -$sub1649 | 0;
-                  if ((HEAP32[$17$s2] | 0) == 0) {
+                  var $idx_neg1658 = CHECK_OVERFLOW(-$sub1649, 32, 0);
+                  var $add_ptr1659 = CHECK_OVERFLOW($put_0 + $idx_neg1658, 32, 0);
+                  if ($tobool1655) {
                     var $call1665 = _adler32($191, $add_ptr1659, $sub1649);
                     var $cond1667 = $call1665;
                   } else {
@@ -4442,7 +5182,7 @@ function _inflate($strm) {
                   var $out_1 = $left_0;
                   break;
                 }
-                HEAP32[$msg$s2] = STRING_TABLE.__str17 | 0;
+                HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str17, 32, 0);
                 HEAP32[$mode$s2] = 29;
                 var $ret_0_be = $ret_0;
                 var $next_0_be = $next_52;
@@ -4524,15 +5264,19 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add176 = ((HEAPU8[$next_3] & 255) << $bits_3) + $hold_3 | 0;
-              var $next_3 = $next_3 + 1 | 0;
-              var $have_3 = $have_3 - 1 | 0;
+              var $dec172 = CHECK_OVERFLOW($have_3 - 1, 32, 0);
+              var $incdec_ptr173 = CHECK_OVERFLOW($next_3 + 1, 32, 0);
+              var $shl175 = (HEAPU8[$next_3] & 255) << $bits_3;
+              var $add176 = CHECK_OVERFLOW($shl175 + $hold_3, 32, 0);
+              var $add177 = CHECK_OVERFLOW($bits_3 + 8, 32, 0);
+              var $next_3 = $incdec_ptr173;
+              var $have_3 = $dec172;
               var $hold_3 = $add176;
-              var $bits_3 = $bits_3 + 8 | 0;
+              var $bits_3 = $add177;
             }
             var $62 = HEAP32[$18$s2];
             if (($62 | 0) != 0) {
-              var $time = $62 + 4 | 0;
+              var $time = CHECK_OVERFLOW($62 + 4, 32, 0);
               HEAP32[$time >> 2] = $hold_3;
             }
             if ((HEAP32[$17$s2] & 512 | 0) != 0) {
@@ -4619,18 +5363,29 @@ function _inflate($strm) {
                   var $out_4 = $out_0;
                   break $for_cond$12;
                 }
-                var $add829 = ((HEAPU8[$next_28] & 255) << $bits_24) + $hold_24 | 0;
-                var $next_28 = $next_28 + 1 | 0;
-                var $have_28 = $have_28 - 1 | 0;
+                var $dec825 = CHECK_OVERFLOW($have_28 - 1, 32, 0);
+                var $incdec_ptr826 = CHECK_OVERFLOW($next_28 + 1, 32, 0);
+                var $shl828 = (HEAPU8[$next_28] & 255) << $bits_24;
+                var $add829 = CHECK_OVERFLOW($shl828 + $hold_24, 32, 0);
+                var $add830 = CHECK_OVERFLOW($bits_24 + 8, 32, 0);
+                var $next_28 = $incdec_ptr826;
+                var $have_28 = $dec825;
                 var $hold_24 = $add829;
-                var $bits_24 = $bits_24 + 8 | 0;
+                var $bits_24 = $add830;
               }
-              HEAP32[$39$s2] = $121 + 1 | 0;
-              HEAP16[((HEAPU16[_inflate_order + ($121 << 1) >> 1] & 65535) << 1 >> 1) + $40$s1] = $hold_24 & 65535 & 7;
+              var $conv837 = $hold_24 & 65535 & 7;
+              var $inc839 = CHECK_OVERFLOW($121 + 1, 32, 0);
+              HEAP32[$39$s2] = $inc839;
+              var $arrayidx840 = CHECK_OVERFLOW(($121 << 1) + _inflate_order, 32, 0);
+              var $idxprom = HEAPU16[$arrayidx840 >> 1] & 65535;
+              var $arrayidx841 = CHECK_OVERFLOW(($idxprom << 1) + $40, 32, 0);
+              HEAP16[$arrayidx841 >> 1] = $conv837;
+              var $shr843 = $hold_24 >>> 3;
+              var $sub844 = CHECK_OVERFLOW($bits_24 - 3, 32, 0);
               var $next_27 = $next_28;
               var $have_27 = $have_28;
-              var $hold_23 = $hold_24 >>> 3;
-              var $bits_23 = $bits_24 - 3 | 0;
+              var $hold_23 = $shr843;
+              var $bits_23 = $sub844;
             }
             var $cmp850111 = $121 >>> 0 < 19;
             $while_body852$$while_end859$131 : do {
@@ -4638,8 +5393,12 @@ function _inflate($strm) {
                 var $125 = $121;
                 while (1) {
                   var $125;
-                  HEAP32[$39$s2] = $125 + 1 | 0;
-                  HEAP16[((HEAPU16[_inflate_order + ($125 << 1) >> 1] & 65535) << 1 >> 1) + $40$s1] = 0;
+                  var $inc854 = CHECK_OVERFLOW($125 + 1, 32, 0);
+                  HEAP32[$39$s2] = $inc854;
+                  var $arrayidx855 = CHECK_OVERFLOW(($125 << 1) + _inflate_order, 32, 0);
+                  var $idxprom856 = HEAPU16[$arrayidx855 >> 1] & 65535;
+                  var $arrayidx858 = CHECK_OVERFLOW(($idxprom856 << 1) + $40, 32, 0);
+                  HEAP16[$arrayidx858 >> 1] = 0;
                   var $_pr = HEAPU32[$39$s2];
                   if ($_pr >>> 0 >= 19) {
                     break $while_body852$$while_end859$131;
@@ -4663,7 +5422,7 @@ function _inflate($strm) {
               __label__ = 161;
               break;
             }
-            HEAP32[$msg$s2] = STRING_TABLE.__str923 | 0;
+            HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str925, 32, 0);
             HEAP32[$mode$s2] = 29;
             var $ret_0_be = $call868;
             var $next_0_be = $next_27;
@@ -4712,11 +5471,15 @@ function _inflate($strm) {
                     var $out_4 = $out_2;
                     break $for_cond$12;
                   }
-                  var $add1721 = ((HEAPU8[$next_55] & 255) << $bits_51) + $hold_51 | 0;
-                  var $next_55 = $next_55 + 1 | 0;
-                  var $have_55 = $have_55 - 1 | 0;
+                  var $dec1717 = CHECK_OVERFLOW($have_55 - 1, 32, 0);
+                  var $incdec_ptr1718 = CHECK_OVERFLOW($next_55 + 1, 32, 0);
+                  var $shl1720 = (HEAPU8[$next_55] & 255) << $bits_51;
+                  var $add1721 = CHECK_OVERFLOW($shl1720 + $hold_51, 32, 0);
+                  var $add1722 = CHECK_OVERFLOW($bits_51 + 8, 32, 0);
+                  var $next_55 = $incdec_ptr1718;
+                  var $have_55 = $dec1717;
                   var $hold_51 = $add1721;
-                  var $bits_51 = $bits_51 + 8 | 0;
+                  var $bits_51 = $add1722;
                 }
                 if (($hold_51 | 0) == (HEAP32[$35$s2] | 0)) {
                   var $next_56 = $next_55;
@@ -4725,7 +5488,7 @@ function _inflate($strm) {
                   var $bits_52 = 0;
                   break;
                 }
-                HEAP32[$msg$s2] = STRING_TABLE.__str18 | 0;
+                HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str18, 32, 0);
                 HEAP32[$mode$s2] = 29;
                 var $ret_0_be = $ret_0;
                 var $next_0_be = $next_55;
@@ -4776,18 +5539,25 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add227 = ((HEAPU8[$next_4] & 255) << $bits_4) + $hold_4 | 0;
-              var $next_4 = $next_4 + 1 | 0;
-              var $have_4 = $have_4 - 1 | 0;
+              var $dec223 = CHECK_OVERFLOW($have_4 - 1, 32, 0);
+              var $incdec_ptr224 = CHECK_OVERFLOW($next_4 + 1, 32, 0);
+              var $shl226 = (HEAPU8[$next_4] & 255) << $bits_4;
+              var $add227 = CHECK_OVERFLOW($shl226 + $hold_4, 32, 0);
+              var $add228 = CHECK_OVERFLOW($bits_4 + 8, 32, 0);
+              var $next_4 = $incdec_ptr224;
+              var $have_4 = $dec223;
               var $hold_4 = $add227;
-              var $bits_4 = $bits_4 + 8 | 0;
+              var $bits_4 = $add228;
             }
             var $66 = HEAP32[$18$s2];
             if (($66 | 0) != 0) {
-              var $xflags = $66 + 8 | 0;
-              HEAP32[$xflags >> 2] = $hold_4 & 255;
-              var $os = HEAP32[$18$s2] + 12 | 0;
-              HEAP32[$os >> 2] = $hold_4 >>> 8;
+              var $and236 = $hold_4 & 255;
+              var $xflags = CHECK_OVERFLOW($66 + 8, 32, 0);
+              HEAP32[$xflags >> 2] = $and236;
+              var $shr238 = $hold_4 >>> 8;
+              var $67 = HEAP32[$18$s2];
+              var $os = CHECK_OVERFLOW($67 + 12, 32, 0);
+              HEAP32[$os >> 2] = $shr238;
             }
             if ((HEAP32[$17$s2] & 512 | 0) != 0) {
               HEAP8[$arrayidx] = $hold_4 & 255;
@@ -4830,11 +5600,15 @@ function _inflate($strm) {
                   var $out_4 = $out_0;
                   break $for_cond$12;
                 }
-                var $add641 = ((HEAPU8[$next_22] & 255) << $bits_18) + $hold_18 | 0;
-                var $next_22 = $next_22 + 1 | 0;
-                var $have_22 = $have_22 - 1 | 0;
+                var $dec637 = CHECK_OVERFLOW($have_22 - 1, 32, 0);
+                var $incdec_ptr638 = CHECK_OVERFLOW($next_22 + 1, 32, 0);
+                var $shl640 = (HEAPU8[$next_22] & 255) << $bits_18;
+                var $add641 = CHECK_OVERFLOW($shl640 + $hold_18, 32, 0);
+                var $add642 = CHECK_OVERFLOW($bits_18 + 8, 32, 0);
+                var $next_22 = $incdec_ptr638;
+                var $have_22 = $dec637;
                 var $hold_18 = $add641;
-                var $bits_18 = $bits_18 + 8 | 0;
+                var $bits_18 = $add642;
               }
               HEAP32[$23$s2] = $hold_18 & 1;
               var $and655 = $hold_18 >>> 1 & 3;
@@ -4846,29 +5620,33 @@ function _inflate($strm) {
               } else if ($and655 == 2) {
                 HEAP32[$mode$s2] = 16;
               } else if ($and655 == 3) {
-                HEAP32[$msg$s2] = STRING_TABLE.__str620 | 0;
+                HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str622, 32, 0);
                 HEAP32[$mode$s2] = 29;
               }
+              var $shr675 = $hold_18 >>> 3;
+              var $sub676 = CHECK_OVERFLOW($bits_18 - 3, 32, 0);
               var $ret_0_be = $ret_0;
               var $next_0_be = $next_22;
               var $put_0_be = $put_0;
               var $have_0_be = $have_22;
               var $left_0_be = $left_0;
-              var $hold_0_be = $hold_18 >>> 3;
-              var $bits_0_be = $bits_18 - 3 | 0;
+              var $hold_0_be = $shr675;
+              var $bits_0_be = $sub676;
               var $out_0_be = $out_0;
               __label__ = 265;
               break;
             }
             var $and619 = $bits_17 & 7;
+            var $shr620 = $hold_17 >>> ($and619 >>> 0);
+            var $sub622 = CHECK_OVERFLOW($bits_17 - $and619, 32, 0);
             HEAP32[$mode$s2] = 26;
             var $ret_0_be = $ret_0;
             var $next_0_be = $next_21;
             var $put_0_be = $put_0;
             var $have_0_be = $have_21;
             var $left_0_be = $left_0;
-            var $hold_0_be = $hold_17 >>> ($and619 >>> 0);
-            var $bits_0_be = $bits_17 - $and619 | 0;
+            var $hold_0_be = $shr620;
+            var $bits_0_be = $sub622;
             var $out_0_be = $out_0;
             __label__ = 265;
             break;
@@ -4903,11 +5681,12 @@ function _inflate($strm) {
               break $for_cond$12;
             }
             _memcpy($put_0, $next_25, $copy_4, 1);
-            var $sub744 = $have_25 - $copy_4 | 0;
-            var $add_ptr745 = $next_25 + $copy_4 | 0;
-            var $sub746 = $left_0 - $copy_4 | 0;
-            var $add_ptr747 = $put_0 + $copy_4 | 0;
-            var $sub749 = HEAP32[$21$s2] - $copy_4 | 0;
+            var $sub744 = CHECK_OVERFLOW($have_25 - $copy_4, 32, 0);
+            var $add_ptr745 = CHECK_OVERFLOW($next_25 + $copy_4, 32, 0);
+            var $sub746 = CHECK_OVERFLOW($left_0 - $copy_4, 32, 0);
+            var $add_ptr747 = CHECK_OVERFLOW($put_0 + $copy_4, 32, 0);
+            var $119 = HEAP32[$21$s2];
+            var $sub749 = CHECK_OVERFLOW($119 - $copy_4, 32, 0);
             HEAP32[$21$s2] = $sub749;
             var $ret_0_be = $ret_0;
             var $next_0_be = $add_ptr745;
@@ -4936,9 +5715,11 @@ function _inflate($strm) {
               var $next_29;
               var $127 = HEAPU32[$39$s2];
               var $128 = HEAPU32[$36$s2];
-              var $add881 = HEAP32[$37$s2] + $128 | 0;
+              var $129 = HEAP32[$37$s2];
+              var $add881 = CHECK_OVERFLOW($129 + $128, 32, 0);
               if ($127 >>> 0 < $add881 >>> 0) {
-                var $sub888 = (1 << HEAP32[$25$s2]) - 1 | 0;
+                var $shl887 = 1 << HEAP32[$25$s2];
+                var $sub888 = CHECK_OVERFLOW($shl887 - 1, 32, 0);
                 var $131 = HEAPU32[$26 >> 2];
                 var $next_30 = $next_29;
                 var $have_30 = $have_29;
@@ -4950,7 +5731,8 @@ function _inflate($strm) {
                   var $have_30;
                   var $next_30;
                   var $and889 = $sub888 & $hold_26;
-                  var $conv893 = HEAPU8[($and889 << 2) + $131 + 1 | 0] & 255;
+                  var $arrayidx891_1 = CHECK_OVERFLOW(($and889 << 2) + $131 + 1, 32, 0);
+                  var $conv893 = HEAPU8[$arrayidx891_1] & 255;
                   if ($conv893 >>> 0 <= $bits_26 >>> 0) {
                     break;
                   }
@@ -4963,13 +5745,18 @@ function _inflate($strm) {
                     var $out_4 = $out_0;
                     break $for_cond$12;
                   }
-                  var $add907 = ((HEAPU8[$next_30] & 255) << $bits_26) + $hold_26 | 0;
-                  var $next_30 = $next_30 + 1 | 0;
-                  var $have_30 = $have_30 - 1 | 0;
+                  var $dec903 = CHECK_OVERFLOW($have_30 - 1, 32, 0);
+                  var $incdec_ptr904 = CHECK_OVERFLOW($next_30 + 1, 32, 0);
+                  var $shl906 = (HEAPU8[$next_30] & 255) << $bits_26;
+                  var $add907 = CHECK_OVERFLOW($shl906 + $hold_26, 32, 0);
+                  var $add908 = CHECK_OVERFLOW($bits_26 + 8, 32, 0);
+                  var $next_30 = $incdec_ptr904;
+                  var $have_30 = $dec903;
                   var $hold_26 = $add907;
-                  var $bits_26 = $bits_26 + 8 | 0;
+                  var $bits_26 = $add908;
                 }
-                var $tmp26 = HEAPU16[$131 + ($and889 << 2) + 2 >> 1];
+                var $arrayidx891_2 = CHECK_OVERFLOW(($and889 << 2) + $131 + 2, 32, 0);
+                var $tmp26 = HEAPU16[$arrayidx891_2 >> 1];
                 if (($tmp26 & 65535) < 16) {
                   var $next_31 = $next_30;
                   var $have_31 = $have_30;
@@ -4992,23 +5779,29 @@ function _inflate($strm) {
                       var $out_4 = $out_0;
                       break $for_cond$12;
                     }
-                    var $add931 = ((HEAPU8[$next_31] & 255) << $bits_27) + $hold_27 | 0;
-                    var $next_31 = $next_31 + 1 | 0;
-                    var $have_31 = $have_31 - 1 | 0;
+                    var $dec927 = CHECK_OVERFLOW($have_31 - 1, 32, 0);
+                    var $incdec_ptr928 = CHECK_OVERFLOW($next_31 + 1, 32, 0);
+                    var $shl930 = (HEAPU8[$next_31] & 255) << $bits_27;
+                    var $add931 = CHECK_OVERFLOW($shl930 + $hold_27, 32, 0);
+                    var $add932 = CHECK_OVERFLOW($bits_27 + 8, 32, 0);
+                    var $next_31 = $incdec_ptr928;
+                    var $have_31 = $dec927;
                     var $hold_27 = $add931;
-                    var $bits_27 = $bits_27 + 8 | 0;
+                    var $bits_27 = $add932;
                   }
                   var $shr941 = $hold_27 >>> ($conv893 >>> 0);
-                  var $sub944 = $bits_27 - $conv893 | 0;
-                  HEAP32[$39$s2] = $127 + 1 | 0;
-                  HEAP16[($127 << 1 >> 1) + $40$s1] = $tmp26;
+                  var $sub944 = CHECK_OVERFLOW($bits_27 - $conv893, 32, 0);
+                  var $inc949 = CHECK_OVERFLOW($127 + 1, 32, 0);
+                  HEAP32[$39$s2] = $inc949;
+                  var $arrayidx951 = CHECK_OVERFLOW(($127 << 1) + $40, 32, 0);
+                  HEAP16[$arrayidx951 >> 1] = $tmp26;
                   var $next_29 = $next_31;
                   var $have_29 = $have_31;
                   var $hold_25 = $shr941;
                   var $bits_25 = $sub944;
                 } else {
                   if ($tmp26 == 16) {
-                    var $add962 = $conv893 + 2 | 0;
+                    var $add962 = CHECK_OVERFLOW($conv893 + 2, 32, 0);
                     var $next_32 = $next_30;
                     var $have_32 = $have_30;
                     var $hold_28 = $hold_26;
@@ -5030,16 +5823,20 @@ function _inflate($strm) {
                         var $out_4 = $out_0;
                         break $for_cond$12;
                       }
-                      var $add975 = ((HEAPU8[$next_32] & 255) << $bits_28) + $hold_28 | 0;
-                      var $next_32 = $next_32 + 1 | 0;
-                      var $have_32 = $have_32 - 1 | 0;
+                      var $dec971 = CHECK_OVERFLOW($have_32 - 1, 32, 0);
+                      var $incdec_ptr972 = CHECK_OVERFLOW($next_32 + 1, 32, 0);
+                      var $shl974 = (HEAPU8[$next_32] & 255) << $bits_28;
+                      var $add975 = CHECK_OVERFLOW($shl974 + $hold_28, 32, 0);
+                      var $add976 = CHECK_OVERFLOW($bits_28 + 8, 32, 0);
+                      var $next_32 = $incdec_ptr972;
+                      var $have_32 = $dec971;
                       var $hold_28 = $add975;
-                      var $bits_28 = $bits_28 + 8 | 0;
+                      var $bits_28 = $add976;
                     }
                     var $shr985 = $hold_28 >>> ($conv893 >>> 0);
-                    var $sub988 = $bits_28 - $conv893 | 0;
+                    var $sub988 = CHECK_OVERFLOW($bits_28 - $conv893, 32, 0);
                     if (($127 | 0) == 0) {
-                      HEAP32[$msg$s2] = STRING_TABLE.__str1024 | 0;
+                      HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str1026, 32, 0);
                       HEAP32[$mode$s2] = 29;
                       var $ret_0_be = $ret_1_ph;
                       var $next_0_be = $next_32;
@@ -5052,14 +5849,21 @@ function _inflate($strm) {
                       __label__ = 265;
                       break $for_cond_backedge$$while_cond214$$sw_bb260$$sw_bb317$$sw_bb373$$sw_bb433$$sw_bb496$$sw_bb614$$sw_bb728$$while_cond877_preheader$$sw_bb1176$$sw_bb1178$$sw_bb1344$$for_cond1390_preheader$$sw_bb1505$$sw_bb1549$148;
                     }
-                    var $len_0 = HEAP16[($127 - 1 << 1 >> 1) + $40$s1];
+                    var $sub999 = CHECK_OVERFLOW($127 - 1, 32, 0);
+                    var $arrayidx1001 = CHECK_OVERFLOW(($sub999 << 1) + $40, 32, 0);
+                    var $135 = HEAP16[$arrayidx1001 >> 1];
+                    var $and1003 = $shr985 & 3;
+                    var $add1004 = CHECK_OVERFLOW($and1003 + 3, 32, 0);
+                    var $shr1006 = $shr985 >>> 2;
+                    var $sub1007 = CHECK_OVERFLOW($sub988 - 2, 32, 0);
+                    var $len_0 = $135;
                     var $next_35 = $next_32;
                     var $have_35 = $have_32;
-                    var $hold_31 = $shr985 >>> 2;
-                    var $bits_31 = $sub988 - 2 | 0;
-                    var $copy_5 = ($shr985 & 3) + 3 | 0;
+                    var $hold_31 = $shr1006;
+                    var $bits_31 = $sub1007;
+                    var $copy_5 = $add1004;
                   } else if ($tmp26 == 17) {
-                    var $add1020 = $conv893 + 3 | 0;
+                    var $add1020 = CHECK_OVERFLOW($conv893 + 3, 32, 0);
                     var $next_33 = $next_30;
                     var $have_33 = $have_30;
                     var $hold_29 = $hold_26;
@@ -5081,21 +5885,30 @@ function _inflate($strm) {
                         var $out_4 = $out_0;
                         break $for_cond$12;
                       }
-                      var $add1033 = ((HEAPU8[$next_33] & 255) << $bits_29) + $hold_29 | 0;
-                      var $next_33 = $next_33 + 1 | 0;
-                      var $have_33 = $have_33 - 1 | 0;
+                      var $dec1029 = CHECK_OVERFLOW($have_33 - 1, 32, 0);
+                      var $incdec_ptr1030 = CHECK_OVERFLOW($next_33 + 1, 32, 0);
+                      var $shl1032 = (HEAPU8[$next_33] & 255) << $bits_29;
+                      var $add1033 = CHECK_OVERFLOW($shl1032 + $hold_29, 32, 0);
+                      var $add1034 = CHECK_OVERFLOW($bits_29 + 8, 32, 0);
+                      var $next_33 = $incdec_ptr1030;
+                      var $have_33 = $dec1029;
                       var $hold_29 = $add1033;
-                      var $bits_29 = $bits_29 + 8 | 0;
+                      var $bits_29 = $add1034;
                     }
                     var $shr1043 = $hold_29 >>> ($conv893 >>> 0);
+                    var $and1049 = $shr1043 & 7;
+                    var $add1050 = CHECK_OVERFLOW($and1049 + 3, 32, 0);
+                    var $shr1052 = $shr1043 >>> 3;
+                    var $sub1046 = CHECK_OVERFLOW(-3 - $conv893, 32, 0);
+                    var $sub1053 = CHECK_OVERFLOW($sub1046 + $bits_29, 32, 0);
                     var $len_0 = 0;
                     var $next_35 = $next_33;
                     var $have_35 = $have_33;
-                    var $hold_31 = $shr1043 >>> 3;
-                    var $bits_31 = -3 - $conv893 + $bits_29 | 0;
-                    var $copy_5 = ($shr1043 & 7) + 3 | 0;
+                    var $hold_31 = $shr1052;
+                    var $bits_31 = $sub1053;
+                    var $copy_5 = $add1050;
                   } else {
-                    var $add1061 = $conv893 + 7 | 0;
+                    var $add1061 = CHECK_OVERFLOW($conv893 + 7, 32, 0);
                     var $next_34 = $next_30;
                     var $have_34 = $have_30;
                     var $hold_30 = $hold_26;
@@ -5117,19 +5930,28 @@ function _inflate($strm) {
                         var $out_4 = $out_0;
                         break $for_cond$12;
                       }
-                      var $add1074 = ((HEAPU8[$next_34] & 255) << $bits_30) + $hold_30 | 0;
-                      var $next_34 = $next_34 + 1 | 0;
-                      var $have_34 = $have_34 - 1 | 0;
+                      var $dec1070 = CHECK_OVERFLOW($have_34 - 1, 32, 0);
+                      var $incdec_ptr1071 = CHECK_OVERFLOW($next_34 + 1, 32, 0);
+                      var $shl1073 = (HEAPU8[$next_34] & 255) << $bits_30;
+                      var $add1074 = CHECK_OVERFLOW($shl1073 + $hold_30, 32, 0);
+                      var $add1075 = CHECK_OVERFLOW($bits_30 + 8, 32, 0);
+                      var $next_34 = $incdec_ptr1071;
+                      var $have_34 = $dec1070;
                       var $hold_30 = $add1074;
-                      var $bits_30 = $bits_30 + 8 | 0;
+                      var $bits_30 = $add1075;
                     }
                     var $shr1084 = $hold_30 >>> ($conv893 >>> 0);
+                    var $and1090 = $shr1084 & 127;
+                    var $add1091 = CHECK_OVERFLOW($and1090 + 11, 32, 0);
+                    var $shr1093 = $shr1084 >>> 7;
+                    var $sub1087 = CHECK_OVERFLOW(-7 - $conv893, 32, 0);
+                    var $sub1094 = CHECK_OVERFLOW($sub1087 + $bits_30, 32, 0);
                     var $len_0 = 0;
                     var $next_35 = $next_34;
                     var $have_35 = $have_34;
-                    var $hold_31 = $shr1084 >>> 7;
-                    var $bits_31 = -7 - $conv893 + $bits_30 | 0;
-                    var $copy_5 = ($shr1084 & 127) + 11 | 0;
+                    var $hold_31 = $shr1093;
+                    var $bits_31 = $sub1094;
+                    var $copy_5 = $add1091;
                   }
                   var $copy_5;
                   var $bits_31;
@@ -5137,8 +5959,9 @@ function _inflate($strm) {
                   var $have_35;
                   var $next_35;
                   var $len_0;
-                  if (($127 + $copy_5 | 0) >>> 0 > $add881 >>> 0) {
-                    HEAP32[$msg$s2] = STRING_TABLE.__str1024 | 0;
+                  var $add1100 = CHECK_OVERFLOW($127 + $copy_5, 32, 0);
+                  if ($add1100 >>> 0 > $add881 >>> 0) {
+                    HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str1026, 32, 0);
                     HEAP32[$mode$s2] = 29;
                     var $ret_0_be = $ret_1_ph;
                     var $next_0_be = $next_35;
@@ -5156,9 +5979,11 @@ function _inflate($strm) {
                   while (1) {
                     var $138;
                     var $copy_6127;
-                    var $dec1111 = $copy_6127 - 1 | 0;
-                    HEAP32[$39$s2] = $138 + 1 | 0;
-                    HEAP16[($138 << 1 >> 1) + $40$s1] = $len_0;
+                    var $dec1111 = CHECK_OVERFLOW($copy_6127 - 1, 32, 0);
+                    var $inc1116 = CHECK_OVERFLOW($138 + 1, 32, 0);
+                    HEAP32[$39$s2] = $inc1116;
+                    var $arrayidx1118 = CHECK_OVERFLOW(($138 << 1) + $40, 32, 0);
+                    HEAP16[$arrayidx1118 >> 1] = $len_0;
                     if (($dec1111 | 0) == 0) {
                       var $next_29 = $next_35;
                       var $have_29 = $have_35;
@@ -5184,7 +6009,7 @@ function _inflate($strm) {
                   break $for_cond_backedge$$while_cond214$$sw_bb260$$sw_bb317$$sw_bb373$$sw_bb433$$sw_bb496$$sw_bb614$$sw_bb728$$while_cond877_preheader$$sw_bb1176$$sw_bb1178$$sw_bb1344$$for_cond1390_preheader$$sw_bb1505$$sw_bb1549$148;
                 }
                 if (HEAP16[$44 >> 1] << 16 >> 16 == 0) {
-                  HEAP32[$msg$s2] = STRING_TABLE.__str1125 | 0;
+                  HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str1127, 32, 0);
                   HEAP32[$mode$s2] = 29;
                   var $ret_0_be = $ret_1_ph;
                   var $next_0_be = $next_29;
@@ -5202,7 +6027,7 @@ function _inflate($strm) {
                 HEAP32[$25$s2] = 9;
                 var $call1149 = _inflate_table(1, $arraydecay864, $128, $41, $25, $arraydecay867);
                 if (($call1149 | 0) != 0) {
-                  HEAP32[$msg$s2] = STRING_TABLE.__str1226 | 0;
+                  HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str1228, 32, 0);
                   HEAP32[$mode$s2] = 29;
                   var $ret_0_be = $call1149;
                   var $next_0_be = $next_29;
@@ -5218,7 +6043,8 @@ function _inflate($strm) {
                 var $_c = HEAP32[$41 >> 2];
                 HEAP32[$45 >> 2] = $_c;
                 HEAP32[$46 >> 2] = 6;
-                var $add_ptr1159 = (HEAP32[$36$s2] << 1) + $arraydecay864 | 0;
+                var $141 = HEAP32[$36$s2];
+                var $add_ptr1159 = CHECK_OVERFLOW(($141 << 1) + $arraydecay864, 32, 0);
                 var $142 = HEAP32[$37$s2];
                 var $call1165 = _inflate_table(2, $add_ptr1159, $142, $41, $46, $arraydecay867);
                 if (($call1165 | 0) == 0) {
@@ -5231,7 +6057,7 @@ function _inflate($strm) {
                   __label__ = 202;
                   break $for_cond_backedge$$while_cond214$$sw_bb260$$sw_bb317$$sw_bb373$$sw_bb433$$sw_bb496$$sw_bb614$$sw_bb728$$while_cond877_preheader$$sw_bb1176$$sw_bb1178$$sw_bb1344$$for_cond1390_preheader$$sw_bb1505$$sw_bb1549$148;
                 }
-                HEAP32[$msg$s2] = STRING_TABLE.__str1327 | 0;
+                HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str1329, 32, 0);
                 HEAP32[$mode$s2] = 29;
                 var $ret_0_be = $call1165;
                 var $next_0_be = $next_29;
@@ -5265,7 +6091,7 @@ function _inflate($strm) {
                   var $bits_7 = $bits_5;
                   break;
                 }
-                var $extra = $75 + 16 | 0;
+                var $extra = CHECK_OVERFLOW($75 + 16, 32, 0);
                 HEAP32[$extra >> 2] = 0;
                 var $next_7 = $next_5;
                 var $have_7 = $have_5;
@@ -5293,18 +6119,22 @@ function _inflate($strm) {
                     var $out_4 = $out_0;
                     break $for_cond$12;
                   }
-                  var $add279 = ((HEAPU8[$next_6] & 255) << $bits_6) + $hold_6 | 0;
-                  var $next_6 = $next_6 + 1 | 0;
-                  var $have_6 = $have_6 - 1 | 0;
+                  var $dec275 = CHECK_OVERFLOW($have_6 - 1, 32, 0);
+                  var $incdec_ptr276 = CHECK_OVERFLOW($next_6 + 1, 32, 0);
+                  var $shl278 = (HEAPU8[$next_6] & 255) << $bits_6;
+                  var $add279 = CHECK_OVERFLOW($shl278 + $hold_6, 32, 0);
+                  var $add280 = CHECK_OVERFLOW($bits_6 + 8, 32, 0);
+                  var $next_6 = $incdec_ptr276;
+                  var $have_6 = $dec275;
                   var $hold_6 = $add279;
-                  var $bits_6 = $bits_6 + 8 | 0;
+                  var $bits_6 = $add280;
                 }
                 HEAP32[$21$s2] = $hold_6;
                 var $72 = HEAP32[$18$s2];
                 if (($72 | 0) == 0) {
                   var $73 = $70;
                 } else {
-                  var $extra_len = $72 + 20 | 0;
+                  var $extra_len = CHECK_OVERFLOW($72 + 20, 32, 0);
                   HEAP32[$extra_len >> 2] = $hold_6;
                   var $73 = HEAP32[$17$s2];
                 }
@@ -5374,21 +6204,28 @@ function _inflate($strm) {
                 var $86 = $77;
                 var $85 = $76;
               } else {
-                var $78 = HEAPU32[$18$s2], $78$s2 = $78 >> 2;
+                var $78 = HEAPU32[$18$s2];
                 var $cmp330 = ($78 | 0) == 0;
                 do {
                   if ($cmp330) {
                     var $82 = $76;
                   } else {
-                    var $79 = HEAP32[$78$s2 + 4];
+                    var $extra334 = CHECK_OVERFLOW($78 + 16, 32, 0);
+                    var $79 = HEAP32[$extra334 >> 2];
                     if (($79 | 0) == 0) {
                       var $82 = $76;
                       break;
                     }
-                    var $sub341 = HEAP32[$78$s2 + 5] - $77 | 0;
-                    var $add_ptr = $79 + $sub341 | 0;
-                    var $81 = HEAPU32[$78$s2 + 6];
-                    var $cond351 = ($sub341 + $copy_0 | 0) >>> 0 > $81 >>> 0 ? $81 - $sub341 | 0 : $copy_0;
+                    var $extra_len339 = CHECK_OVERFLOW($78 + 20, 32, 0);
+                    var $80 = HEAP32[$extra_len339 >> 2];
+                    var $sub341 = CHECK_OVERFLOW($80 - $77, 32, 0);
+                    var $add_ptr = CHECK_OVERFLOW($79 + $sub341, 32, 0);
+                    var $add344 = CHECK_OVERFLOW($sub341 + $copy_0, 32, 0);
+                    var $extra_max = CHECK_OVERFLOW($78 + 24, 32, 0);
+                    var $81 = HEAPU32[$extra_max >> 2];
+                    var $cmp346 = $add344 >>> 0 > $81 >>> 0;
+                    var $sub350 = CHECK_OVERFLOW($81 - $sub341, 32, 0);
+                    var $cond351 = $cmp346 ? $sub350 : $copy_0;
                     _memcpy($add_ptr, $next_8, $cond351, 1);
                     var $82 = HEAP32[$17$s2];
                   }
@@ -5399,9 +6236,10 @@ function _inflate($strm) {
                   var $call358 = _crc32($83, $next_8, $copy_0);
                   HEAP32[$16$s2] = $call358;
                 }
-                var $sub361 = $have_8 - $copy_0 | 0;
-                var $add_ptr362 = $next_8 + $copy_0 | 0;
-                var $sub364 = HEAP32[$21$s2] - $copy_0 | 0;
+                var $sub361 = CHECK_OVERFLOW($have_8 - $copy_0, 32, 0);
+                var $add_ptr362 = CHECK_OVERFLOW($next_8 + $copy_0, 32, 0);
+                var $84 = HEAP32[$21$s2];
+                var $sub364 = CHECK_OVERFLOW($84 - $copy_0, 32, 0);
                 HEAP32[$21$s2] = $sub364;
                 var $next_9 = $add_ptr362;
                 var $have_9 = $sub361;
@@ -5482,7 +6320,8 @@ function _inflate($strm) {
               break;
             }
             HEAP32[$24$s2] = 0;
-            var $sub1213 = (1 << HEAP32[$25$s2]) - 1 | 0;
+            var $shl1212 = 1 << HEAP32[$25$s2];
+            var $sub1213 = CHECK_OVERFLOW($shl1212 - 1, 32, 0);
             var $151 = HEAPU32[$26 >> 2];
             var $next_39 = $next_38;
             var $have_39 = $have_38;
@@ -5494,7 +6333,8 @@ function _inflate($strm) {
               var $have_39;
               var $next_39;
               var $and1214 = $sub1213 & $hold_35;
-              var $tmp22 = HEAPU8[($and1214 << 2) + $151 + 1 | 0];
+              var $arrayidx1216_1 = CHECK_OVERFLOW(($and1214 << 2) + $151 + 1, 32, 0);
+              var $tmp22 = HEAPU8[$arrayidx1216_1];
               var $conv1218 = $tmp22 & 255;
               if ($conv1218 >>> 0 <= $bits_35 >>> 0) {
                 break;
@@ -5508,14 +6348,20 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add1232 = ((HEAPU8[$next_39] & 255) << $bits_35) + $hold_35 | 0;
-              var $next_39 = $next_39 + 1 | 0;
-              var $have_39 = $have_39 - 1 | 0;
+              var $dec1228 = CHECK_OVERFLOW($have_39 - 1, 32, 0);
+              var $incdec_ptr1229 = CHECK_OVERFLOW($next_39 + 1, 32, 0);
+              var $shl1231 = (HEAPU8[$next_39] & 255) << $bits_35;
+              var $add1232 = CHECK_OVERFLOW($shl1231 + $hold_35, 32, 0);
+              var $add1233 = CHECK_OVERFLOW($bits_35 + 8, 32, 0);
+              var $next_39 = $incdec_ptr1229;
+              var $have_39 = $dec1228;
               var $hold_35 = $add1232;
-              var $bits_35 = $bits_35 + 8 | 0;
+              var $bits_35 = $add1233;
             }
-            var $tmp21 = HEAPU8[($and1214 << 2) + $151 | 0];
-            var $tmp23 = HEAPU16[$151 + ($and1214 << 2) + 2 >> 1];
+            var $arrayidx1216_0 = CHECK_OVERFLOW(($and1214 << 2) + $151, 32, 0);
+            var $tmp21 = HEAPU8[$arrayidx1216_0];
+            var $arrayidx1216_2 = CHECK_OVERFLOW(($and1214 << 2) + $151 + 2, 32, 0);
+            var $tmp23 = HEAPU16[$arrayidx1216_2 >> 1];
             var $conv1237 = $tmp21 & 255;
             var $tobool1238 = $tmp21 << 24 >> 24 == 0;
             do {
@@ -5541,7 +6387,9 @@ function _inflate($strm) {
                   break;
                 }
                 var $conv1248 = $tmp23 & 65535;
-                var $sub1255 = (1 << $conv1218 + $conv1237) - 1 | 0;
+                var $add1253 = CHECK_OVERFLOW($conv1218 + $conv1237, 32, 0);
+                var $shl1254 = 1 << $add1253;
+                var $sub1255 = CHECK_OVERFLOW($shl1254 - 1, 32, 0);
                 var $next_40 = $next_39;
                 var $have_40 = $have_39;
                 var $hold_36 = $hold_35;
@@ -5551,9 +6399,13 @@ function _inflate($strm) {
                   var $hold_36;
                   var $have_40;
                   var $next_40;
-                  var $add1260 = (($hold_36 & $sub1255) >>> ($conv1218 >>> 0)) + $conv1248 | 0;
-                  var $tmp19 = HEAPU8[($add1260 << 2) + $151 + 1 | 0];
-                  if ((($tmp19 & 255) + $conv1218 | 0) >>> 0 <= $bits_36 >>> 0) {
+                  var $shr1259 = ($hold_36 & $sub1255) >>> ($conv1218 >>> 0);
+                  var $add1260 = CHECK_OVERFLOW($shr1259 + $conv1248, 32, 0);
+                  var $arrayidx1262_1 = CHECK_OVERFLOW(($add1260 << 2) + $151 + 1, 32, 0);
+                  var $tmp19 = HEAPU8[$arrayidx1262_1];
+                  var $conv1266 = $tmp19 & 255;
+                  var $add1267 = CHECK_OVERFLOW($conv1266 + $conv1218, 32, 0);
+                  if ($add1267 >>> 0 <= $bits_36 >>> 0) {
                     break;
                   }
                   if (($have_40 | 0) == 0) {
@@ -5565,16 +6417,22 @@ function _inflate($strm) {
                     var $out_4 = $out_0;
                     break $for_cond$12;
                   }
-                  var $add1281 = ((HEAPU8[$next_40] & 255) << $bits_36) + $hold_36 | 0;
-                  var $next_40 = $next_40 + 1 | 0;
-                  var $have_40 = $have_40 - 1 | 0;
+                  var $dec1277 = CHECK_OVERFLOW($have_40 - 1, 32, 0);
+                  var $incdec_ptr1278 = CHECK_OVERFLOW($next_40 + 1, 32, 0);
+                  var $shl1280 = (HEAPU8[$next_40] & 255) << $bits_36;
+                  var $add1281 = CHECK_OVERFLOW($shl1280 + $hold_36, 32, 0);
+                  var $add1282 = CHECK_OVERFLOW($bits_36 + 8, 32, 0);
+                  var $next_40 = $incdec_ptr1278;
+                  var $have_40 = $dec1277;
                   var $hold_36 = $add1281;
-                  var $bits_36 = $bits_36 + 8 | 0;
+                  var $bits_36 = $add1282;
                 }
-                var $tmp20 = HEAP16[$151 + ($add1260 << 2) + 2 >> 1];
-                var $tmp18 = HEAP8[($add1260 << 2) + $151 | 0];
+                var $arrayidx1262_2 = CHECK_OVERFLOW(($add1260 << 2) + $151 + 2, 32, 0);
+                var $arrayidx1262_0 = CHECK_OVERFLOW(($add1260 << 2) + $151, 32, 0);
+                var $tmp20 = HEAP16[$arrayidx1262_2 >> 1];
+                var $tmp18 = HEAP8[$arrayidx1262_0];
                 var $shr1289 = $hold_36 >>> ($conv1218 >>> 0);
-                var $sub1292 = $bits_36 - $conv1218 | 0;
+                var $sub1292 = CHECK_OVERFLOW($bits_36 - $conv1218, 32, 0);
                 HEAP32[$24$s2] = $conv1218;
                 var $next_41 = $next_40;
                 var $have_41 = $have_40;
@@ -5596,8 +6454,9 @@ function _inflate($strm) {
             var $next_41;
             var $conv1302 = $here_110_0 & 255;
             var $shr1303 = $hold_37 >>> ($conv1302 >>> 0);
-            var $sub1306 = $bits_37 - $conv1302 | 0;
-            HEAP32[$24$s2] = $154 + $conv1302 | 0;
+            var $sub1306 = CHECK_OVERFLOW($bits_37 - $conv1302, 32, 0);
+            var $add1312 = CHECK_OVERFLOW($154 + $conv1302, 32, 0);
+            HEAP32[$24$s2] = $add1312;
             HEAP32[$21$s2] = $here_211_0 & 65535;
             var $conv1317 = $here_09_0 & 255;
             if ($here_09_0 << 24 >> 24 == 0) {
@@ -5640,7 +6499,7 @@ function _inflate($strm) {
               __label__ = 224;
               break;
             }
-            HEAP32[$msg$s2] = STRING_TABLE.__str255 | 0;
+            HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str259, 32, 0);
             HEAP32[$mode$s2] = 29;
             var $ret_0_be = $ret_3;
             var $next_0_be = $next_41;
@@ -5670,7 +6529,7 @@ function _inflate($strm) {
                   var $have_12 = $have_11;
                   break;
                 }
-                var $name428 = $97 + 28 | 0;
+                var $name428 = CHECK_OVERFLOW($97 + 28, 32, 0);
                 HEAP32[$name428 >> 2] = 0;
                 var $next_12 = $next_11;
                 var $have_12 = $have_11;
@@ -5687,22 +6546,27 @@ function _inflate($strm) {
                 var $copy_1 = 0;
                 while (1) {
                   var $copy_1;
-                  var $inc = $copy_1 + 1 | 0;
-                  var $89 = HEAP8[$next_11 + $copy_1 | 0];
+                  var $inc = CHECK_OVERFLOW($copy_1 + 1, 32, 0);
+                  var $arrayidx383 = CHECK_OVERFLOW($next_11 + $copy_1, 32, 0);
+                  var $89 = HEAP8[$arrayidx383];
                   var $90 = HEAP32[$18$s2];
                   var $cmp386 = ($90 | 0) == 0;
                   do {
                     if (!$cmp386) {
-                      var $name = $90 + 28 | 0;
+                      var $name = CHECK_OVERFLOW($90 + 28, 32, 0);
                       if ((HEAP32[$name >> 2] | 0) == 0) {
                         break;
                       }
                       var $92 = HEAPU32[$21$s2];
-                      if ($92 >>> 0 >= HEAPU32[$90 + 32 >> 2] >>> 0) {
+                      var $name_max = CHECK_OVERFLOW($90 + 32, 32, 0);
+                      if ($92 >>> 0 >= HEAPU32[$name_max >> 2] >>> 0) {
                         break;
                       }
-                      HEAP32[$21$s2] = $92 + 1 | 0;
-                      HEAP8[HEAP32[$name >> 2] + $92 | 0] = $89;
+                      var $inc400 = CHECK_OVERFLOW($92 + 1, 32, 0);
+                      HEAP32[$21$s2] = $inc400;
+                      var $94 = HEAP32[$name >> 2];
+                      var $arrayidx403 = CHECK_OVERFLOW($94 + $92, 32, 0);
+                      HEAP8[$arrayidx403] = $89;
                     }
                   } while (0);
                   var $tobool405 = $89 << 24 >> 24 != 0;
@@ -5716,8 +6580,8 @@ function _inflate($strm) {
                   var $call414 = _crc32($96, $next_11, $inc);
                   HEAP32[$16$s2] = $call414;
                 }
-                var $sub417 = $have_11 - $inc | 0;
-                var $add_ptr418 = $next_11 + $inc | 0;
+                var $sub417 = CHECK_OVERFLOW($have_11 - $inc, 32, 0);
+                var $add_ptr418 = CHECK_OVERFLOW($next_11 + $inc, 32, 0);
                 if ($tobool405) {
                   var $ret_8 = $ret_0;
                   var $next_58 = $add_ptr418;
@@ -5776,20 +6640,30 @@ function _inflate($strm) {
                   var $out_4 = $out_0;
                   break $for_cond$12;
                 }
-                var $add1363 = ((HEAPU8[$next_43] & 255) << $bits_39) + $hold_39 | 0;
-                var $next_43 = $next_43 + 1 | 0;
-                var $have_43 = $have_43 - 1 | 0;
+                var $dec1359 = CHECK_OVERFLOW($have_43 - 1, 32, 0);
+                var $incdec_ptr1360 = CHECK_OVERFLOW($next_43 + 1, 32, 0);
+                var $shl1362 = (HEAPU8[$next_43] & 255) << $bits_39;
+                var $add1363 = CHECK_OVERFLOW($shl1362 + $hold_39, 32, 0);
+                var $add1364 = CHECK_OVERFLOW($bits_39 + 8, 32, 0);
+                var $next_43 = $incdec_ptr1360;
+                var $have_43 = $dec1359;
                 var $hold_39 = $add1363;
-                var $bits_39 = $bits_39 + 8 | 0;
+                var $bits_39 = $add1364;
               }
-              var $add1375 = HEAP32[$21$s2] + ((1 << $155) - 1 & $hold_39) | 0;
+              var $sub1372 = CHECK_OVERFLOW((1 << $155) - 1, 32, 0);
+              var $and1373 = $sub1372 & $hold_39;
+              var $157 = HEAP32[$21$s2];
+              var $add1375 = CHECK_OVERFLOW($157 + $and1373, 32, 0);
               HEAP32[$21$s2] = $add1375;
-              var $add1385 = HEAP32[$24$s2] + $155 | 0;
+              var $shr1378 = $hold_39 >>> ($155 >>> 0);
+              var $sub1380 = CHECK_OVERFLOW($bits_39 - $155, 32, 0);
+              var $158 = HEAP32[$24$s2];
+              var $add1385 = CHECK_OVERFLOW($158 + $155, 32, 0);
               HEAP32[$24$s2] = $add1385;
               var $next_44 = $next_43;
               var $have_44 = $have_43;
-              var $hold_40 = $hold_39 >>> ($155 >>> 0);
-              var $bits_40 = $bits_39 - $155 | 0;
+              var $hold_40 = $shr1378;
+              var $bits_40 = $sub1380;
               var $159 = $add1375;
             }
             var $159;
@@ -5823,7 +6697,7 @@ function _inflate($strm) {
                   var $have_14 = $have_13;
                   break;
                 }
-                var $comment492 = $107 + 36 | 0;
+                var $comment492 = CHECK_OVERFLOW($107 + 36, 32, 0);
                 HEAP32[$comment492 >> 2] = 0;
                 var $next_14 = $next_13;
                 var $have_14 = $have_13;
@@ -5840,22 +6714,27 @@ function _inflate($strm) {
                 var $copy_2 = 0;
                 while (1) {
                   var $copy_2;
-                  var $inc443 = $copy_2 + 1 | 0;
-                  var $99 = HEAP8[$next_13 + $copy_2 | 0];
+                  var $inc443 = CHECK_OVERFLOW($copy_2 + 1, 32, 0);
+                  var $arrayidx444 = CHECK_OVERFLOW($next_13 + $copy_2, 32, 0);
+                  var $99 = HEAP8[$arrayidx444];
                   var $100 = HEAP32[$18$s2];
                   var $cmp447 = ($100 | 0) == 0;
                   do {
                     if (!$cmp447) {
-                      var $comment = $100 + 36 | 0;
+                      var $comment = CHECK_OVERFLOW($100 + 36, 32, 0);
                       if ((HEAP32[$comment >> 2] | 0) == 0) {
                         break;
                       }
                       var $102 = HEAPU32[$21$s2];
-                      if ($102 >>> 0 >= HEAPU32[$100 + 40 >> 2] >>> 0) {
+                      var $comm_max = CHECK_OVERFLOW($100 + 40, 32, 0);
+                      if ($102 >>> 0 >= HEAPU32[$comm_max >> 2] >>> 0) {
                         break;
                       }
-                      HEAP32[$21$s2] = $102 + 1 | 0;
-                      HEAP8[HEAP32[$comment >> 2] + $102 | 0] = $99;
+                      var $inc461 = CHECK_OVERFLOW($102 + 1, 32, 0);
+                      HEAP32[$21$s2] = $inc461;
+                      var $104 = HEAP32[$comment >> 2];
+                      var $arrayidx464 = CHECK_OVERFLOW($104 + $102, 32, 0);
+                      HEAP8[$arrayidx464] = $99;
                     }
                   } while (0);
                   var $tobool467 = $99 << 24 >> 24 != 0;
@@ -5869,8 +6748,8 @@ function _inflate($strm) {
                   var $call478 = _crc32($106, $next_13, $inc443);
                   HEAP32[$16$s2] = $call478;
                 }
-                var $sub481 = $have_13 - $inc443 | 0;
-                var $add_ptr482 = $next_13 + $inc443 | 0;
+                var $sub481 = CHECK_OVERFLOW($have_13 - $inc443, 32, 0);
+                var $add_ptr482 = CHECK_OVERFLOW($next_13 + $inc443, 32, 0);
                 if ($tobool467) {
                   var $ret_8 = $ret_0;
                   var $next_58 = $add_ptr482;
@@ -5899,7 +6778,8 @@ function _inflate($strm) {
             var $have_45_ph;
             var $next_45_ph;
             var $ret_5_ph;
-            var $sub1393 = (1 << HEAP32[$46 >> 2]) - 1 | 0;
+            var $shl1392 = 1 << HEAP32[$46 >> 2];
+            var $sub1393 = CHECK_OVERFLOW($shl1392 - 1, 32, 0);
             var $161 = HEAPU32[$47 >> 2];
             var $next_45 = $next_45_ph;
             var $have_45 = $have_45_ph;
@@ -5911,7 +6791,8 @@ function _inflate($strm) {
               var $have_45;
               var $next_45;
               var $and1394 = $sub1393 & $hold_41;
-              var $tmp16 = HEAPU8[($and1394 << 2) + $161 + 1 | 0];
+              var $arrayidx1396_1 = CHECK_OVERFLOW(($and1394 << 2) + $161 + 1, 32, 0);
+              var $tmp16 = HEAPU8[$arrayidx1396_1];
               var $conv1398 = $tmp16 & 255;
               if ($conv1398 >>> 0 <= $bits_41 >>> 0) {
                 break;
@@ -5925,18 +6806,26 @@ function _inflate($strm) {
                 var $out_4 = $out_0;
                 break $for_cond$12;
               }
-              var $add1412 = ((HEAPU8[$next_45] & 255) << $bits_41) + $hold_41 | 0;
-              var $next_45 = $next_45 + 1 | 0;
-              var $have_45 = $have_45 - 1 | 0;
+              var $dec1408 = CHECK_OVERFLOW($have_45 - 1, 32, 0);
+              var $incdec_ptr1409 = CHECK_OVERFLOW($next_45 + 1, 32, 0);
+              var $shl1411 = (HEAPU8[$next_45] & 255) << $bits_41;
+              var $add1412 = CHECK_OVERFLOW($shl1411 + $hold_41, 32, 0);
+              var $add1413 = CHECK_OVERFLOW($bits_41 + 8, 32, 0);
+              var $next_45 = $incdec_ptr1409;
+              var $have_45 = $dec1408;
               var $hold_41 = $add1412;
-              var $bits_41 = $bits_41 + 8 | 0;
+              var $bits_41 = $add1413;
             }
-            var $tmp15 = HEAPU8[($and1394 << 2) + $161 | 0];
-            var $tmp17 = HEAPU16[$161 + ($and1394 << 2) + 2 >> 1];
+            var $arrayidx1396_0 = CHECK_OVERFLOW(($and1394 << 2) + $161, 32, 0);
+            var $tmp15 = HEAPU8[$arrayidx1396_0];
+            var $arrayidx1396_2 = CHECK_OVERFLOW(($and1394 << 2) + $161 + 2, 32, 0);
+            var $tmp17 = HEAPU16[$arrayidx1396_2 >> 1];
             var $conv1418 = $tmp15 & 255;
             if (($conv1418 & 240 | 0) == 0) {
               var $conv1425 = $tmp17 & 65535;
-              var $sub1432 = (1 << $conv1398 + $conv1418) - 1 | 0;
+              var $add1430 = CHECK_OVERFLOW($conv1398 + $conv1418, 32, 0);
+              var $shl1431 = 1 << $add1430;
+              var $sub1432 = CHECK_OVERFLOW($shl1431 - 1, 32, 0);
               var $next_46 = $next_45;
               var $have_46 = $have_45;
               var $hold_42 = $hold_41;
@@ -5946,9 +6835,13 @@ function _inflate($strm) {
                 var $hold_42;
                 var $have_46;
                 var $next_46;
-                var $add1437 = (($hold_42 & $sub1432) >>> ($conv1398 >>> 0)) + $conv1425 | 0;
-                var $tmp13 = HEAPU8[($add1437 << 2) + $161 + 1 | 0];
-                if ((($tmp13 & 255) + $conv1398 | 0) >>> 0 <= $bits_42 >>> 0) {
+                var $shr1436 = ($hold_42 & $sub1432) >>> ($conv1398 >>> 0);
+                var $add1437 = CHECK_OVERFLOW($shr1436 + $conv1425, 32, 0);
+                var $arrayidx1439_1 = CHECK_OVERFLOW(($add1437 << 2) + $161 + 1, 32, 0);
+                var $tmp13 = HEAPU8[$arrayidx1439_1];
+                var $conv1443 = $tmp13 & 255;
+                var $add1444 = CHECK_OVERFLOW($conv1443 + $conv1398, 32, 0);
+                if ($add1444 >>> 0 <= $bits_42 >>> 0) {
                   break;
                 }
                 if (($have_46 | 0) == 0) {
@@ -5960,17 +6853,24 @@ function _inflate($strm) {
                   var $out_4 = $out_0;
                   break $for_cond$12;
                 }
-                var $add1458 = ((HEAPU8[$next_46] & 255) << $bits_42) + $hold_42 | 0;
-                var $next_46 = $next_46 + 1 | 0;
-                var $have_46 = $have_46 - 1 | 0;
+                var $dec1454 = CHECK_OVERFLOW($have_46 - 1, 32, 0);
+                var $incdec_ptr1455 = CHECK_OVERFLOW($next_46 + 1, 32, 0);
+                var $shl1457 = (HEAPU8[$next_46] & 255) << $bits_42;
+                var $add1458 = CHECK_OVERFLOW($shl1457 + $hold_42, 32, 0);
+                var $add1459 = CHECK_OVERFLOW($bits_42 + 8, 32, 0);
+                var $next_46 = $incdec_ptr1455;
+                var $have_46 = $dec1454;
                 var $hold_42 = $add1458;
-                var $bits_42 = $bits_42 + 8 | 0;
+                var $bits_42 = $add1459;
               }
-              var $tmp14 = HEAP16[$161 + ($add1437 << 2) + 2 >> 1];
-              var $tmp12 = HEAP8[($add1437 << 2) + $161 | 0];
+              var $arrayidx1439_2 = CHECK_OVERFLOW(($add1437 << 2) + $161 + 2, 32, 0);
+              var $arrayidx1439_0 = CHECK_OVERFLOW(($add1437 << 2) + $161, 32, 0);
+              var $tmp14 = HEAP16[$arrayidx1439_2 >> 1];
+              var $tmp12 = HEAP8[$arrayidx1439_0];
               var $shr1466 = $hold_42 >>> ($conv1398 >>> 0);
-              var $sub1469 = $bits_42 - $conv1398 | 0;
-              var $add1475 = HEAP32[$24$s2] + $conv1398 | 0;
+              var $sub1469 = CHECK_OVERFLOW($bits_42 - $conv1398, 32, 0);
+              var $164 = HEAP32[$24$s2];
+              var $add1475 = CHECK_OVERFLOW($164 + $conv1398, 32, 0);
               HEAP32[$24$s2] = $add1475;
               var $next_47 = $next_46;
               var $have_47 = $have_46;
@@ -6000,8 +6900,9 @@ function _inflate($strm) {
             var $next_47;
             var $conv1479 = $here_110_1 & 255;
             var $shr1480 = $hold_43 >>> ($conv1479 >>> 0);
-            var $sub1483 = $bits_43 - $conv1479 | 0;
-            HEAP32[$24$s2] = $165 + $conv1479 | 0;
+            var $sub1483 = CHECK_OVERFLOW($bits_43 - $conv1479, 32, 0);
+            var $add1489 = CHECK_OVERFLOW($165 + $conv1479, 32, 0);
+            HEAP32[$24$s2] = $add1489;
             var $conv1491 = $here_09_1 & 255;
             if (($conv1491 & 64 | 0) == 0) {
               HEAP32[$29$s2] = $here_211_1 & 65535;
@@ -6017,7 +6918,7 @@ function _inflate($strm) {
               __label__ = 245;
               break;
             }
-            HEAP32[$msg$s2] = STRING_TABLE.__str154 | 0;
+            HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str158, 32, 0);
             HEAP32[$mode$s2] = 29;
             var $ret_0_be = $ret_5_ph;
             var $next_0_be = $next_47;
@@ -6062,11 +6963,15 @@ function _inflate($strm) {
                     var $out_4 = $out_0;
                     break $for_cond$12;
                   }
-                  var $add515 = ((HEAPU8[$next_16] & 255) << $bits_12) + $hold_12 | 0;
-                  var $next_16 = $next_16 + 1 | 0;
-                  var $have_16 = $have_16 - 1 | 0;
+                  var $dec511 = CHECK_OVERFLOW($have_16 - 1, 32, 0);
+                  var $incdec_ptr512 = CHECK_OVERFLOW($next_16 + 1, 32, 0);
+                  var $shl514 = (HEAPU8[$next_16] & 255) << $bits_12;
+                  var $add515 = CHECK_OVERFLOW($shl514 + $hold_12, 32, 0);
+                  var $add516 = CHECK_OVERFLOW($bits_12 + 8, 32, 0);
+                  var $next_16 = $incdec_ptr512;
+                  var $have_16 = $dec511;
                   var $hold_12 = $add515;
-                  var $bits_12 = $bits_12 + 8 | 0;
+                  var $bits_12 = $add516;
                 }
                 if (($hold_12 | 0) == (HEAP32[$16$s2] & 65535 | 0)) {
                   var $next_17 = $next_16;
@@ -6075,7 +6980,7 @@ function _inflate($strm) {
                   var $bits_13 = 0;
                   break;
                 }
-                HEAP32[$msg$s2] = STRING_TABLE.__str519 | 0;
+                HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str521, 32, 0);
                 HEAP32[$mode$s2] = 29;
                 var $ret_0_be = $ret_0;
                 var $next_0_be = $next_16;
@@ -6099,8 +7004,11 @@ function _inflate($strm) {
             var $next_17;
             var $111 = HEAPU32[$18$s2];
             if (($111 | 0) != 0) {
-              HEAP32[($111 + 44 | 0) >> 2] = $108 >>> 9 & 1;
-              var $done543 = HEAP32[$18$s2] + 48 | 0;
+              var $and540 = $108 >>> 9 & 1;
+              var $hcrc = CHECK_OVERFLOW($111 + 44, 32, 0);
+              HEAP32[$hcrc >> 2] = $and540;
+              var $112 = HEAP32[$18$s2];
+              var $done543 = CHECK_OVERFLOW($112 + 48, 32, 0);
               HEAP32[$done543 >> 2] = 1;
             }
             var $call545 = _crc32(0, 0, 0);
@@ -6151,20 +7059,30 @@ function _inflate($strm) {
                   var $out_4 = $out_0;
                   break $for_cond$12;
                 }
-                var $add1524 = ((HEAPU8[$next_49] & 255) << $bits_45) + $hold_45 | 0;
-                var $next_49 = $next_49 + 1 | 0;
-                var $have_49 = $have_49 - 1 | 0;
+                var $dec1520 = CHECK_OVERFLOW($have_49 - 1, 32, 0);
+                var $incdec_ptr1521 = CHECK_OVERFLOW($next_49 + 1, 32, 0);
+                var $shl1523 = (HEAPU8[$next_49] & 255) << $bits_45;
+                var $add1524 = CHECK_OVERFLOW($shl1523 + $hold_45, 32, 0);
+                var $add1525 = CHECK_OVERFLOW($bits_45 + 8, 32, 0);
+                var $next_49 = $incdec_ptr1521;
+                var $have_49 = $dec1520;
                 var $hold_45 = $add1524;
-                var $bits_45 = $bits_45 + 8 | 0;
+                var $bits_45 = $add1525;
               }
-              var $add1536 = HEAP32[$29$s2] + ((1 << $166) - 1 & $hold_45) | 0;
+              var $sub1533 = CHECK_OVERFLOW((1 << $166) - 1, 32, 0);
+              var $and1534 = $sub1533 & $hold_45;
+              var $168 = HEAP32[$29$s2];
+              var $add1536 = CHECK_OVERFLOW($168 + $and1534, 32, 0);
               HEAP32[$29$s2] = $add1536;
-              var $add1546 = HEAP32[$24$s2] + $166 | 0;
+              var $shr1539 = $hold_45 >>> ($166 >>> 0);
+              var $sub1541 = CHECK_OVERFLOW($bits_45 - $166, 32, 0);
+              var $169 = HEAP32[$24$s2];
+              var $add1546 = CHECK_OVERFLOW($169 + $166, 32, 0);
               HEAP32[$24$s2] = $add1546;
               var $next_50 = $next_49;
               var $have_50 = $have_49;
-              var $hold_46 = $hold_45 >>> ($166 >>> 0);
-              var $bits_46 = $bits_45 - $166 | 0;
+              var $hold_46 = $shr1539;
+              var $bits_46 = $sub1541;
             }
             var $bits_46;
             var $hold_46;
@@ -6196,19 +7114,19 @@ function _inflate($strm) {
               var $out_4 = $out_0;
               break $for_cond$12;
             }
-            var $sub1554 = $out_0 - $left_0 | 0;
+            var $sub1554 = CHECK_OVERFLOW($out_0 - $left_0, 32, 0);
             var $170 = HEAPU32[$29$s2];
             var $cmp1556 = $170 >>> 0 > $sub1554 >>> 0;
             do {
               if ($cmp1556) {
-                var $sub1560 = $170 - $sub1554 | 0;
+                var $sub1560 = CHECK_OVERFLOW($170 - $sub1554, 32, 0);
                 var $cmp1561 = $sub1560 >>> 0 > HEAPU32[$30 >> 2] >>> 0;
                 do {
                   if ($cmp1561) {
                     if ((HEAP32[$31 >> 2] | 0) == 0) {
                       break;
                     }
-                    HEAP32[$msg$s2] = STRING_TABLE.__str53 | 0;
+                    HEAP32[$msg$s2] = CHECK_OVERFLOW(STRING_TABLE.__str57, 32, 0);
                     HEAP32[$mode$s2] = 29;
                     var $ret_0_be = $ret_7;
                     var $next_0_be = $next_51;
@@ -6223,11 +7141,18 @@ function _inflate($strm) {
                 } while (0);
                 var $173 = HEAPU32[$32 >> 2];
                 if ($sub1560 >>> 0 > $173 >>> 0) {
-                  var $sub1574 = $sub1560 - $173 | 0;
-                  var $from_0 = HEAP32[$33 >> 2] + (HEAP32[$34 >> 2] - $sub1574) | 0;
+                  var $sub1574 = CHECK_OVERFLOW($sub1560 - $173, 32, 0);
+                  var $174 = HEAP32[$33 >> 2];
+                  var $175 = HEAP32[$34 >> 2];
+                  var $sub1575 = CHECK_OVERFLOW($175 - $sub1574, 32, 0);
+                  var $add_ptr1576 = CHECK_OVERFLOW($174 + $sub1575, 32, 0);
+                  var $from_0 = $add_ptr1576;
                   var $copy_7 = $sub1574;
                 } else {
-                  var $from_0 = HEAP32[$33 >> 2] + ($173 - $sub1560) | 0;
+                  var $176 = HEAP32[$33 >> 2];
+                  var $sub1580 = CHECK_OVERFLOW($173 - $sub1560, 32, 0);
+                  var $add_ptr1581 = CHECK_OVERFLOW($176 + $sub1580, 32, 0);
+                  var $from_0 = $add_ptr1581;
                   var $copy_7 = $sub1560;
                 }
                 var $copy_7;
@@ -6243,8 +7168,10 @@ function _inflate($strm) {
                 var $copy_8 = $177;
                 var $179 = $177;
               } else {
+                var $idx_neg = CHECK_OVERFLOW(-$170, 32, 0);
+                var $add_ptr1591 = CHECK_OVERFLOW($put_0 + $idx_neg, 32, 0);
                 var $178 = HEAP32[$21$s2];
-                var $from_1 = $put_0 + -$170 | 0;
+                var $from_1 = $add_ptr1591;
                 var $copy_8 = $178;
                 var $179 = $178;
               }
@@ -6253,7 +7180,8 @@ function _inflate($strm) {
             var $copy_8;
             var $from_1;
             var $copy_9 = $copy_8 >>> 0 > $left_0 >>> 0 ? $left_0 : $copy_8;
-            HEAP32[$21$s2] = $179 - $copy_9 | 0;
+            var $sub1600 = CHECK_OVERFLOW($179 - $copy_9, 32, 0);
+            HEAP32[$21$s2] = $sub1600;
             var $180 = $copy_8 ^ -1;
             var $181 = $left_0 ^ -1;
             var $umax = $180 >>> 0 > $181 >>> 0 ? $180 : $181;
@@ -6264,18 +7192,20 @@ function _inflate($strm) {
               var $copy_10;
               var $put_1;
               var $from_2;
+              var $incdec_ptr1602 = CHECK_OVERFLOW($from_2 + 1, 32, 0);
               var $183 = HEAP8[$from_2];
+              var $incdec_ptr1603 = CHECK_OVERFLOW($put_1 + 1, 32, 0);
               HEAP8[$put_1] = $183;
-              var $dec1605 = $copy_10 - 1 | 0;
+              var $dec1605 = CHECK_OVERFLOW($copy_10 - 1, 32, 0);
               if (($dec1605 | 0) == 0) {
                 break;
               }
-              var $from_2 = $from_2 + 1 | 0;
-              var $put_1 = $put_1 + 1 | 0;
+              var $from_2 = $incdec_ptr1602;
+              var $put_1 = $incdec_ptr1603;
               var $copy_10 = $dec1605;
             }
-            var $sub1598 = $left_0 - $copy_9 | 0;
-            var $scevgep632 = $put_0 + ($umax ^ -1) | 0;
+            var $sub1598 = CHECK_OVERFLOW($left_0 - $copy_9, 32, 0);
+            var $scevgep632 = CHECK_OVERFLOW($put_0 + ($umax ^ -1), 32, 0);
             if ((HEAP32[$21$s2] | 0) != 0) {
               var $ret_0_be = $ret_7;
               var $next_0_be = $next_51;
@@ -6358,19 +7288,26 @@ function _inflate($strm) {
       } while (0);
       var $201 = HEAPU32[$avail_in15$s2];
       var $202 = HEAPU32[$avail_out$s2];
-      var $sub1774 = $out_4 - $202 | 0;
-      var $total_in = $strm + 8 | 0;
-      var $add1775 = $10 - $201 + HEAP32[$total_in >> 2] | 0;
+      var $sub1774 = CHECK_OVERFLOW($out_4 - $202, 32, 0);
+      var $total_in = CHECK_OVERFLOW($strm + 8, 32, 0);
+      var $203 = HEAP32[$total_in >> 2];
+      var $sub1772 = CHECK_OVERFLOW($10 - $201, 32, 0);
+      var $add1775 = CHECK_OVERFLOW($sub1772 + $203, 32, 0);
       HEAP32[$total_in >> 2] = $add1775;
-      var $add1777 = HEAP32[$total_out$s2] + $sub1774 | 0;
+      var $204 = HEAP32[$total_out$s2];
+      var $add1777 = CHECK_OVERFLOW($204 + $sub1774, 32, 0);
       HEAP32[$total_out$s2] = $add1777;
-      var $add1779 = HEAP32[$35$s2] + $sub1774 | 0;
+      var $205 = HEAP32[$35$s2];
+      var $add1779 = CHECK_OVERFLOW($205 + $sub1774, 32, 0);
       HEAP32[$35$s2] = $add1779;
       var $tobool1783 = ($out_4 | 0) == ($202 | 0);
       if (!((HEAP32[$15$s2] | 0) == 0 | $tobool1783)) {
+        var $tobool1786 = (HEAP32[$17$s2] | 0) == 0;
         var $208 = HEAP32[$16$s2];
-        var $add_ptr1791 = HEAP32[$next_out$s2] + -$sub1774 | 0;
-        if ((HEAP32[$17$s2] | 0) == 0) {
+        var $209 = HEAP32[$next_out$s2];
+        var $idx_neg1790 = CHECK_OVERFLOW(-$sub1774, 32, 0);
+        var $add_ptr1791 = CHECK_OVERFLOW($209 + $idx_neg1790, 32, 0);
+        if ($tobool1786) {
           var $call1798 = _adler32($208, $add_ptr1791, $sub1774);
           var $cond1800 = $call1798;
         } else {
@@ -6381,6 +7318,7 @@ function _inflate($strm) {
         HEAP32[$16$s2] = $cond1800;
         HEAP32[$adler$s2] = $cond1800;
       }
+      var $210 = HEAP32[$13$s2];
       var $cond1807 = (HEAP32[$23$s2] | 0) != 0 ? 64 : 0;
       var $212 = HEAP32[$mode$s2];
       var $cond1812 = ($212 | 0) == 11 ? 128 : 0;
@@ -6391,8 +7329,11 @@ function _inflate($strm) {
         var $213 = $phitmp;
       }
       var $213;
-      var $add1821 = $cond1807 + HEAP32[$13$s2] + $cond1812 + $213 | 0;
-      HEAP32[$strm + 44 >> 2] = $add1821;
+      var $add1808 = CHECK_OVERFLOW($cond1807 + $210, 32, 0);
+      var $add1813 = CHECK_OVERFLOW($add1808 + $cond1812, 32, 0);
+      var $add1821 = CHECK_OVERFLOW($add1813 + $213, 32, 0);
+      var $data_type = CHECK_OVERFLOW($strm + 44, 32, 0);
+      HEAP32[$data_type >> 2] = $add1821;
       var $ret_9 = ($10 | 0) == ($201 | 0) & $tobool1783 & ($ret_8 | 0) == 0 ? -5 : $ret_8;
       var $retval_0 = $ret_9;
     }
@@ -6406,10 +7347,14 @@ function _inflate($strm) {
 _inflate["X"] = 1;
 
 function _fixedtables($state) {
-  HEAP32[$state + 76 >> 2] = _fixedtables_lenfix | 0;
-  HEAP32[$state + 84 >> 2] = 9;
-  HEAP32[$state + 80 >> 2] = _fixedtables_distfix | 0;
-  HEAP32[$state + 88 >> 2] = 5;
+  var $lencode = CHECK_OVERFLOW($state + 76, 32, 0);
+  HEAP32[$lencode >> 2] = CHECK_OVERFLOW(_fixedtables_lenfix, 32, 0);
+  var $lenbits = CHECK_OVERFLOW($state + 84, 32, 0);
+  HEAP32[$lenbits >> 2] = 9;
+  var $distcode = CHECK_OVERFLOW($state + 80, 32, 0);
+  HEAP32[$distcode >> 2] = CHECK_OVERFLOW(_fixedtables_distfix, 32, 0);
+  var $distbits = CHECK_OVERFLOW($state + 88, 32, 0);
+  HEAP32[$distbits >> 2] = 5;
   return;
   return;
 }
@@ -6418,67 +7363,122 @@ function _init_block($s) {
   var $n_03 = 0;
   while (1) {
     var $n_03;
-    HEAP16[$s + ($n_03 << 2) + 148 >> 1] = 0;
-    var $inc = $n_03 + 1 | 0;
+    var $freq = CHECK_OVERFLOW(($n_03 << 2) + $s + 148, 32, 0);
+    HEAP16[$freq >> 1] = 0;
+    var $inc = CHECK_OVERFLOW($n_03 + 1, 32, 0);
     if (($inc | 0) == 286) {
       break;
     }
     var $n_03 = $inc;
   }
-  HEAP16[$s + 2440 >> 1] = 0;
-  HEAP16[$s + 2444 >> 1] = 0;
-  HEAP16[$s + 2448 >> 1] = 0;
-  HEAP16[$s + 2452 >> 1] = 0;
-  HEAP16[$s + 2456 >> 1] = 0;
-  HEAP16[$s + 2460 >> 1] = 0;
-  HEAP16[$s + 2464 >> 1] = 0;
-  HEAP16[$s + 2468 >> 1] = 0;
-  HEAP16[$s + 2472 >> 1] = 0;
-  HEAP16[$s + 2476 >> 1] = 0;
-  HEAP16[$s + 2480 >> 1] = 0;
-  HEAP16[$s + 2484 >> 1] = 0;
-  HEAP16[$s + 2488 >> 1] = 0;
-  HEAP16[$s + 2492 >> 1] = 0;
-  HEAP16[$s + 2496 >> 1] = 0;
-  HEAP16[$s + 2500 >> 1] = 0;
-  HEAP16[$s + 2504 >> 1] = 0;
-  HEAP16[$s + 2508 >> 1] = 0;
-  HEAP16[$s + 2512 >> 1] = 0;
-  HEAP16[$s + 2516 >> 1] = 0;
-  HEAP16[$s + 2520 >> 1] = 0;
-  HEAP16[$s + 2524 >> 1] = 0;
-  HEAP16[$s + 2528 >> 1] = 0;
-  HEAP16[$s + 2532 >> 1] = 0;
-  HEAP16[$s + 2536 >> 1] = 0;
-  HEAP16[$s + 2540 >> 1] = 0;
-  HEAP16[$s + 2544 >> 1] = 0;
-  HEAP16[$s + 2548 >> 1] = 0;
-  HEAP16[$s + 2552 >> 1] = 0;
-  HEAP16[$s + 2556 >> 1] = 0;
-  HEAP16[$s + 2684 >> 1] = 0;
-  HEAP16[$s + 2688 >> 1] = 0;
-  HEAP16[$s + 2692 >> 1] = 0;
-  HEAP16[$s + 2696 >> 1] = 0;
-  HEAP16[$s + 2700 >> 1] = 0;
-  HEAP16[$s + 2704 >> 1] = 0;
-  HEAP16[$s + 2708 >> 1] = 0;
-  HEAP16[$s + 2712 >> 1] = 0;
-  HEAP16[$s + 2716 >> 1] = 0;
-  HEAP16[$s + 2720 >> 1] = 0;
-  HEAP16[$s + 2724 >> 1] = 0;
-  HEAP16[$s + 2728 >> 1] = 0;
-  HEAP16[$s + 2732 >> 1] = 0;
-  HEAP16[$s + 2736 >> 1] = 0;
-  HEAP16[$s + 2740 >> 1] = 0;
-  HEAP16[$s + 2744 >> 1] = 0;
-  HEAP16[$s + 2748 >> 1] = 0;
-  HEAP16[$s + 2752 >> 1] = 0;
-  HEAP16[$s + 2756 >> 1] = 0;
-  HEAP16[$s + 1172 >> 1] = 1;
-  HEAP32[$s + 5804 >> 2] = 0;
-  HEAP32[$s + 5800 >> 2] = 0;
-  HEAP32[$s + 5808 >> 2] = 0;
-  HEAP32[$s + 5792 >> 2] = 0;
+  var $freq6 = CHECK_OVERFLOW($s + 2440, 32, 0);
+  HEAP16[$freq6 >> 1] = 0;
+  var $freq6_1 = CHECK_OVERFLOW($s + 2444, 32, 0);
+  HEAP16[$freq6_1 >> 1] = 0;
+  var $freq6_2 = CHECK_OVERFLOW($s + 2448, 32, 0);
+  HEAP16[$freq6_2 >> 1] = 0;
+  var $freq6_3 = CHECK_OVERFLOW($s + 2452, 32, 0);
+  HEAP16[$freq6_3 >> 1] = 0;
+  var $freq6_4 = CHECK_OVERFLOW($s + 2456, 32, 0);
+  HEAP16[$freq6_4 >> 1] = 0;
+  var $freq6_5 = CHECK_OVERFLOW($s + 2460, 32, 0);
+  HEAP16[$freq6_5 >> 1] = 0;
+  var $freq6_6 = CHECK_OVERFLOW($s + 2464, 32, 0);
+  HEAP16[$freq6_6 >> 1] = 0;
+  var $freq6_7 = CHECK_OVERFLOW($s + 2468, 32, 0);
+  HEAP16[$freq6_7 >> 1] = 0;
+  var $freq6_8 = CHECK_OVERFLOW($s + 2472, 32, 0);
+  HEAP16[$freq6_8 >> 1] = 0;
+  var $freq6_9 = CHECK_OVERFLOW($s + 2476, 32, 0);
+  HEAP16[$freq6_9 >> 1] = 0;
+  var $freq6_10 = CHECK_OVERFLOW($s + 2480, 32, 0);
+  HEAP16[$freq6_10 >> 1] = 0;
+  var $freq6_11 = CHECK_OVERFLOW($s + 2484, 32, 0);
+  HEAP16[$freq6_11 >> 1] = 0;
+  var $freq6_12 = CHECK_OVERFLOW($s + 2488, 32, 0);
+  HEAP16[$freq6_12 >> 1] = 0;
+  var $freq6_13 = CHECK_OVERFLOW($s + 2492, 32, 0);
+  HEAP16[$freq6_13 >> 1] = 0;
+  var $freq6_14 = CHECK_OVERFLOW($s + 2496, 32, 0);
+  HEAP16[$freq6_14 >> 1] = 0;
+  var $freq6_15 = CHECK_OVERFLOW($s + 2500, 32, 0);
+  HEAP16[$freq6_15 >> 1] = 0;
+  var $freq6_16 = CHECK_OVERFLOW($s + 2504, 32, 0);
+  HEAP16[$freq6_16 >> 1] = 0;
+  var $freq6_17 = CHECK_OVERFLOW($s + 2508, 32, 0);
+  HEAP16[$freq6_17 >> 1] = 0;
+  var $freq6_18 = CHECK_OVERFLOW($s + 2512, 32, 0);
+  HEAP16[$freq6_18 >> 1] = 0;
+  var $freq6_19 = CHECK_OVERFLOW($s + 2516, 32, 0);
+  HEAP16[$freq6_19 >> 1] = 0;
+  var $freq6_20 = CHECK_OVERFLOW($s + 2520, 32, 0);
+  HEAP16[$freq6_20 >> 1] = 0;
+  var $freq6_21 = CHECK_OVERFLOW($s + 2524, 32, 0);
+  HEAP16[$freq6_21 >> 1] = 0;
+  var $freq6_22 = CHECK_OVERFLOW($s + 2528, 32, 0);
+  HEAP16[$freq6_22 >> 1] = 0;
+  var $freq6_23 = CHECK_OVERFLOW($s + 2532, 32, 0);
+  HEAP16[$freq6_23 >> 1] = 0;
+  var $freq6_24 = CHECK_OVERFLOW($s + 2536, 32, 0);
+  HEAP16[$freq6_24 >> 1] = 0;
+  var $freq6_25 = CHECK_OVERFLOW($s + 2540, 32, 0);
+  HEAP16[$freq6_25 >> 1] = 0;
+  var $freq6_26 = CHECK_OVERFLOW($s + 2544, 32, 0);
+  HEAP16[$freq6_26 >> 1] = 0;
+  var $freq6_27 = CHECK_OVERFLOW($s + 2548, 32, 0);
+  HEAP16[$freq6_27 >> 1] = 0;
+  var $freq6_28 = CHECK_OVERFLOW($s + 2552, 32, 0);
+  HEAP16[$freq6_28 >> 1] = 0;
+  var $freq6_29 = CHECK_OVERFLOW($s + 2556, 32, 0);
+  HEAP16[$freq6_29 >> 1] = 0;
+  var $freq15 = CHECK_OVERFLOW($s + 2684, 32, 0);
+  HEAP16[$freq15 >> 1] = 0;
+  var $freq15_1 = CHECK_OVERFLOW($s + 2688, 32, 0);
+  HEAP16[$freq15_1 >> 1] = 0;
+  var $freq15_2 = CHECK_OVERFLOW($s + 2692, 32, 0);
+  HEAP16[$freq15_2 >> 1] = 0;
+  var $freq15_3 = CHECK_OVERFLOW($s + 2696, 32, 0);
+  HEAP16[$freq15_3 >> 1] = 0;
+  var $freq15_4 = CHECK_OVERFLOW($s + 2700, 32, 0);
+  HEAP16[$freq15_4 >> 1] = 0;
+  var $freq15_5 = CHECK_OVERFLOW($s + 2704, 32, 0);
+  HEAP16[$freq15_5 >> 1] = 0;
+  var $freq15_6 = CHECK_OVERFLOW($s + 2708, 32, 0);
+  HEAP16[$freq15_6 >> 1] = 0;
+  var $freq15_7 = CHECK_OVERFLOW($s + 2712, 32, 0);
+  HEAP16[$freq15_7 >> 1] = 0;
+  var $freq15_8 = CHECK_OVERFLOW($s + 2716, 32, 0);
+  HEAP16[$freq15_8 >> 1] = 0;
+  var $freq15_9 = CHECK_OVERFLOW($s + 2720, 32, 0);
+  HEAP16[$freq15_9 >> 1] = 0;
+  var $freq15_10 = CHECK_OVERFLOW($s + 2724, 32, 0);
+  HEAP16[$freq15_10 >> 1] = 0;
+  var $freq15_11 = CHECK_OVERFLOW($s + 2728, 32, 0);
+  HEAP16[$freq15_11 >> 1] = 0;
+  var $freq15_12 = CHECK_OVERFLOW($s + 2732, 32, 0);
+  HEAP16[$freq15_12 >> 1] = 0;
+  var $freq15_13 = CHECK_OVERFLOW($s + 2736, 32, 0);
+  HEAP16[$freq15_13 >> 1] = 0;
+  var $freq15_14 = CHECK_OVERFLOW($s + 2740, 32, 0);
+  HEAP16[$freq15_14 >> 1] = 0;
+  var $freq15_15 = CHECK_OVERFLOW($s + 2744, 32, 0);
+  HEAP16[$freq15_15 >> 1] = 0;
+  var $freq15_16 = CHECK_OVERFLOW($s + 2748, 32, 0);
+  HEAP16[$freq15_16 >> 1] = 0;
+  var $freq15_17 = CHECK_OVERFLOW($s + 2752, 32, 0);
+  HEAP16[$freq15_17 >> 1] = 0;
+  var $freq15_18 = CHECK_OVERFLOW($s + 2756, 32, 0);
+  HEAP16[$freq15_18 >> 1] = 0;
+  var $freq22 = CHECK_OVERFLOW($s + 1172, 32, 0);
+  HEAP16[$freq22 >> 1] = 1;
+  var $static_len = CHECK_OVERFLOW($s + 5804, 32, 0);
+  HEAP32[$static_len >> 2] = 0;
+  var $opt_len = CHECK_OVERFLOW($s + 5800, 32, 0);
+  HEAP32[$opt_len >> 2] = 0;
+  var $matches = CHECK_OVERFLOW($s + 5808, 32, 0);
+  HEAP32[$matches >> 2] = 0;
+  var $last_lit = CHECK_OVERFLOW($s + 5792, 32, 0);
+  HEAP32[$last_lit >> 2] = 0;
   return;
   return;
 }
@@ -6490,38 +7490,47 @@ function _bi_flush($s) {
   var $pending$s2;
   var $bi_buf$s1;
   var $bi_valid$s2;
-  var $bi_valid$s2 = ($s + 5820 | 0) >> 2;
+  var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0), $bi_valid$s2 = $bi_valid >> 2;
   var $0 = HEAPU32[$bi_valid$s2];
   var $cmp = ($0 | 0) == 16;
   do {
     if ($cmp) {
-      var $bi_buf$s1 = ($s + 5816 | 0) >> 1;
+      var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf$s1 = $bi_buf >> 1;
       var $conv1 = HEAP16[$bi_buf$s1] & 255;
-      var $pending$s2 = ($s + 20 | 0) >> 2;
+      var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
       var $2 = HEAP32[$pending$s2];
-      var $inc = $2 + 1 | 0;
+      var $inc = CHECK_OVERFLOW($2 + 1, 32, 0);
       HEAP32[$pending$s2] = $inc;
-      var $pending_buf = $s + 8 | 0;
-      HEAP8[HEAP32[$pending_buf >> 2] + $2 | 0] = $conv1;
+      var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0);
+      var $3 = HEAP32[$pending_buf >> 2];
+      var $arrayidx = CHECK_OVERFLOW($3 + $2, 32, 0);
+      HEAP8[$arrayidx] = $conv1;
       var $conv4 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
       var $5 = HEAPU32[$pending$s2];
-      HEAP32[$pending$s2] = $5 + 1 | 0;
-      HEAP8[HEAP32[$pending_buf >> 2] + $5 | 0] = $conv4;
+      var $inc6 = CHECK_OVERFLOW($5 + 1, 32, 0);
+      HEAP32[$pending$s2] = $inc6;
+      var $6 = HEAP32[$pending_buf >> 2];
+      var $arrayidx8 = CHECK_OVERFLOW($6 + $5, 32, 0);
+      HEAP8[$arrayidx8] = $conv4;
       HEAP16[$bi_buf$s1] = 0;
       HEAP32[$bi_valid$s2] = 0;
     } else {
       if (($0 | 0) <= 7) {
         break;
       }
-      var $bi_buf15$s1 = ($s + 5816 | 0) >> 1;
+      var $bi_buf15 = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf15$s1 = $bi_buf15 >> 1;
       var $conv16 = HEAP16[$bi_buf15$s1] & 255;
-      var $pending17 = $s + 20 | 0;
+      var $pending17 = CHECK_OVERFLOW($s + 20, 32, 0);
       var $8 = HEAP32[$pending17 >> 2];
-      var $inc18 = $8 + 1 | 0;
+      var $inc18 = CHECK_OVERFLOW($8 + 1, 32, 0);
       HEAP32[$pending17 >> 2] = $inc18;
-      HEAP8[HEAP32[$s + 8 >> 2] + $8 | 0] = $conv16;
+      var $pending_buf19 = CHECK_OVERFLOW($s + 8, 32, 0);
+      var $9 = HEAP32[$pending_buf19 >> 2];
+      var $arrayidx20 = CHECK_OVERFLOW($9 + $8, 32, 0);
+      HEAP8[$arrayidx20] = $conv16;
       HEAP16[$bi_buf15$s1] = (HEAPU16[$bi_buf15$s1] & 65535) >>> 8;
-      var $sub = HEAP32[$bi_valid$s2] - 8 | 0;
+      var $11 = HEAP32[$bi_valid$s2];
+      var $sub = CHECK_OVERFLOW($11 - 8, 32, 0);
       HEAP32[$bi_valid$s2] = $sub;
     }
   } while (0);
@@ -6530,7 +7539,6 @@ function _bi_flush($s) {
 }
 
 function _detect_data_type($s) {
-  var $s$s1 = $s >> 1;
   var __label__;
   var $n_0 = 0;
   var $black_mask_0 = -201342849;
@@ -6542,26 +7550,31 @@ function _detect_data_type($s) {
       break;
     }
     if (($black_mask_0 & 1 | 0) != 0) {
-      if (HEAP16[(($n_0 << 2) + 148 >> 1) + $s$s1] << 16 >> 16 != 0) {
+      var $freq = CHECK_OVERFLOW(($n_0 << 2) + $s + 148, 32, 0);
+      if (HEAP16[$freq >> 1] << 16 >> 16 != 0) {
         var $retval_0 = 0;
         __label__ = 11;
         break;
       }
     }
-    var $n_0 = $n_0 + 1 | 0;
+    var $inc = CHECK_OVERFLOW($n_0 + 1, 32, 0);
+    var $n_0 = $inc;
     var $black_mask_0 = $black_mask_0 >>> 1;
   }
   $for_end$$return$105 : do {
     if (__label__ == 5) {
-      if (HEAP16[$s$s1 + 92] << 16 >> 16 != 0) {
+      var $freq6 = CHECK_OVERFLOW($s + 184, 32, 0);
+      if (HEAP16[$freq6 >> 1] << 16 >> 16 != 0) {
         var $retval_0 = 1;
         break;
       }
-      if (HEAP16[$s$s1 + 94] << 16 >> 16 != 0) {
+      var $freq13 = CHECK_OVERFLOW($s + 188, 32, 0);
+      if (HEAP16[$freq13 >> 1] << 16 >> 16 != 0) {
         var $retval_0 = 1;
         break;
       }
-      if (HEAP16[$s$s1 + 100] << 16 >> 16 != 0) {
+      var $freq21 = CHECK_OVERFLOW($s + 200, 32, 0);
+      if (HEAP16[$freq21 >> 1] << 16 >> 16 != 0) {
         var $retval_0 = 1;
         break;
       }
@@ -6572,11 +7585,13 @@ function _detect_data_type($s) {
           var $retval_0 = 0;
           break $for_end$$return$105;
         }
-        if (HEAP16[(($n_1 << 2) + 148 >> 1) + $s$s1] << 16 >> 16 != 0) {
+        var $freq34 = CHECK_OVERFLOW(($n_1 << 2) + $s + 148, 32, 0);
+        if (HEAP16[$freq34 >> 1] << 16 >> 16 != 0) {
           var $retval_0 = 1;
           break $for_end$$return$105;
         }
-        var $n_1 = $n_1 + 1 | 0;
+        var $inc41 = CHECK_OVERFLOW($n_1 + 1, 32, 0);
+        var $n_1 = $inc41;
       }
     }
   } while (0);
@@ -6588,22 +7603,25 @@ function _detect_data_type($s) {
 function _updatewindow($strm, $out) {
   var $21$s2;
   var $9$s2;
-  var $0$s2;
-  var $strm$s2 = $strm >> 2;
   var __label__;
-  var $0 = HEAPU32[$strm$s2 + 7], $0$s2 = $0 >> 2;
-  var $window = $0 + 52 | 0;
+  var $state1 = CHECK_OVERFLOW($strm + 28, 32, 0);
+  var $0 = HEAPU32[$state1 >> 2];
+  var $window = CHECK_OVERFLOW($0 + 52, 32, 0);
   var $1 = $window;
   var $2 = HEAP32[$1 >> 2];
   var $cmp = ($2 | 0) == 0;
   do {
     if ($cmp) {
-      var $3 = HEAP32[$strm$s2 + 8];
-      var $4 = HEAP32[$strm$s2 + 10];
-      var $shl = 1 << HEAP32[$0$s2 + 9];
+      var $zalloc = CHECK_OVERFLOW($strm + 32, 32, 0);
+      var $3 = HEAP32[$zalloc >> 2];
+      var $opaque = CHECK_OVERFLOW($strm + 40, 32, 0);
+      var $4 = HEAP32[$opaque >> 2];
+      var $5 = CHECK_OVERFLOW($0 + 36, 32, 0);
+      var $shl = 1 << HEAP32[$5 >> 2];
       var $call = FUNCTION_TABLE[$3]($4, $shl, 1);
+      var $7 = CHECK_OVERFLOW($window, 32, 0);
       var $call_c = $call;
-      HEAP32[$window >> 2] = $call_c;
+      HEAP32[$7 >> 2] = $call_c;
       if (($call | 0) == 0) {
         var $retval_0 = 1;
         __label__ = 12;
@@ -6620,60 +7638,76 @@ function _updatewindow($strm, $out) {
   do {
     if (__label__ == 2) {
       var $8;
-      var $9$s2 = ($0 + 40 | 0) >> 2;
+      var $9 = CHECK_OVERFLOW($0 + 40, 32, 0), $9$s2 = $9 >> 2;
       var $10 = HEAP32[$9$s2];
       if (($10 | 0) == 0) {
-        var $shl10 = 1 << HEAP32[$0$s2 + 9];
+        var $11 = CHECK_OVERFLOW($0 + 36, 32, 0);
+        var $shl10 = 1 << HEAP32[$11 >> 2];
         HEAP32[$9$s2] = $shl10;
-        HEAP32[$0$s2 + 12] = 0;
-        HEAP32[$0$s2 + 11] = 0;
+        var $13 = CHECK_OVERFLOW($0 + 48, 32, 0);
+        HEAP32[$13 >> 2] = 0;
+        var $14 = CHECK_OVERFLOW($0 + 44, 32, 0);
+        HEAP32[$14 >> 2] = 0;
         var $15 = $shl10;
       } else {
         var $15 = $10;
       }
       var $15;
-      var $sub = $out - HEAP32[$strm$s2 + 4] | 0;
+      var $avail_out = CHECK_OVERFLOW($strm + 16, 32, 0);
+      var $16 = HEAP32[$avail_out >> 2];
+      var $sub = CHECK_OVERFLOW($out - $16, 32, 0);
       if ($sub >>> 0 < $15 >>> 0) {
-        var $21$s2 = ($0 + 48 | 0) >> 2;
+        var $21 = CHECK_OVERFLOW($0 + 48, 32, 0), $21$s2 = $21 >> 2;
         var $22 = HEAPU32[$21$s2];
-        var $sub24 = $15 - $22 | 0;
+        var $sub24 = CHECK_OVERFLOW($15 - $22, 32, 0);
         var $dist_0 = $sub24 >>> 0 > $sub >>> 0 ? $sub : $sub24;
-        var $add_ptr30 = $8 + $22 | 0;
-        var $next_out31 = $strm + 12 | 0;
-        var $add_ptr33 = HEAP32[$next_out31 >> 2] + -$sub | 0;
+        var $add_ptr30 = CHECK_OVERFLOW($8 + $22, 32, 0);
+        var $next_out31 = CHECK_OVERFLOW($strm + 12, 32, 0);
+        var $23 = HEAP32[$next_out31 >> 2];
+        var $idx_neg32 = CHECK_OVERFLOW(-$sub, 32, 0);
+        var $add_ptr33 = CHECK_OVERFLOW($23 + $idx_neg32, 32, 0);
         _memcpy($add_ptr30, $add_ptr33, $dist_0, 1);
-        var $sub34 = $sub - $dist_0 | 0;
+        var $sub34 = CHECK_OVERFLOW($sub - $dist_0, 32, 0);
         if (($sub | 0) == ($dist_0 | 0)) {
-          var $add = HEAP32[$21$s2] + $dist_0 | 0;
+          var $28 = HEAP32[$21$s2];
+          var $add = CHECK_OVERFLOW($28 + $dist_0, 32, 0);
           HEAP32[$21$s2] = $add;
           var $29 = HEAPU32[$9$s2];
           if (($add | 0) == ($29 | 0)) {
             HEAP32[$21$s2] = 0;
           }
-          var $30 = $0 + 44 | 0;
+          var $30 = CHECK_OVERFLOW($0 + 44, 32, 0);
           var $31 = HEAPU32[$30 >> 2];
           if ($31 >>> 0 >= $29 >>> 0) {
             var $retval_0 = 0;
             break;
           }
-          var $add56 = $31 + $dist_0 | 0;
+          var $add56 = CHECK_OVERFLOW($31 + $dist_0, 32, 0);
           HEAP32[$30 >> 2] = $add56;
           var $retval_0 = 0;
         } else {
           var $24 = HEAP32[$1 >> 2];
-          var $add_ptr39 = HEAP32[$next_out31 >> 2] + -$sub34 | 0;
+          var $25 = HEAP32[$next_out31 >> 2];
+          var $idx_neg38 = CHECK_OVERFLOW(-$sub34, 32, 0);
+          var $add_ptr39 = CHECK_OVERFLOW($25 + $idx_neg38, 32, 0);
           _memcpy($24, $add_ptr39, $sub34, 1);
           HEAP32[$21$s2] = $sub34;
           var $26 = HEAP32[$9$s2];
-          HEAP32[$0$s2 + 11] = $26;
+          var $27 = CHECK_OVERFLOW($0 + 44, 32, 0);
+          HEAP32[$27 >> 2] = $26;
           var $retval_0 = 0;
         }
       } else {
-        var $add_ptr = HEAP32[$strm$s2 + 3] + -$15 | 0;
+        var $next_out = CHECK_OVERFLOW($strm + 12, 32, 0);
+        var $17 = HEAP32[$next_out >> 2];
+        var $idx_neg = CHECK_OVERFLOW(-$15, 32, 0);
+        var $add_ptr = CHECK_OVERFLOW($17 + $idx_neg, 32, 0);
         _memcpy($8, $add_ptr, $15, 1);
-        HEAP32[$0$s2 + 12] = 0;
+        var $18 = CHECK_OVERFLOW($0 + 48, 32, 0);
+        HEAP32[$18 >> 2] = 0;
         var $19 = HEAP32[$9$s2];
-        HEAP32[$0$s2 + 11] = $19;
+        var $20 = CHECK_OVERFLOW($0 + 44, 32, 0);
+        HEAP32[$20 >> 2] = $19;
         var $retval_0 = 0;
       }
     }
@@ -6690,19 +7724,21 @@ function _inflateEnd($strm) {
   var $cmp = ($strm | 0) == 0;
   do {
     if (!$cmp) {
-      var $state1$s2 = ($strm + 28 | 0) >> 2;
+      var $state1 = CHECK_OVERFLOW($strm + 28, 32, 0), $state1$s2 = $state1 >> 2;
       var $0 = HEAP32[$state1$s2];
       if (($0 | 0) == 0) {
         break;
       }
-      var $zfree = $strm + 36 | 0;
+      var $zfree = CHECK_OVERFLOW($strm + 36, 32, 0);
       var $1 = HEAP32[$zfree >> 2];
       if (($1 | 0) == 0) {
         break;
       }
-      var $3 = HEAP32[$0 + 52 >> 2];
-      var $opaque12_pre = $strm + 40 | 0;
-      if (($3 | 0) == 0) {
+      var $window = CHECK_OVERFLOW($0 + 52, 32, 0);
+      var $3 = HEAP32[$window >> 2];
+      var $cmp6 = ($3 | 0) == 0;
+      var $opaque12_pre = CHECK_OVERFLOW($strm + 40, 32, 0);
+      if ($cmp6) {
         var $6 = $1;
         var $5 = $0;
       } else {
@@ -6723,15 +7759,27 @@ function _inflateEnd($strm) {
 }
 
 function __tr_init($s) {
-  HEAP32[$s + 2840 >> 2] = $s + 148 | 0;
-  HEAP32[$s + 2848 >> 2] = _static_l_desc;
-  HEAP32[$s + 2852 >> 2] = $s + 2440 | 0;
-  HEAP32[$s + 2860 >> 2] = _static_d_desc;
-  HEAP32[$s + 2864 >> 2] = $s + 2684 | 0;
-  HEAP32[$s + 2872 >> 2] = _static_bl_desc;
-  HEAP16[$s + 5816 >> 1] = 0;
-  HEAP32[$s + 5820 >> 2] = 0;
-  HEAP32[$s + 5812 >> 2] = 8;
+  var $arraydecay = CHECK_OVERFLOW($s + 148, 32, 0);
+  var $dyn_tree = CHECK_OVERFLOW($s + 2840, 32, 0);
+  HEAP32[$dyn_tree >> 2] = $arraydecay;
+  var $stat_desc = CHECK_OVERFLOW($s + 2848, 32, 0);
+  HEAP32[$stat_desc >> 2] = _static_l_desc;
+  var $arraydecay2 = CHECK_OVERFLOW($s + 2440, 32, 0);
+  var $dyn_tree3 = CHECK_OVERFLOW($s + 2852, 32, 0);
+  HEAP32[$dyn_tree3 >> 2] = $arraydecay2;
+  var $stat_desc5 = CHECK_OVERFLOW($s + 2860, 32, 0);
+  HEAP32[$stat_desc5 >> 2] = _static_d_desc;
+  var $arraydecay6 = CHECK_OVERFLOW($s + 2684, 32, 0);
+  var $dyn_tree7 = CHECK_OVERFLOW($s + 2864, 32, 0);
+  HEAP32[$dyn_tree7 >> 2] = $arraydecay6;
+  var $stat_desc9 = CHECK_OVERFLOW($s + 2872, 32, 0);
+  HEAP32[$stat_desc9 >> 2] = _static_bl_desc;
+  var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0);
+  HEAP16[$bi_buf >> 1] = 0;
+  var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0);
+  HEAP32[$bi_valid >> 2] = 0;
+  var $last_eob_len = CHECK_OVERFLOW($s + 5812, 32, 0);
+  HEAP32[$last_eob_len >> 2] = 8;
   _init_block($s);
   return;
   return;
@@ -6741,30 +7789,39 @@ function __tr_stored_block($s, $buf, $stored_len, $last) {
   var $pending$s2;
   var $bi_buf$s1;
   var $bi_valid$s2;
-  var $bi_valid$s2 = ($s + 5820 | 0) >> 2;
+  var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0), $bi_valid$s2 = $bi_valid >> 2;
   var $0 = HEAPU32[$bi_valid$s2];
   var $cmp = ($0 | 0) > 13;
   var $conv1 = $last & 65535;
-  var $bi_buf$s1 = ($s + 5816 | 0) >> 1;
-  var $or = HEAPU16[$bi_buf$s1] & 65535 | $conv1 << $0;
+  var $shl = $conv1 << $0;
+  var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf$s1 = $bi_buf >> 1;
+  var $or = HEAPU16[$bi_buf$s1] & 65535 | $shl;
   HEAP16[$bi_buf$s1] = $or & 65535;
   if ($cmp) {
     var $conv7 = $or & 255;
-    var $pending$s2 = ($s + 20 | 0) >> 2;
+    var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
     var $2 = HEAP32[$pending$s2];
-    var $inc = $2 + 1 | 0;
+    var $inc = CHECK_OVERFLOW($2 + 1, 32, 0);
     HEAP32[$pending$s2] = $inc;
-    var $pending_buf = $s + 8 | 0;
-    HEAP8[HEAP32[$pending_buf >> 2] + $2 | 0] = $conv7;
+    var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0);
+    var $3 = HEAP32[$pending_buf >> 2];
+    var $arrayidx = CHECK_OVERFLOW($3 + $2, 32, 0);
+    HEAP8[$arrayidx] = $conv7;
     var $conv10 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
     var $5 = HEAPU32[$pending$s2];
-    HEAP32[$pending$s2] = $5 + 1 | 0;
-    HEAP8[HEAP32[$pending_buf >> 2] + $5 | 0] = $conv10;
+    var $inc12 = CHECK_OVERFLOW($5 + 1, 32, 0);
+    HEAP32[$pending$s2] = $inc12;
+    var $6 = HEAP32[$pending_buf >> 2];
+    var $arrayidx14 = CHECK_OVERFLOW($6 + $5, 32, 0);
+    HEAP8[$arrayidx14] = $conv10;
     var $7 = HEAPU32[$bi_valid$s2];
-    HEAP16[$bi_buf$s1] = $conv1 >>> ((16 - $7 | 0) >>> 0) & 65535;
-    var $storemerge = $7 - 13 | 0;
+    var $sub18 = CHECK_OVERFLOW(16 - $7, 32, 0);
+    HEAP16[$bi_buf$s1] = $conv1 >>> ($sub18 >>> 0) & 65535;
+    var $add24 = CHECK_OVERFLOW($7 - 13, 32, 0);
+    var $storemerge = $add24;
   } else {
-    var $storemerge = $0 + 3 | 0;
+    var $add35 = CHECK_OVERFLOW($0 + 3, 32, 0);
+    var $storemerge = $add35;
   }
   var $storemerge;
   HEAP32[$bi_valid$s2] = $storemerge;
@@ -6777,28 +7834,39 @@ function _copy_block($s, $buf, $len) {
   var $pending_buf$s2;
   var $pending$s2;
   _bi_windup($s);
-  HEAP32[$s + 5812 >> 2] = 8;
+  var $last_eob_len = CHECK_OVERFLOW($s + 5812, 32, 0);
+  HEAP32[$last_eob_len >> 2] = 8;
   var $conv2 = $len & 255;
-  var $pending$s2 = ($s + 20 | 0) >> 2;
+  var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
   var $0 = HEAP32[$pending$s2];
-  var $inc = $0 + 1 | 0;
+  var $inc = CHECK_OVERFLOW($0 + 1, 32, 0);
   HEAP32[$pending$s2] = $inc;
-  var $pending_buf$s2 = ($s + 8 | 0) >> 2;
-  HEAP8[HEAP32[$pending_buf$s2] + $0 | 0] = $conv2;
+  var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0), $pending_buf$s2 = $pending_buf >> 2;
+  var $1 = HEAP32[$pending_buf$s2];
+  var $arrayidx = CHECK_OVERFLOW($1 + $0, 32, 0);
+  HEAP8[$arrayidx] = $conv2;
   var $conv5 = $len >>> 8 & 255;
   var $2 = HEAPU32[$pending$s2];
-  HEAP32[$pending$s2] = $2 + 1 | 0;
-  HEAP8[HEAP32[$pending_buf$s2] + $2 | 0] = $conv5;
+  var $inc7 = CHECK_OVERFLOW($2 + 1, 32, 0);
+  HEAP32[$pending$s2] = $inc7;
+  var $3 = HEAP32[$pending_buf$s2];
+  var $arrayidx9 = CHECK_OVERFLOW($3 + $2, 32, 0);
+  HEAP8[$arrayidx9] = $conv5;
   var $conv11 = $len & 65535 ^ 65535;
   var $conv13 = $conv11 & 255;
   var $4 = HEAP32[$pending$s2];
-  var $inc15 = $4 + 1 | 0;
+  var $inc15 = CHECK_OVERFLOW($4 + 1, 32, 0);
   HEAP32[$pending$s2] = $inc15;
-  HEAP8[HEAP32[$pending_buf$s2] + $4 | 0] = $conv13;
+  var $5 = HEAP32[$pending_buf$s2];
+  var $arrayidx17 = CHECK_OVERFLOW($5 + $4, 32, 0);
+  HEAP8[$arrayidx17] = $conv13;
   var $conv22 = $conv11 >>> 8 & 255;
   var $6 = HEAPU32[$pending$s2];
-  HEAP32[$pending$s2] = $6 + 1 | 0;
-  HEAP8[HEAP32[$pending_buf$s2] + $6 | 0] = $conv22;
+  var $inc24 = CHECK_OVERFLOW($6 + 1, 32, 0);
+  HEAP32[$pending$s2] = $inc24;
+  var $7 = HEAP32[$pending_buf$s2];
+  var $arrayidx26 = CHECK_OVERFLOW($7 + $6, 32, 0);
+  HEAP8[$arrayidx26] = $conv22;
   var $tobool273 = ($len | 0) == 0;
   $while_end$$while_body$41 : do {
     if (!$tobool273) {
@@ -6807,16 +7875,19 @@ function _copy_block($s, $buf, $len) {
       while (1) {
         var $len_addr_05;
         var $buf_addr_04;
-        var $dec = $len_addr_05 - 1 | 0;
+        var $dec = CHECK_OVERFLOW($len_addr_05 - 1, 32, 0);
+        var $incdec_ptr = CHECK_OVERFLOW($buf_addr_04 + 1, 32, 0);
         var $8 = HEAP8[$buf_addr_04];
         var $9 = HEAP32[$pending$s2];
-        var $inc29 = $9 + 1 | 0;
+        var $inc29 = CHECK_OVERFLOW($9 + 1, 32, 0);
         HEAP32[$pending$s2] = $inc29;
-        HEAP8[HEAP32[$pending_buf$s2] + $9 | 0] = $8;
+        var $10 = HEAP32[$pending_buf$s2];
+        var $arrayidx31 = CHECK_OVERFLOW($10 + $9, 32, 0);
+        HEAP8[$arrayidx31] = $8;
         if (($dec | 0) == 0) {
           break $while_end$$while_body$41;
         }
-        var $buf_addr_04 = $buf_addr_04 + 1 | 0;
+        var $buf_addr_04 = $incdec_ptr;
         var $len_addr_05 = $dec;
       }
     }
@@ -6834,102 +7905,140 @@ function __tr_align($s) {
   var $pending$s2;
   var $bi_buf$s1;
   var $bi_valid$s2;
-  var $bi_valid$s2 = ($s + 5820 | 0) >> 2;
+  var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0), $bi_valid$s2 = $bi_valid >> 2;
   var $0 = HEAPU32[$bi_valid$s2];
   var $cmp = ($0 | 0) > 13;
-  var $bi_buf$s1 = ($s + 5816 | 0) >> 1;
-  var $or = HEAPU16[$bi_buf$s1] & 65535 | 2 << $0;
+  var $shl = 2 << $0;
+  var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf$s1 = $bi_buf >> 1;
+  var $or = HEAPU16[$bi_buf$s1] & 65535 | $shl;
   var $conv4 = $or & 65535;
   HEAP16[$bi_buf$s1] = $conv4;
   if ($cmp) {
     var $conv7 = $or & 255;
-    var $pending$s2 = ($s + 20 | 0) >> 2;
+    var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
     var $2 = HEAP32[$pending$s2];
-    var $inc = $2 + 1 | 0;
+    var $inc = CHECK_OVERFLOW($2 + 1, 32, 0);
     HEAP32[$pending$s2] = $inc;
-    var $pending_buf = $s + 8 | 0;
-    HEAP8[HEAP32[$pending_buf >> 2] + $2 | 0] = $conv7;
+    var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0);
+    var $3 = HEAP32[$pending_buf >> 2];
+    var $arrayidx = CHECK_OVERFLOW($3 + $2, 32, 0);
+    HEAP8[$arrayidx] = $conv7;
     var $conv10 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
     var $5 = HEAPU32[$pending$s2];
-    HEAP32[$pending$s2] = $5 + 1 | 0;
-    HEAP8[HEAP32[$pending_buf >> 2] + $5 | 0] = $conv10;
+    var $inc12 = CHECK_OVERFLOW($5 + 1, 32, 0);
+    HEAP32[$pending$s2] = $inc12;
+    var $6 = HEAP32[$pending_buf >> 2];
+    var $arrayidx14 = CHECK_OVERFLOW($6 + $5, 32, 0);
+    HEAP8[$arrayidx14] = $conv10;
     var $7 = HEAPU32[$bi_valid$s2];
-    var $conv20 = 2 >>> ((16 - $7 | 0) >>> 0) & 65535;
+    var $sub18 = CHECK_OVERFLOW(16 - $7, 32, 0);
+    var $conv20 = 2 >>> ($sub18 >>> 0) & 65535;
     HEAP16[$bi_buf$s1] = $conv20;
-    var $storemerge = $7 - 13 | 0;
+    var $add = CHECK_OVERFLOW($7 - 13, 32, 0);
+    var $storemerge = $add;
     var $8 = $conv20;
   } else {
-    var $storemerge = $0 + 3 | 0;
+    var $add31 = CHECK_OVERFLOW($0 + 3, 32, 0);
+    var $storemerge = $add31;
     var $8 = $conv4;
   }
   var $8;
   var $storemerge;
   HEAP32[$bi_valid$s2] = $storemerge;
   if (($storemerge | 0) > 9) {
-    var $pending53$s2 = ($s + 20 | 0) >> 2;
+    var $conv52 = $8 & 255;
+    var $pending53 = CHECK_OVERFLOW($s + 20, 32, 0), $pending53$s2 = $pending53 >> 2;
     var $9 = HEAP32[$pending53$s2];
-    var $inc54 = $9 + 1 | 0;
+    var $inc54 = CHECK_OVERFLOW($9 + 1, 32, 0);
     HEAP32[$pending53$s2] = $inc54;
-    var $pending_buf55 = $s + 8 | 0;
-    HEAP8[HEAP32[$pending_buf55 >> 2] + $9 | 0] = $8 & 255;
+    var $pending_buf55 = CHECK_OVERFLOW($s + 8, 32, 0);
+    var $10 = HEAP32[$pending_buf55 >> 2];
+    var $arrayidx56 = CHECK_OVERFLOW($10 + $9, 32, 0);
+    HEAP8[$arrayidx56] = $conv52;
     var $conv60 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
     var $12 = HEAPU32[$pending53$s2];
-    HEAP32[$pending53$s2] = $12 + 1 | 0;
-    HEAP8[HEAP32[$pending_buf55 >> 2] + $12 | 0] = $conv60;
+    var $inc62 = CHECK_OVERFLOW($12 + 1, 32, 0);
+    HEAP32[$pending53$s2] = $inc62;
+    var $13 = HEAP32[$pending_buf55 >> 2];
+    var $arrayidx64 = CHECK_OVERFLOW($13 + $12, 32, 0);
+    HEAP8[$arrayidx64] = $conv60;
     HEAP16[$bi_buf$s1] = 0;
-    var $storemerge1 = HEAP32[$bi_valid$s2] - 9 | 0;
+    var $14 = HEAP32[$bi_valid$s2];
+    var $add74 = CHECK_OVERFLOW($14 - 9, 32, 0);
+    var $storemerge1 = $add74;
   } else {
-    var $storemerge1 = $storemerge + 7 | 0;
+    var $add84 = CHECK_OVERFLOW($storemerge + 7, 32, 0);
+    var $storemerge1 = $add84;
   }
   var $storemerge1;
   HEAP32[$bi_valid$s2] = $storemerge1;
   _bi_flush($s);
-  var $last_eob_len = $s + 5812 | 0;
+  var $last_eob_len = CHECK_OVERFLOW($s + 5812, 32, 0);
+  var $15 = HEAP32[$last_eob_len >> 2];
   var $16 = HEAPU32[$bi_valid$s2];
-  if ((HEAP32[$last_eob_len >> 2] + 11 - $16 | 0) < 9) {
+  var $add87 = CHECK_OVERFLOW($15 + 11, 32, 0);
+  var $sub89 = CHECK_OVERFLOW($add87 - $16, 32, 0);
+  if (($sub89 | 0) < 9) {
     var $cmp96 = ($16 | 0) > 13;
     var $or106 = HEAPU16[$bi_buf$s1] & 65535 | 2 << $16;
     var $conv107 = $or106 & 65535;
     HEAP16[$bi_buf$s1] = $conv107;
     if ($cmp96) {
       var $conv111 = $or106 & 255;
-      var $pending112$s2 = ($s + 20 | 0) >> 2;
+      var $pending112 = CHECK_OVERFLOW($s + 20, 32, 0), $pending112$s2 = $pending112 >> 2;
       var $18 = HEAP32[$pending112$s2];
-      var $inc113 = $18 + 1 | 0;
+      var $inc113 = CHECK_OVERFLOW($18 + 1, 32, 0);
       HEAP32[$pending112$s2] = $inc113;
-      var $pending_buf114 = $s + 8 | 0;
-      HEAP8[HEAP32[$pending_buf114 >> 2] + $18 | 0] = $conv111;
+      var $pending_buf114 = CHECK_OVERFLOW($s + 8, 32, 0);
+      var $19 = HEAP32[$pending_buf114 >> 2];
+      var $arrayidx115 = CHECK_OVERFLOW($19 + $18, 32, 0);
+      HEAP8[$arrayidx115] = $conv111;
       var $conv119 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
       var $21 = HEAPU32[$pending112$s2];
-      HEAP32[$pending112$s2] = $21 + 1 | 0;
-      HEAP8[HEAP32[$pending_buf114 >> 2] + $21 | 0] = $conv119;
+      var $inc121 = CHECK_OVERFLOW($21 + 1, 32, 0);
+      HEAP32[$pending112$s2] = $inc121;
+      var $22 = HEAP32[$pending_buf114 >> 2];
+      var $arrayidx123 = CHECK_OVERFLOW($22 + $21, 32, 0);
+      HEAP8[$arrayidx123] = $conv119;
       var $23 = HEAPU32[$bi_valid$s2];
-      var $conv129 = 2 >>> ((16 - $23 | 0) >>> 0) & 65535;
+      var $sub127 = CHECK_OVERFLOW(16 - $23, 32, 0);
+      var $conv129 = 2 >>> ($sub127 >>> 0) & 65535;
       HEAP16[$bi_buf$s1] = $conv129;
-      var $storemerge2 = $23 - 13 | 0;
+      var $add133 = CHECK_OVERFLOW($23 - 13, 32, 0);
+      var $storemerge2 = $add133;
       var $24 = $conv129;
     } else {
-      var $storemerge2 = $16 + 3 | 0;
+      var $add142 = CHECK_OVERFLOW($16 + 3, 32, 0);
+      var $storemerge2 = $add142;
       var $24 = $conv107;
     }
     var $24;
     var $storemerge2;
     HEAP32[$bi_valid$s2] = $storemerge2;
     if (($storemerge2 | 0) > 9) {
-      var $pending165$s2 = ($s + 20 | 0) >> 2;
+      var $conv164 = $24 & 255;
+      var $pending165 = CHECK_OVERFLOW($s + 20, 32, 0), $pending165$s2 = $pending165 >> 2;
       var $25 = HEAP32[$pending165$s2];
-      var $inc166 = $25 + 1 | 0;
+      var $inc166 = CHECK_OVERFLOW($25 + 1, 32, 0);
       HEAP32[$pending165$s2] = $inc166;
-      var $pending_buf167 = $s + 8 | 0;
-      HEAP8[HEAP32[$pending_buf167 >> 2] + $25 | 0] = $24 & 255;
+      var $pending_buf167 = CHECK_OVERFLOW($s + 8, 32, 0);
+      var $26 = HEAP32[$pending_buf167 >> 2];
+      var $arrayidx168 = CHECK_OVERFLOW($26 + $25, 32, 0);
+      HEAP8[$arrayidx168] = $conv164;
       var $conv172 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
       var $28 = HEAPU32[$pending165$s2];
-      HEAP32[$pending165$s2] = $28 + 1 | 0;
-      HEAP8[HEAP32[$pending_buf167 >> 2] + $28 | 0] = $conv172;
+      var $inc174 = CHECK_OVERFLOW($28 + 1, 32, 0);
+      HEAP32[$pending165$s2] = $inc174;
+      var $29 = HEAP32[$pending_buf167 >> 2];
+      var $arrayidx176 = CHECK_OVERFLOW($29 + $28, 32, 0);
+      HEAP8[$arrayidx176] = $conv172;
       HEAP16[$bi_buf$s1] = 0;
-      var $storemerge3 = HEAP32[$bi_valid$s2] - 9 | 0;
+      var $30 = HEAP32[$bi_valid$s2];
+      var $add186 = CHECK_OVERFLOW($30 - 9, 32, 0);
+      var $storemerge3 = $add186;
     } else {
-      var $storemerge3 = $storemerge2 + 7 | 0;
+      var $add196 = CHECK_OVERFLOW($storemerge2 + 7, 32, 0);
+      var $storemerge3 = $add196;
     }
     var $storemerge3;
     HEAP32[$bi_valid$s2] = $storemerge3;
@@ -6948,22 +8057,30 @@ function __tr_flush_block($s, $buf, $stored_len, $last) {
   var $pending$s2;
   var $bi_buf$s1;
   var $bi_valid$s2;
-  var $s$s2 = $s >> 2;
-  var $cmp = (HEAP32[$s$s2 + 33] | 0) > 0;
+  var $level = CHECK_OVERFLOW($s + 132, 32, 0);
+  var $cmp = (HEAP32[$level >> 2] | 0) > 0;
   do {
     if ($cmp) {
-      var $data_type = HEAP32[$s$s2] + 44 | 0;
+      var $strm = CHECK_OVERFLOW($s, 32, 0);
+      var $1 = HEAP32[$strm >> 2];
+      var $data_type = CHECK_OVERFLOW($1 + 44, 32, 0);
       if ((HEAP32[$data_type >> 2] | 0) == 2) {
         var $call = _detect_data_type($s);
         HEAP32[$data_type >> 2] = $call;
       }
-      var $l_desc = $s + 2840 | 0;
+      var $l_desc = CHECK_OVERFLOW($s + 2840, 32, 0);
       _build_tree($s, $l_desc);
-      var $d_desc = $s + 2852 | 0;
+      var $d_desc = CHECK_OVERFLOW($s + 2852, 32, 0);
       _build_tree($s, $d_desc);
       var $call5 = _build_bl_tree($s);
-      var $shr = (HEAP32[$s$s2 + 1450] + 10 | 0) >>> 3;
-      var $shr9 = (HEAP32[$s$s2 + 1451] + 10 | 0) >>> 3;
+      var $opt_len = CHECK_OVERFLOW($s + 5800, 32, 0);
+      var $3 = HEAP32[$opt_len >> 2];
+      var $add6 = CHECK_OVERFLOW($3 + 10, 32, 0);
+      var $shr = $add6 >>> 3;
+      var $static_len = CHECK_OVERFLOW($s + 5804, 32, 0);
+      var $4 = HEAP32[$static_len >> 2];
+      var $add8 = CHECK_OVERFLOW($4 + 10, 32, 0);
+      var $shr9 = $add8 >>> 3;
       if ($shr9 >>> 0 > $shr >>> 0) {
         var $max_blindex_0 = $call5;
         var $static_lenb_0 = $shr9;
@@ -6974,7 +8091,7 @@ function __tr_flush_block($s, $buf, $stored_len, $last) {
       var $static_lenb_0 = $shr9;
       var $opt_lenb_0 = $shr9;
     } else {
-      var $add13 = $stored_len + 5 | 0;
+      var $add13 = CHECK_OVERFLOW($stored_len + 5, 32, 0);
       var $max_blindex_0 = 0;
       var $static_lenb_0 = $add13;
       var $opt_lenb_0 = $add13;
@@ -6983,66 +8100,94 @@ function __tr_flush_block($s, $buf, $stored_len, $last) {
   var $opt_lenb_0;
   var $static_lenb_0;
   var $max_blindex_0;
-  if (($stored_len + 4 | 0) >>> 0 > $opt_lenb_0 >>> 0 | ($buf | 0) == 0) {
-    var $bi_valid$s2 = ($s + 5820 | 0) >> 2;
+  var $add15 = CHECK_OVERFLOW($stored_len + 4, 32, 0);
+  if ($add15 >>> 0 > $opt_lenb_0 >>> 0 | ($buf | 0) == 0) {
+    var $strategy = CHECK_OVERFLOW($s + 136, 32, 0);
+    var $or_cond4 = (HEAP32[$strategy >> 2] | 0) == 4 | ($static_lenb_0 | 0) == ($opt_lenb_0 | 0);
+    var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0), $bi_valid$s2 = $bi_valid >> 2;
     var $6 = HEAPU32[$bi_valid$s2];
     var $cmp23 = ($6 | 0) > 13;
-    if ((HEAP32[$s$s2 + 34] | 0) == 4 | ($static_lenb_0 | 0) == ($opt_lenb_0 | 0)) {
-      var $conv26 = $last + 2 & 65535;
-      var $bi_buf$s1 = ($s + 5816 | 0) >> 1;
-      var $or = HEAPU16[$bi_buf$s1] & 65535 | $conv26 << $6;
+    if ($or_cond4) {
+      var $add25 = CHECK_OVERFLOW($last + 2, 32, 0);
+      var $conv26 = $add25 & 65535;
+      var $shl = $conv26 << $6;
+      var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf$s1 = $bi_buf >> 1;
+      var $or = HEAPU16[$bi_buf$s1] & 65535 | $shl;
       HEAP16[$bi_buf$s1] = $or & 65535;
       if ($cmp23) {
         var $conv32 = $or & 255;
-        var $pending$s2 = ($s + 20 | 0) >> 2;
+        var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
         var $8 = HEAP32[$pending$s2];
-        var $inc = $8 + 1 | 0;
+        var $inc = CHECK_OVERFLOW($8 + 1, 32, 0);
         HEAP32[$pending$s2] = $inc;
-        var $pending_buf = $s + 8 | 0;
-        HEAP8[HEAP32[$pending_buf >> 2] + $8 | 0] = $conv32;
+        var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0);
+        var $9 = HEAP32[$pending_buf >> 2];
+        var $arrayidx = CHECK_OVERFLOW($9 + $8, 32, 0);
+        HEAP8[$arrayidx] = $conv32;
         var $conv36 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
         var $11 = HEAPU32[$pending$s2];
-        HEAP32[$pending$s2] = $11 + 1 | 0;
-        HEAP8[HEAP32[$pending_buf >> 2] + $11 | 0] = $conv36;
+        var $inc38 = CHECK_OVERFLOW($11 + 1, 32, 0);
+        HEAP32[$pending$s2] = $inc38;
+        var $12 = HEAP32[$pending_buf >> 2];
+        var $arrayidx40 = CHECK_OVERFLOW($12 + $11, 32, 0);
+        HEAP8[$arrayidx40] = $conv36;
         var $13 = HEAPU32[$bi_valid$s2];
-        HEAP16[$bi_buf$s1] = $conv26 >>> ((16 - $13 | 0) >>> 0) & 65535;
-        var $storemerge2 = $13 - 13 | 0;
+        var $sub44 = CHECK_OVERFLOW(16 - $13, 32, 0);
+        HEAP16[$bi_buf$s1] = $conv26 >>> ($sub44 >>> 0) & 65535;
+        var $add50 = CHECK_OVERFLOW($13 - 13, 32, 0);
+        var $storemerge2 = $add50;
       } else {
-        var $storemerge2 = $6 + 3 | 0;
+        var $add62 = CHECK_OVERFLOW($6 + 3, 32, 0);
+        var $storemerge2 = $add62;
       }
       var $storemerge2;
       HEAP32[$bi_valid$s2] = $storemerge2;
-      _compress_block($s, _static_ltree | 0, _static_dtree | 0);
+      _compress_block($s, CHECK_OVERFLOW(_static_ltree, 32, 0), CHECK_OVERFLOW(_static_dtree, 32, 0));
     } else {
-      var $conv74 = $last + 4 & 65535;
-      var $bi_buf77$s1 = ($s + 5816 | 0) >> 1;
-      var $or79 = HEAPU16[$bi_buf77$s1] & 65535 | $conv74 << $6;
+      var $add72 = CHECK_OVERFLOW($last + 4, 32, 0);
+      var $conv74 = $add72 & 65535;
+      var $shl76 = $conv74 << $6;
+      var $bi_buf77 = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf77$s1 = $bi_buf77 >> 1;
+      var $or79 = HEAPU16[$bi_buf77$s1] & 65535 | $shl76;
       HEAP16[$bi_buf77$s1] = $or79 & 65535;
       if ($cmp23) {
         var $conv84 = $or79 & 255;
-        var $pending85$s2 = ($s + 20 | 0) >> 2;
+        var $pending85 = CHECK_OVERFLOW($s + 20, 32, 0), $pending85$s2 = $pending85 >> 2;
         var $15 = HEAP32[$pending85$s2];
-        var $inc86 = $15 + 1 | 0;
+        var $inc86 = CHECK_OVERFLOW($15 + 1, 32, 0);
         HEAP32[$pending85$s2] = $inc86;
-        var $pending_buf87 = $s + 8 | 0;
-        HEAP8[HEAP32[$pending_buf87 >> 2] + $15 | 0] = $conv84;
+        var $pending_buf87 = CHECK_OVERFLOW($s + 8, 32, 0);
+        var $16 = HEAP32[$pending_buf87 >> 2];
+        var $arrayidx88 = CHECK_OVERFLOW($16 + $15, 32, 0);
+        HEAP8[$arrayidx88] = $conv84;
         var $conv92 = (HEAPU16[$bi_buf77$s1] & 65535) >>> 8 & 255;
         var $18 = HEAPU32[$pending85$s2];
-        HEAP32[$pending85$s2] = $18 + 1 | 0;
-        HEAP8[HEAP32[$pending_buf87 >> 2] + $18 | 0] = $conv92;
+        var $inc94 = CHECK_OVERFLOW($18 + 1, 32, 0);
+        HEAP32[$pending85$s2] = $inc94;
+        var $19 = HEAP32[$pending_buf87 >> 2];
+        var $arrayidx96 = CHECK_OVERFLOW($19 + $18, 32, 0);
+        HEAP8[$arrayidx96] = $conv92;
         var $20 = HEAPU32[$bi_valid$s2];
-        HEAP16[$bi_buf77$s1] = $conv74 >>> ((16 - $20 | 0) >>> 0) & 65535;
-        var $storemerge = $20 - 13 | 0;
+        var $sub100 = CHECK_OVERFLOW(16 - $20, 32, 0);
+        HEAP16[$bi_buf77$s1] = $conv74 >>> ($sub100 >>> 0) & 65535;
+        var $add106 = CHECK_OVERFLOW($20 - 13, 32, 0);
+        var $storemerge = $add106;
       } else {
-        var $storemerge = $6 + 3 | 0;
+        var $add118 = CHECK_OVERFLOW($6 + 3, 32, 0);
+        var $storemerge = $add118;
       }
       var $storemerge;
       HEAP32[$bi_valid$s2] = $storemerge;
-      var $add121 = HEAP32[$s$s2 + 711] + 1 | 0;
-      var $add124 = HEAP32[$s$s2 + 714] + 1 | 0;
-      _send_all_trees($s, $add121, $add124, $max_blindex_0 + 1 | 0);
-      var $arraydecay = $s + 148 | 0;
-      var $arraydecay126 = $s + 2440 | 0;
+      var $max_code = CHECK_OVERFLOW($s + 2844, 32, 0);
+      var $21 = HEAP32[$max_code >> 2];
+      var $add121 = CHECK_OVERFLOW($21 + 1, 32, 0);
+      var $max_code123 = CHECK_OVERFLOW($s + 2856, 32, 0);
+      var $22 = HEAP32[$max_code123 >> 2];
+      var $add124 = CHECK_OVERFLOW($22 + 1, 32, 0);
+      var $add125 = CHECK_OVERFLOW($max_blindex_0 + 1, 32, 0);
+      _send_all_trees($s, $add121, $add124, $add125);
+      var $arraydecay = CHECK_OVERFLOW($s + 148, 32, 0);
+      var $arraydecay126 = CHECK_OVERFLOW($s + 2440, 32, 0);
       _compress_block($s, $arraydecay, $arraydecay126);
     }
   } else {
@@ -7065,119 +8210,161 @@ function _compress_block($s, $ltree, $dtree) {
   var $pending$s2;
   var $bi_buf$s1;
   var $bi_valid$s2;
-  var $ltree$s1 = $ltree >> 1;
-  var $last_lit = $s + 5792 | 0;
+  var $last_lit = CHECK_OVERFLOW($s + 5792, 32, 0);
   var $cmp = (HEAP32[$last_lit >> 2] | 0) == 0;
   $entry_if_end320_crit_edge$$do_body_preheader$34 : do {
     if ($cmp) {
-      var $62 = HEAP32[$s + 5820 >> 2];
-      var $61 = HEAP16[$s + 5816 >> 1];
+      var $bi_valid326_phi_trans_insert = CHECK_OVERFLOW($s + 5820, 32, 0);
+      var $_pre = HEAP32[$bi_valid326_phi_trans_insert >> 2];
+      var $bi_buf340_phi_trans_insert = CHECK_OVERFLOW($s + 5816, 32, 0);
+      var $62 = $_pre;
+      var $61 = HEAP16[$bi_buf340_phi_trans_insert >> 1];
     } else {
-      var $d_buf = $s + 5796 | 0;
-      var $l_buf = $s + 5784 | 0;
-      var $bi_valid$s2 = ($s + 5820 | 0) >> 2;
-      var $bi_buf$s1 = ($s + 5816 | 0) >> 1;
-      var $pending$s2 = ($s + 20 | 0) >> 2;
-      var $pending_buf$s2 = ($s + 8 | 0) >> 2;
+      var $d_buf = CHECK_OVERFLOW($s + 5796, 32, 0);
+      var $l_buf = CHECK_OVERFLOW($s + 5784, 32, 0);
+      var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0), $bi_valid$s2 = $bi_valid >> 2;
+      var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf$s1 = $bi_buf >> 1;
+      var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
+      var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0), $pending_buf$s2 = $pending_buf >> 2;
       var $lx_0 = 0;
       while (1) {
         var $lx_0;
-        var $2 = HEAPU16[HEAP32[$d_buf >> 2] + ($lx_0 << 1) >> 1];
+        var $1 = HEAP32[$d_buf >> 2];
+        var $arrayidx = CHECK_OVERFLOW(($lx_0 << 1) + $1, 32, 0);
+        var $2 = HEAPU16[$arrayidx >> 1];
         var $conv = $2 & 65535;
-        var $inc = $lx_0 + 1 | 0;
-        var $conv2 = HEAPU8[HEAP32[$l_buf >> 2] + $lx_0 | 0] & 255;
+        var $inc = CHECK_OVERFLOW($lx_0 + 1, 32, 0);
+        var $3 = HEAP32[$l_buf >> 2];
+        var $arrayidx1 = CHECK_OVERFLOW($3 + $lx_0, 32, 0);
+        var $conv2 = HEAPU8[$arrayidx1] & 255;
         var $cmp3 = $2 << 16 >> 16 == 0;
         do {
           if ($cmp3) {
-            var $conv8 = HEAPU16[(($conv2 << 2) + 2 >> 1) + $ltree$s1] & 65535;
+            var $len7 = CHECK_OVERFLOW(($conv2 << 2) + $ltree + 2, 32, 0);
+            var $conv8 = HEAPU16[$len7 >> 1] & 65535;
             var $6 = HEAPU32[$bi_valid$s2];
-            var $cmp9 = ($6 | 0) > (16 - $conv8 | 0);
-            var $conv16 = HEAPU16[($conv2 << 2 >> 1) + $ltree$s1] & 65535;
+            var $sub = CHECK_OVERFLOW(16 - $conv8, 32, 0);
+            var $cmp9 = ($6 | 0) > ($sub | 0);
+            var $code13 = CHECK_OVERFLOW(($conv2 << 2) + $ltree, 32, 0);
+            var $conv16 = HEAPU16[$code13 >> 1] & 65535;
             var $or = HEAPU16[$bi_buf$s1] & 65535 | $conv16 << $6;
             var $conv19 = $or & 65535;
             HEAP16[$bi_buf$s1] = $conv19;
             if ($cmp9) {
               var $conv22 = $or & 255;
               var $9 = HEAP32[$pending$s2];
-              var $inc23 = $9 + 1 | 0;
+              var $inc23 = CHECK_OVERFLOW($9 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc23;
-              HEAP8[HEAP32[$pending_buf$s2] + $9 | 0] = $conv22;
+              var $10 = HEAP32[$pending_buf$s2];
+              var $arrayidx24 = CHECK_OVERFLOW($10 + $9, 32, 0);
+              HEAP8[$arrayidx24] = $conv22;
               var $conv27 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
               var $12 = HEAPU32[$pending$s2];
-              HEAP32[$pending$s2] = $12 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf$s2] + $12 | 0] = $conv27;
+              var $inc29 = CHECK_OVERFLOW($12 + 1, 32, 0);
+              HEAP32[$pending$s2] = $inc29;
+              var $13 = HEAP32[$pending_buf$s2];
+              var $arrayidx31 = CHECK_OVERFLOW($13 + $12, 32, 0);
+              HEAP8[$arrayidx31] = $conv27;
               var $14 = HEAPU32[$bi_valid$s2];
-              var $conv37 = $conv16 >>> ((16 - $14 | 0) >>> 0) & 65535;
+              var $sub35 = CHECK_OVERFLOW(16 - $14, 32, 0);
+              var $conv37 = $conv16 >>> ($sub35 >>> 0) & 65535;
               HEAP16[$bi_buf$s1] = $conv37;
-              var $add = $conv8 - 16 + $14 | 0;
+              var $sub39 = CHECK_OVERFLOW($conv8 - 16, 32, 0);
+              var $add = CHECK_OVERFLOW($sub39 + $14, 32, 0);
               HEAP32[$bi_valid$s2] = $add;
               var $59 = $add;
               var $58 = $conv37;
             } else {
-              var $add52 = $6 + $conv8 | 0;
+              var $add52 = CHECK_OVERFLOW($6 + $conv8, 32, 0);
               HEAP32[$bi_valid$s2] = $add52;
               var $59 = $add52;
               var $58 = $conv19;
             }
           } else {
-            var $arrayidx54 = STRING_TABLE.__length_code + $conv2 | 0;
+            var $arrayidx54 = CHECK_OVERFLOW(STRING_TABLE.__length_code + $conv2, 32, 0);
             var $conv55 = HEAPU8[$arrayidx54] & 255;
-            var $add58 = ($conv55 | 256) + 1 | 0;
-            var $conv62 = HEAPU16[(($add58 << 2) + 2 >> 1) + $ltree$s1] & 65535;
+            var $add572 = $conv55 | 256;
+            var $add58 = CHECK_OVERFLOW($add572 + 1, 32, 0);
+            var $len61 = CHECK_OVERFLOW(($add58 << 2) + $ltree + 2, 32, 0);
+            var $conv62 = HEAPU16[$len61 >> 1] & 65535;
             var $17 = HEAPU32[$bi_valid$s2];
-            var $cmp65 = ($17 | 0) > (16 - $conv62 | 0);
-            var $conv76 = HEAPU16[($add58 << 2 >> 1) + $ltree$s1] & 65535;
+            var $sub64 = CHECK_OVERFLOW(16 - $conv62, 32, 0);
+            var $cmp65 = ($17 | 0) > ($sub64 | 0);
+            var $code73 = CHECK_OVERFLOW(($add58 << 2) + $ltree, 32, 0);
+            var $conv76 = HEAPU16[$code73 >> 1] & 65535;
             var $or81 = HEAPU16[$bi_buf$s1] & 65535 | $conv76 << $17;
             var $conv82 = $or81 & 65535;
             HEAP16[$bi_buf$s1] = $conv82;
             if ($cmp65) {
               var $conv86 = $or81 & 255;
               var $20 = HEAP32[$pending$s2];
-              var $inc88 = $20 + 1 | 0;
+              var $inc88 = CHECK_OVERFLOW($20 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc88;
-              HEAP8[HEAP32[$pending_buf$s2] + $20 | 0] = $conv86;
+              var $21 = HEAP32[$pending_buf$s2];
+              var $arrayidx90 = CHECK_OVERFLOW($21 + $20, 32, 0);
+              HEAP8[$arrayidx90] = $conv86;
               var $conv94 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
               var $23 = HEAPU32[$pending$s2];
-              HEAP32[$pending$s2] = $23 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf$s2] + $23 | 0] = $conv94;
+              var $inc96 = CHECK_OVERFLOW($23 + 1, 32, 0);
+              HEAP32[$pending$s2] = $inc96;
+              var $24 = HEAP32[$pending_buf$s2];
+              var $arrayidx98 = CHECK_OVERFLOW($24 + $23, 32, 0);
+              HEAP8[$arrayidx98] = $conv94;
               var $25 = HEAPU32[$bi_valid$s2];
-              var $conv104 = $conv76 >>> ((16 - $25 | 0) >>> 0) & 65535;
+              var $sub102 = CHECK_OVERFLOW(16 - $25, 32, 0);
+              var $conv104 = $conv76 >>> ($sub102 >>> 0) & 65535;
               HEAP16[$bi_buf$s1] = $conv104;
-              var $27 = $conv62 - 16 + $25 | 0;
+              var $sub106 = CHECK_OVERFLOW($conv62 - 16, 32, 0);
+              var $add108 = CHECK_OVERFLOW($sub106 + $25, 32, 0);
+              var $27 = $add108;
               var $26 = $conv104;
             } else {
-              var $27 = $17 + $conv62 | 0;
+              var $add123 = CHECK_OVERFLOW($17 + $conv62, 32, 0);
+              var $27 = $add123;
               var $26 = $conv82;
             }
             var $26;
             var $27;
             HEAP32[$bi_valid$s2] = $27;
-            var $28 = HEAPU32[_extra_lbits + ($conv55 << 2) >> 2];
-            if (($conv55 - 8 | 0) >>> 0 < 20) {
-              var $cmp134 = ($27 | 0) > (16 - $28 | 0);
-              var $conv139 = $conv2 - HEAP32[_base_length + ($conv55 << 2) >> 2] & 65535;
+            var $arrayidx125 = CHECK_OVERFLOW(($conv55 << 2) + _extra_lbits, 32, 0);
+            var $28 = HEAPU32[$arrayidx125 >> 2];
+            var $29 = CHECK_OVERFLOW($conv55 - 8, 32, 0);
+            if ($29 >>> 0 < 20) {
+              var $arrayidx129 = CHECK_OVERFLOW(($conv55 << 2) + _base_length, 32, 0);
+              var $30 = HEAP32[$arrayidx129 >> 2];
+              var $sub130 = CHECK_OVERFLOW($conv2 - $30, 32, 0);
+              var $sub133 = CHECK_OVERFLOW(16 - $28, 32, 0);
+              var $cmp134 = ($27 | 0) > ($sub133 | 0);
+              var $conv139 = $sub130 & 65535;
               var $or144 = $conv139 << $27 | $26 & 65535;
               var $conv145 = $or144 & 65535;
               HEAP16[$bi_buf$s1] = $conv145;
               if ($cmp134) {
                 var $conv149 = $or144 & 255;
                 var $31 = HEAP32[$pending$s2];
-                var $inc151 = $31 + 1 | 0;
+                var $inc151 = CHECK_OVERFLOW($31 + 1, 32, 0);
                 HEAP32[$pending$s2] = $inc151;
-                HEAP8[HEAP32[$pending_buf$s2] + $31 | 0] = $conv149;
+                var $32 = HEAP32[$pending_buf$s2];
+                var $arrayidx153 = CHECK_OVERFLOW($32 + $31, 32, 0);
+                HEAP8[$arrayidx153] = $conv149;
                 var $conv157 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
                 var $34 = HEAPU32[$pending$s2];
-                HEAP32[$pending$s2] = $34 + 1 | 0;
-                HEAP8[HEAP32[$pending_buf$s2] + $34 | 0] = $conv157;
+                var $inc159 = CHECK_OVERFLOW($34 + 1, 32, 0);
+                HEAP32[$pending$s2] = $inc159;
+                var $35 = HEAP32[$pending_buf$s2];
+                var $arrayidx161 = CHECK_OVERFLOW($35 + $34, 32, 0);
+                HEAP8[$arrayidx161] = $conv157;
                 var $36 = HEAPU32[$bi_valid$s2];
-                var $conv167 = $conv139 >>> ((16 - $36 | 0) >>> 0) & 65535;
+                var $sub165 = CHECK_OVERFLOW(16 - $36, 32, 0);
+                var $conv167 = $conv139 >>> ($sub165 >>> 0) & 65535;
                 HEAP16[$bi_buf$s1] = $conv167;
-                var $add171 = $28 - 16 + $36 | 0;
+                var $sub169 = CHECK_OVERFLOW($28 - 16, 32, 0);
+                var $add171 = CHECK_OVERFLOW($sub169 + $36, 32, 0);
                 HEAP32[$bi_valid$s2] = $add171;
                 var $38 = $add171;
                 var $37 = $conv167;
               } else {
-                var $add182 = $27 + $28 | 0;
+                var $add182 = CHECK_OVERFLOW($27 + $28, 32, 0);
                 HEAP32[$bi_valid$s2] = $add182;
                 var $38 = $add182;
                 var $37 = $conv145;
@@ -7188,73 +8375,100 @@ function _compress_block($s, $ltree, $dtree) {
             }
             var $37;
             var $38;
-            var $dec = $conv - 1 | 0;
+            var $dec = CHECK_OVERFLOW($conv - 1, 32, 0);
             if ($dec >>> 0 < 256) {
               var $dec_pn = $dec;
             } else {
-              var $dec_pn = ($dec >>> 7) + 256 | 0;
+              var $shr189 = $dec >>> 7;
+              var $add190 = CHECK_OVERFLOW($shr189 + 256, 32, 0);
+              var $dec_pn = $add190;
             }
             var $dec_pn;
-            var $cond_in_in = STRING_TABLE.__dist_code + $dec_pn | 0;
+            var $cond_in_in = CHECK_OVERFLOW(STRING_TABLE.__dist_code + $dec_pn, 32, 0);
             var $cond = HEAPU8[$cond_in_in] & 255;
-            var $conv197 = HEAPU16[$dtree + ($cond << 2) + 2 >> 1] & 65535;
-            var $cmp200 = ($38 | 0) > (16 - $conv197 | 0);
-            var $conv209 = HEAPU16[$dtree + ($cond << 2) >> 1] & 65535;
+            var $len196 = CHECK_OVERFLOW(($cond << 2) + $dtree + 2, 32, 0);
+            var $conv197 = HEAPU16[$len196 >> 1] & 65535;
+            var $sub199 = CHECK_OVERFLOW(16 - $conv197, 32, 0);
+            var $cmp200 = ($38 | 0) > ($sub199 | 0);
+            var $code206 = CHECK_OVERFLOW(($cond << 2) + $dtree, 32, 0);
+            var $conv209 = HEAPU16[$code206 >> 1] & 65535;
             var $or214 = $37 & 65535 | $conv209 << $38;
             var $conv215 = $or214 & 65535;
             HEAP16[$bi_buf$s1] = $conv215;
             if ($cmp200) {
               var $conv219 = $or214 & 255;
               var $41 = HEAP32[$pending$s2];
-              var $inc221 = $41 + 1 | 0;
+              var $inc221 = CHECK_OVERFLOW($41 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc221;
-              HEAP8[HEAP32[$pending_buf$s2] + $41 | 0] = $conv219;
+              var $42 = HEAP32[$pending_buf$s2];
+              var $arrayidx223 = CHECK_OVERFLOW($42 + $41, 32, 0);
+              HEAP8[$arrayidx223] = $conv219;
               var $conv227 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
               var $44 = HEAPU32[$pending$s2];
-              HEAP32[$pending$s2] = $44 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf$s2] + $44 | 0] = $conv227;
+              var $inc229 = CHECK_OVERFLOW($44 + 1, 32, 0);
+              HEAP32[$pending$s2] = $inc229;
+              var $45 = HEAP32[$pending_buf$s2];
+              var $arrayidx231 = CHECK_OVERFLOW($45 + $44, 32, 0);
+              HEAP8[$arrayidx231] = $conv227;
               var $46 = HEAPU32[$bi_valid$s2];
-              var $conv237 = $conv209 >>> ((16 - $46 | 0) >>> 0) & 65535;
+              var $sub235 = CHECK_OVERFLOW(16 - $46, 32, 0);
+              var $conv237 = $conv209 >>> ($sub235 >>> 0) & 65535;
               HEAP16[$bi_buf$s1] = $conv237;
-              var $48 = $conv197 - 16 + $46 | 0;
+              var $sub239 = CHECK_OVERFLOW($conv197 - 16, 32, 0);
+              var $add241 = CHECK_OVERFLOW($sub239 + $46, 32, 0);
+              var $48 = $add241;
               var $47 = $conv237;
             } else {
-              var $48 = $38 + $conv197 | 0;
+              var $add254 = CHECK_OVERFLOW($38 + $conv197, 32, 0);
+              var $48 = $add254;
               var $47 = $conv215;
             }
             var $47;
             var $48;
             HEAP32[$bi_valid$s2] = $48;
-            var $49 = HEAPU32[_extra_dbits + ($cond << 2) >> 2];
-            if (($cond - 4 | 0) >>> 0 >= 26) {
+            var $arrayidx256 = CHECK_OVERFLOW(($cond << 2) + _extra_dbits, 32, 0);
+            var $49 = HEAPU32[$arrayidx256 >> 2];
+            var $50 = CHECK_OVERFLOW($cond - 4, 32, 0);
+            if ($50 >>> 0 >= 26) {
               var $59 = $48;
               var $58 = $47;
               break;
             }
-            var $cmp265 = ($48 | 0) > (16 - $49 | 0);
-            var $conv270 = $dec - HEAP32[_base_dist + ($cond << 2) >> 2] & 65535;
+            var $arrayidx260 = CHECK_OVERFLOW(($cond << 2) + _base_dist, 32, 0);
+            var $51 = HEAP32[$arrayidx260 >> 2];
+            var $sub261 = CHECK_OVERFLOW($dec - $51, 32, 0);
+            var $sub264 = CHECK_OVERFLOW(16 - $49, 32, 0);
+            var $cmp265 = ($48 | 0) > ($sub264 | 0);
+            var $conv270 = $sub261 & 65535;
             var $or275 = $conv270 << $48 | $47 & 65535;
             var $conv276 = $or275 & 65535;
             HEAP16[$bi_buf$s1] = $conv276;
             if ($cmp265) {
               var $conv280 = $or275 & 255;
               var $52 = HEAP32[$pending$s2];
-              var $inc282 = $52 + 1 | 0;
+              var $inc282 = CHECK_OVERFLOW($52 + 1, 32, 0);
               HEAP32[$pending$s2] = $inc282;
-              HEAP8[HEAP32[$pending_buf$s2] + $52 | 0] = $conv280;
+              var $53 = HEAP32[$pending_buf$s2];
+              var $arrayidx284 = CHECK_OVERFLOW($53 + $52, 32, 0);
+              HEAP8[$arrayidx284] = $conv280;
               var $conv288 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
               var $55 = HEAPU32[$pending$s2];
-              HEAP32[$pending$s2] = $55 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf$s2] + $55 | 0] = $conv288;
+              var $inc290 = CHECK_OVERFLOW($55 + 1, 32, 0);
+              HEAP32[$pending$s2] = $inc290;
+              var $56 = HEAP32[$pending_buf$s2];
+              var $arrayidx292 = CHECK_OVERFLOW($56 + $55, 32, 0);
+              HEAP8[$arrayidx292] = $conv288;
               var $57 = HEAPU32[$bi_valid$s2];
-              var $conv298 = $conv270 >>> ((16 - $57 | 0) >>> 0) & 65535;
+              var $sub296 = CHECK_OVERFLOW(16 - $57, 32, 0);
+              var $conv298 = $conv270 >>> ($sub296 >>> 0) & 65535;
               HEAP16[$bi_buf$s1] = $conv298;
-              var $add302 = $49 - 16 + $57 | 0;
+              var $sub300 = CHECK_OVERFLOW($49 - 16, 32, 0);
+              var $add302 = CHECK_OVERFLOW($sub300 + $57, 32, 0);
               HEAP32[$bi_valid$s2] = $add302;
               var $59 = $add302;
               var $58 = $conv298;
             } else {
-              var $add313 = $48 + $49 | 0;
+              var $add313 = CHECK_OVERFLOW($48 + $49, 32, 0);
               HEAP32[$bi_valid$s2] = $add313;
               var $59 = $add313;
               var $58 = $conv276;
@@ -7274,35 +8488,49 @@ function _compress_block($s, $ltree, $dtree) {
   } while (0);
   var $61;
   var $62;
-  var $len324 = $ltree + 1026 | 0;
+  var $len324 = CHECK_OVERFLOW($ltree + 1026, 32, 0);
   var $conv325 = HEAPU16[$len324 >> 1] & 65535;
-  var $bi_valid326 = $s + 5820 | 0;
-  var $cmp328 = ($62 | 0) > (16 - $conv325 | 0);
-  var $conv337 = HEAPU16[$ltree$s1 + 512] & 65535;
-  var $bi_buf340$s1 = ($s + 5816 | 0) >> 1;
-  var $or342 = $61 & 65535 | $conv337 << $62;
+  var $bi_valid326 = CHECK_OVERFLOW($s + 5820, 32, 0);
+  var $sub327 = CHECK_OVERFLOW(16 - $conv325, 32, 0);
+  var $cmp328 = ($62 | 0) > ($sub327 | 0);
+  var $code334 = CHECK_OVERFLOW($ltree + 1024, 32, 0);
+  var $conv337 = HEAPU16[$code334 >> 1] & 65535;
+  var $shl339 = $conv337 << $62;
+  var $bi_buf340 = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf340$s1 = $bi_buf340 >> 1;
+  var $or342 = $61 & 65535 | $shl339;
   HEAP16[$bi_buf340$s1] = $or342 & 65535;
   if ($cmp328) {
     var $conv347 = $or342 & 255;
-    var $pending348$s2 = ($s + 20 | 0) >> 2;
+    var $pending348 = CHECK_OVERFLOW($s + 20, 32, 0), $pending348$s2 = $pending348 >> 2;
     var $65 = HEAP32[$pending348$s2];
-    var $inc349 = $65 + 1 | 0;
+    var $inc349 = CHECK_OVERFLOW($65 + 1, 32, 0);
     HEAP32[$pending348$s2] = $inc349;
-    var $pending_buf350 = $s + 8 | 0;
-    HEAP8[HEAP32[$pending_buf350 >> 2] + $65 | 0] = $conv347;
+    var $pending_buf350 = CHECK_OVERFLOW($s + 8, 32, 0);
+    var $66 = HEAP32[$pending_buf350 >> 2];
+    var $arrayidx351 = CHECK_OVERFLOW($66 + $65, 32, 0);
+    HEAP8[$arrayidx351] = $conv347;
     var $conv355 = (HEAPU16[$bi_buf340$s1] & 65535) >>> 8 & 255;
     var $68 = HEAPU32[$pending348$s2];
-    HEAP32[$pending348$s2] = $68 + 1 | 0;
-    HEAP8[HEAP32[$pending_buf350 >> 2] + $68 | 0] = $conv355;
+    var $inc357 = CHECK_OVERFLOW($68 + 1, 32, 0);
+    HEAP32[$pending348$s2] = $inc357;
+    var $69 = HEAP32[$pending_buf350 >> 2];
+    var $arrayidx359 = CHECK_OVERFLOW($69 + $68, 32, 0);
+    HEAP8[$arrayidx359] = $conv355;
     var $70 = HEAPU32[$bi_valid326 >> 2];
-    HEAP16[$bi_buf340$s1] = $conv337 >>> ((16 - $70 | 0) >>> 0) & 65535;
-    var $storemerge = $conv325 - 16 + $70 | 0;
+    var $sub363 = CHECK_OVERFLOW(16 - $70, 32, 0);
+    HEAP16[$bi_buf340$s1] = $conv337 >>> ($sub363 >>> 0) & 65535;
+    var $sub367 = CHECK_OVERFLOW($conv325 - 16, 32, 0);
+    var $add369 = CHECK_OVERFLOW($sub367 + $70, 32, 0);
+    var $storemerge = $add369;
   } else {
-    var $storemerge = $62 + $conv325 | 0;
+    var $add382 = CHECK_OVERFLOW($62 + $conv325, 32, 0);
+    var $storemerge = $add382;
   }
   var $storemerge;
   HEAP32[$bi_valid326 >> 2] = $storemerge;
-  HEAP32[$s + 5812 >> 2] = HEAPU16[$len324 >> 1] & 65535;
+  var $conv387 = HEAPU16[$len324 >> 1] & 65535;
+  var $last_eob_len = CHECK_OVERFLOW($s + 5812, 32, 0);
+  HEAP32[$last_eob_len >> 2] = $conv387;
   return;
   return;
 }
@@ -7311,36 +8539,45 @@ _compress_block["X"] = 1;
 
 function _bi_windup($s) {
   var $pending$s2;
-  var $bi_valid = $s + 5820 | 0;
+  var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0);
   var $0 = HEAPU32[$bi_valid >> 2];
   var $cmp = ($0 | 0) > 8;
   do {
     if ($cmp) {
-      var $bi_buf = $s + 5816 | 0;
+      var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0);
       var $conv1 = HEAP16[$bi_buf >> 1] & 255;
-      var $pending$s2 = ($s + 20 | 0) >> 2;
+      var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
       var $2 = HEAP32[$pending$s2];
-      var $inc = $2 + 1 | 0;
+      var $inc = CHECK_OVERFLOW($2 + 1, 32, 0);
       HEAP32[$pending$s2] = $inc;
-      var $pending_buf = $s + 8 | 0;
-      HEAP8[HEAP32[$pending_buf >> 2] + $2 | 0] = $conv1;
+      var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0);
+      var $3 = HEAP32[$pending_buf >> 2];
+      var $arrayidx = CHECK_OVERFLOW($3 + $2, 32, 0);
+      HEAP8[$arrayidx] = $conv1;
       var $conv4 = (HEAPU16[$bi_buf >> 1] & 65535) >>> 8 & 255;
       var $5 = HEAPU32[$pending$s2];
-      HEAP32[$pending$s2] = $5 + 1 | 0;
-      HEAP8[HEAP32[$pending_buf >> 2] + $5 | 0] = $conv4;
+      var $inc6 = CHECK_OVERFLOW($5 + 1, 32, 0);
+      HEAP32[$pending$s2] = $inc6;
+      var $6 = HEAP32[$pending_buf >> 2];
+      var $arrayidx8 = CHECK_OVERFLOW($6 + $5, 32, 0);
+      HEAP8[$arrayidx8] = $conv4;
       var $bi_buf20_pre_phi = $bi_buf;
     } else {
-      var $bi_buf13 = $s + 5816 | 0;
-      if (($0 | 0) <= 0) {
+      var $cmp10 = ($0 | 0) > 0;
+      var $bi_buf13 = CHECK_OVERFLOW($s + 5816, 32, 0);
+      if (!$cmp10) {
         var $bi_buf20_pre_phi = $bi_buf13;
         break;
       }
       var $conv14 = HEAP16[$bi_buf13 >> 1] & 255;
-      var $pending15 = $s + 20 | 0;
+      var $pending15 = CHECK_OVERFLOW($s + 20, 32, 0);
       var $8 = HEAP32[$pending15 >> 2];
-      var $inc16 = $8 + 1 | 0;
+      var $inc16 = CHECK_OVERFLOW($8 + 1, 32, 0);
       HEAP32[$pending15 >> 2] = $inc16;
-      HEAP8[HEAP32[$s + 8 >> 2] + $8 | 0] = $conv14;
+      var $pending_buf17 = CHECK_OVERFLOW($s + 8, 32, 0);
+      var $9 = HEAP32[$pending_buf17 >> 2];
+      var $arrayidx18 = CHECK_OVERFLOW($9 + $8, 32, 0);
+      HEAP8[$arrayidx18] = $conv14;
       var $bi_buf20_pre_phi = $bi_buf13;
     }
   } while (0);
@@ -7356,17 +8593,18 @@ function _build_tree($s, $desc) {
   var $opt_len$s2;
   var $heap_max$s2;
   var $heap_len$s2;
-  var $0$s1;
   var __label__;
-  var $dyn_tree = $desc | 0;
-  var $0 = HEAPU32[$dyn_tree >> 2], $0$s1 = $0 >> 1;
-  var $stat_desc = $desc + 8 | 0;
+  var $dyn_tree = CHECK_OVERFLOW($desc, 32, 0);
+  var $0 = HEAPU32[$dyn_tree >> 2];
+  var $stat_desc = CHECK_OVERFLOW($desc + 8, 32, 0);
   var $1 = HEAP32[$stat_desc >> 2];
-  var $2 = HEAP32[$1 >> 2];
-  var $3 = HEAPU32[$1 + 12 >> 2];
-  var $heap_len$s2 = ($s + 5200 | 0) >> 2;
+  var $static_tree = CHECK_OVERFLOW($1, 32, 0);
+  var $2 = HEAP32[$static_tree >> 2];
+  var $elems2 = CHECK_OVERFLOW($1 + 12, 32, 0);
+  var $3 = HEAPU32[$elems2 >> 2];
+  var $heap_len = CHECK_OVERFLOW($s + 5200, 32, 0), $heap_len$s2 = $heap_len >> 2;
   HEAP32[$heap_len$s2] = 0;
-  var $heap_max$s2 = ($s + 5204 | 0) >> 2;
+  var $heap_max = CHECK_OVERFLOW($s + 5204, 32, 0), $heap_max$s2 = $heap_max >> 2;
   HEAP32[$heap_max$s2] = 573;
   var $cmp7 = ($3 | 0) > 0;
   do {
@@ -7376,19 +8614,23 @@ function _build_tree($s, $desc) {
       while (1) {
         var $max_code_09;
         var $n_08;
-        if (HEAP16[($n_08 << 2 >> 1) + $0$s1] << 16 >> 16 == 0) {
-          HEAP16[(($n_08 << 2) + 2 >> 1) + $0$s1] = 0;
+        var $freq = CHECK_OVERFLOW(($n_08 << 2) + $0, 32, 0);
+        if (HEAP16[$freq >> 1] << 16 >> 16 == 0) {
+          var $len = CHECK_OVERFLOW(($n_08 << 2) + $0 + 2, 32, 0);
+          HEAP16[$len >> 1] = 0;
           var $max_code_1 = $max_code_09;
         } else {
-          var $inc = HEAP32[$heap_len$s2] + 1 | 0;
+          var $9 = HEAP32[$heap_len$s2];
+          var $inc = CHECK_OVERFLOW($9 + 1, 32, 0);
           HEAP32[$heap_len$s2] = $inc;
-          var $arrayidx6 = ($inc << 2) + $s + 2908 | 0;
+          var $arrayidx6 = CHECK_OVERFLOW(($inc << 2) + $s + 2908, 32, 0);
           HEAP32[$arrayidx6 >> 2] = $n_08;
-          HEAP8[$s + ($n_08 + 5208) | 0] = 0;
+          var $arrayidx7 = CHECK_OVERFLOW($s + ($n_08 + 5208), 32, 0);
+          HEAP8[$arrayidx7] = 0;
           var $max_code_1 = $n_08;
         }
         var $max_code_1;
-        var $inc9 = $n_08 + 1 | 0;
+        var $inc9 = CHECK_OVERFLOW($n_08 + 1, 32, 0);
         if (($inc9 | 0) == ($3 | 0)) {
           break;
         }
@@ -7415,24 +8657,29 @@ function _build_tree($s, $desc) {
     if (__label__ == 2) {
       var $max_code_0_lcssa14;
       var $4;
-      var $opt_len$s2 = ($s + 5800 | 0) >> 2;
-      var $static_len = $s + 5804 | 0;
-      if (($2 | 0) == 0) {
+      var $opt_len = CHECK_OVERFLOW($s + 5800, 32, 0), $opt_len$s2 = $opt_len >> 2;
+      var $tobool = ($2 | 0) == 0;
+      var $static_len = CHECK_OVERFLOW($s + 5804, 32, 0);
+      if ($tobool) {
         var $max_code_26_us = $max_code_0_lcssa14;
         var $5 = $4;
         while (1) {
           var $5;
           var $max_code_26_us;
           var $cmp13_us = ($max_code_26_us | 0) < 2;
-          var $inc15_us = $max_code_26_us + 1 | 0;
+          var $inc15_us = CHECK_OVERFLOW($max_code_26_us + 1, 32, 0);
           var $max_code_3_us = $cmp13_us ? $inc15_us : $max_code_26_us;
           var $cond_us = $cmp13_us ? $inc15_us : 0;
-          var $inc17_us = $5 + 1 | 0;
+          var $inc17_us = CHECK_OVERFLOW($5 + 1, 32, 0);
           HEAP32[$heap_len$s2] = $inc17_us;
-          HEAP32[$s + ($inc17_us << 2) + 2908 >> 2] = $cond_us;
-          HEAP16[($cond_us << 2 >> 1) + $0$s1] = 1;
-          HEAP8[$s + ($cond_us + 5208) | 0] = 0;
-          var $dec_us = HEAP32[$opt_len$s2] - 1 | 0;
+          var $arrayidx19_us = CHECK_OVERFLOW(($inc17_us << 2) + $s + 2908, 32, 0);
+          HEAP32[$arrayidx19_us >> 2] = $cond_us;
+          var $freq22_us = CHECK_OVERFLOW(($cond_us << 2) + $0, 32, 0);
+          HEAP16[$freq22_us >> 1] = 1;
+          var $arrayidx24_us = CHECK_OVERFLOW($s + ($cond_us + 5208), 32, 0);
+          HEAP8[$arrayidx24_us] = 0;
+          var $6 = HEAP32[$opt_len$s2];
+          var $dec_us = CHECK_OVERFLOW($6 - 1, 32, 0);
           HEAP32[$opt_len$s2] = $dec_us;
           var $7 = HEAP32[$heap_len$s2];
           if (($7 | 0) >= 2) {
@@ -7449,17 +8696,24 @@ function _build_tree($s, $desc) {
           var $10;
           var $max_code_26;
           var $cmp13 = ($max_code_26 | 0) < 2;
-          var $inc15 = $max_code_26 + 1 | 0;
+          var $inc15 = CHECK_OVERFLOW($max_code_26 + 1, 32, 0);
           var $max_code_3 = $cmp13 ? $inc15 : $max_code_26;
           var $cond = $cmp13 ? $inc15 : 0;
-          var $inc17 = $10 + 1 | 0;
+          var $inc17 = CHECK_OVERFLOW($10 + 1, 32, 0);
           HEAP32[$heap_len$s2] = $inc17;
-          HEAP32[$s + ($inc17 << 2) + 2908 >> 2] = $cond;
-          HEAP16[($cond << 2 >> 1) + $0$s1] = 1;
-          HEAP8[$s + ($cond + 5208) | 0] = 0;
-          var $dec = HEAP32[$opt_len$s2] - 1 | 0;
+          var $arrayidx19 = CHECK_OVERFLOW(($inc17 << 2) + $s + 2908, 32, 0);
+          HEAP32[$arrayidx19 >> 2] = $cond;
+          var $freq22 = CHECK_OVERFLOW(($cond << 2) + $0, 32, 0);
+          HEAP16[$freq22 >> 1] = 1;
+          var $arrayidx24 = CHECK_OVERFLOW($s + ($cond + 5208), 32, 0);
+          HEAP8[$arrayidx24] = 0;
+          var $11 = HEAP32[$opt_len$s2];
+          var $dec = CHECK_OVERFLOW($11 - 1, 32, 0);
           HEAP32[$opt_len$s2] = $dec;
-          var $sub = HEAP32[$static_len >> 2] - (HEAPU16[$2 + ($cond << 2) + 2 >> 1] & 65535) | 0;
+          var $len28 = CHECK_OVERFLOW(($cond << 2) + $2 + 2, 32, 0);
+          var $conv29 = HEAPU16[$len28 >> 1] & 65535;
+          var $13 = HEAP32[$static_len >> 2];
+          var $sub = CHECK_OVERFLOW($13 - $conv29, 32, 0);
           HEAP32[$static_len >> 2] = $sub;
           var $14 = HEAPU32[$heap_len$s2];
           if (($14 | 0) >= 2) {
@@ -7473,7 +8727,7 @@ function _build_tree($s, $desc) {
     }
   } while (0);
   var $max_code_2_lcssa;
-  var $max_code31 = $desc + 4 | 0;
+  var $max_code31 = CHECK_OVERFLOW($desc + 4, 32, 0);
   HEAP32[$max_code31 >> 2] = $max_code_2_lcssa;
   var $15 = HEAP32[$heap_len$s2];
   if (($15 | 0) > 1) {
@@ -7481,7 +8735,7 @@ function _build_tree($s, $desc) {
     while (1) {
       var $n_14;
       _pqdownheap($s, $0, $n_14);
-      var $dec38 = $n_14 - 1 | 0;
+      var $dec38 = CHECK_OVERFLOW($n_14 - 1, 32, 0);
       if (($dec38 | 0) <= 0) {
         break;
       }
@@ -7492,36 +8746,51 @@ function _build_tree($s, $desc) {
     var $_pre11 = $15;
   }
   var $_pre11;
-  var $arrayidx41$s2 = ($s + 2912 | 0) >> 2;
+  var $arrayidx41 = CHECK_OVERFLOW($s + 2912, 32, 0), $arrayidx41$s2 = $arrayidx41 >> 2;
   var $node_0 = $3;
   var $16 = $_pre11;
   while (1) {
     var $16;
     var $node_0;
     var $17 = HEAPU32[$arrayidx41$s2];
-    HEAP32[$heap_len$s2] = $16 - 1 | 0;
-    var $18 = HEAP32[$s + ($16 << 2) + 2908 >> 2];
+    var $dec43 = CHECK_OVERFLOW($16 - 1, 32, 0);
+    HEAP32[$heap_len$s2] = $dec43;
+    var $arrayidx45 = CHECK_OVERFLOW(($16 << 2) + $s + 2908, 32, 0);
+    var $18 = HEAP32[$arrayidx45 >> 2];
     HEAP32[$arrayidx41$s2] = $18;
     _pqdownheap($s, $0, 1);
     var $19 = HEAPU32[$arrayidx41$s2];
-    var $dec51 = HEAP32[$heap_max$s2] - 1 | 0;
+    var $20 = HEAP32[$heap_max$s2];
+    var $dec51 = CHECK_OVERFLOW($20 - 1, 32, 0);
     HEAP32[$heap_max$s2] = $dec51;
-    var $arrayidx53 = ($dec51 << 2) + $s + 2908 | 0;
+    var $arrayidx53 = CHECK_OVERFLOW(($dec51 << 2) + $s + 2908, 32, 0);
     HEAP32[$arrayidx53 >> 2] = $17;
-    var $dec55 = HEAP32[$heap_max$s2] - 1 | 0;
+    var $21 = HEAP32[$heap_max$s2];
+    var $dec55 = CHECK_OVERFLOW($21 - 1, 32, 0);
     HEAP32[$heap_max$s2] = $dec55;
-    var $arrayidx57 = ($dec55 << 2) + $s + 2908 | 0;
+    var $arrayidx57 = CHECK_OVERFLOW(($dec55 << 2) + $s + 2908, 32, 0);
     HEAP32[$arrayidx57 >> 2] = $19;
-    var $add = HEAP16[($19 << 2 >> 1) + $0$s1] + HEAP16[($17 << 2 >> 1) + $0$s1] & 65535;
-    HEAP16[($node_0 << 2 >> 1) + $0$s1] = $add;
-    var $24 = HEAPU8[$s + ($17 + 5208) | 0];
-    var $25 = HEAPU8[$s + ($19 + 5208) | 0];
+    var $freq60 = CHECK_OVERFLOW(($17 << 2) + $0, 32, 0);
+    var $22 = HEAP16[$freq60 >> 1];
+    var $freq64 = CHECK_OVERFLOW(($19 << 2) + $0, 32, 0);
+    var $23 = HEAP16[$freq64 >> 1];
+    var $add = CHECK_OVERFLOW($23 + $22, 16, 0);
+    var $freq69 = CHECK_OVERFLOW(($node_0 << 2) + $0, 32, 0);
+    HEAP16[$freq69 >> 1] = $add;
+    var $arrayidx71 = CHECK_OVERFLOW($s + ($17 + 5208), 32, 0);
+    var $24 = HEAPU8[$arrayidx71];
+    var $arrayidx74 = CHECK_OVERFLOW($s + ($19 + 5208), 32, 0);
+    var $25 = HEAPU8[$arrayidx74];
     var $_ = ($24 & 255) < ($25 & 255) ? $25 : $24;
-    HEAP8[$s + ($node_0 + 5208) | 0] = $_ + 1 & 255;
+    var $add88 = CHECK_OVERFLOW($_ + 1, 8, 0);
+    var $arrayidx91 = CHECK_OVERFLOW($s + ($node_0 + 5208), 32, 0);
+    HEAP8[$arrayidx91] = $add88;
     var $conv92 = $node_0 & 65535;
-    HEAP16[(($19 << 2) + 2 >> 1) + $0$s1] = $conv92;
-    HEAP16[(($17 << 2) + 2 >> 1) + $0$s1] = $conv92;
-    var $inc98 = $node_0 + 1 | 0;
+    var $dad = CHECK_OVERFLOW(($19 << 2) + $0 + 2, 32, 0);
+    HEAP16[$dad >> 1] = $conv92;
+    var $dad97 = CHECK_OVERFLOW(($17 << 2) + $0 + 2, 32, 0);
+    HEAP16[$dad97 >> 1] = $conv92;
+    var $inc98 = CHECK_OVERFLOW($node_0 + 1, 32, 0);
     HEAP32[$arrayidx41$s2] = $node_0;
     _pqdownheap($s, $0, 1);
     var $26 = HEAPU32[$heap_len$s2];
@@ -7532,15 +8801,16 @@ function _build_tree($s, $desc) {
     var $16 = $26;
   }
   var $27 = HEAP32[$arrayidx41$s2];
-  var $dec107 = HEAP32[$heap_max$s2] - 1 | 0;
+  var $28 = HEAP32[$heap_max$s2];
+  var $dec107 = CHECK_OVERFLOW($28 - 1, 32, 0);
   HEAP32[$heap_max$s2] = $dec107;
-  var $arrayidx109 = ($dec107 << 2) + $s + 2908 | 0;
+  var $arrayidx109 = CHECK_OVERFLOW(($dec107 << 2) + $s + 2908, 32, 0);
   HEAP32[$arrayidx109 >> 2] = $27;
   var $desc_idx_val = HEAP32[$dyn_tree >> 2];
   var $desc_idx1_val = HEAP32[$max_code31 >> 2];
   var $desc_idx2_val = HEAP32[$stat_desc >> 2];
   _gen_bitlen($s, $desc_idx_val, $desc_idx1_val, $desc_idx2_val);
-  var $arraydecay = $s + 2876 | 0;
+  var $arraydecay = CHECK_OVERFLOW($s + 2876, 32, 0);
   _gen_codes($0, $max_code_2_lcssa, $arraydecay);
   return;
   return;
@@ -7549,13 +8819,15 @@ function _build_tree($s, $desc) {
 _build_tree["X"] = 1;
 
 function _build_bl_tree($s) {
-  var $arraydecay = $s + 148 | 0;
-  var $0 = HEAP32[$s + 2844 >> 2];
+  var $arraydecay = CHECK_OVERFLOW($s + 148, 32, 0);
+  var $max_code = CHECK_OVERFLOW($s + 2844, 32, 0);
+  var $0 = HEAP32[$max_code >> 2];
   _scan_tree($s, $arraydecay, $0);
-  var $arraydecay1 = $s + 2440 | 0;
-  var $1 = HEAP32[$s + 2856 >> 2];
+  var $arraydecay1 = CHECK_OVERFLOW($s + 2440, 32, 0);
+  var $max_code2 = CHECK_OVERFLOW($s + 2856, 32, 0);
+  var $1 = HEAP32[$max_code2 >> 2];
   _scan_tree($s, $arraydecay1, $1);
-  var $bl_desc = $s + 2864 | 0;
+  var $bl_desc = CHECK_OVERFLOW($s + 2864, 32, 0);
   _build_tree($s, $bl_desc);
   var $max_blindex_0 = 18;
   while (1) {
@@ -7563,14 +8835,20 @@ function _build_bl_tree($s) {
     if (($max_blindex_0 | 0) <= 2) {
       break;
     }
-    var $arrayidx = STRING_TABLE._bl_order + $max_blindex_0 | 0;
-    if (HEAP16[$s + ((HEAPU8[$arrayidx] & 255) << 2) + 2686 >> 1] << 16 >> 16 != 0) {
+    var $arrayidx = CHECK_OVERFLOW(STRING_TABLE._bl_order + $max_blindex_0, 32, 0);
+    var $idxprom = HEAPU8[$arrayidx] & 255;
+    var $len = CHECK_OVERFLOW(($idxprom << 2) + $s + 2686, 32, 0);
+    if (HEAP16[$len >> 1] << 16 >> 16 != 0) {
       break;
     }
-    var $max_blindex_0 = $max_blindex_0 - 1 | 0;
+    var $dec = CHECK_OVERFLOW($max_blindex_0 - 1, 32, 0);
+    var $max_blindex_0 = $dec;
   }
-  var $opt_len = $s + 5800 | 0;
-  var $add9 = $max_blindex_0 * 3 + HEAP32[$opt_len >> 2] + 17 | 0;
+  var $4 = CHECK_OVERFLOW($max_blindex_0 * 3, 32, 0);
+  var $opt_len = CHECK_OVERFLOW($s + 5800, 32, 0);
+  var $5 = HEAP32[$opt_len >> 2];
+  var $add8 = CHECK_OVERFLOW($4 + 17, 32, 0);
+  var $add9 = CHECK_OVERFLOW($add8 + $5, 32, 0);
   HEAP32[$opt_len >> 2] = $add9;
   return $max_blindex_0;
   return null;
@@ -7583,90 +8861,119 @@ function _send_all_trees($s, $lcodes, $dcodes, $blcodes) {
   var $pending$s2;
   var $bi_buf$s1;
   var $bi_valid$s2;
-  var $bi_valid$s2 = ($s + 5820 | 0) >> 2;
+  var $bi_valid = CHECK_OVERFLOW($s + 5820, 32, 0), $bi_valid$s2 = $bi_valid >> 2;
   var $0 = HEAPU32[$bi_valid$s2];
   var $cmp = ($0 | 0) > 11;
-  var $conv2 = $lcodes + 65279 & 65535;
-  var $bi_buf$s1 = ($s + 5816 | 0) >> 1;
-  var $or = HEAPU16[$bi_buf$s1] & 65535 | $conv2 << $0;
+  var $sub1 = CHECK_OVERFLOW($lcodes + 65279, 32, 0);
+  var $conv2 = $sub1 & 65535;
+  var $shl = $conv2 << $0;
+  var $bi_buf = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf$s1 = $bi_buf >> 1;
+  var $or = HEAPU16[$bi_buf$s1] & 65535 | $shl;
   var $conv5 = $or & 65535;
   HEAP16[$bi_buf$s1] = $conv5;
   if ($cmp) {
     var $conv8 = $or & 255;
-    var $pending$s2 = ($s + 20 | 0) >> 2;
+    var $pending = CHECK_OVERFLOW($s + 20, 32, 0), $pending$s2 = $pending >> 2;
     var $2 = HEAP32[$pending$s2];
-    var $inc = $2 + 1 | 0;
+    var $inc = CHECK_OVERFLOW($2 + 1, 32, 0);
     HEAP32[$pending$s2] = $inc;
-    var $pending_buf = $s + 8 | 0;
-    HEAP8[HEAP32[$pending_buf >> 2] + $2 | 0] = $conv8;
+    var $pending_buf = CHECK_OVERFLOW($s + 8, 32, 0);
+    var $3 = HEAP32[$pending_buf >> 2];
+    var $arrayidx = CHECK_OVERFLOW($3 + $2, 32, 0);
+    HEAP8[$arrayidx] = $conv8;
     var $conv11 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
     var $5 = HEAPU32[$pending$s2];
-    HEAP32[$pending$s2] = $5 + 1 | 0;
-    HEAP8[HEAP32[$pending_buf >> 2] + $5 | 0] = $conv11;
+    var $inc13 = CHECK_OVERFLOW($5 + 1, 32, 0);
+    HEAP32[$pending$s2] = $inc13;
+    var $6 = HEAP32[$pending_buf >> 2];
+    var $arrayidx15 = CHECK_OVERFLOW($6 + $5, 32, 0);
+    HEAP8[$arrayidx15] = $conv11;
     var $7 = HEAPU32[$bi_valid$s2];
-    var $conv21 = $conv2 >>> ((16 - $7 | 0) >>> 0) & 65535;
+    var $sub19 = CHECK_OVERFLOW(16 - $7, 32, 0);
+    var $conv21 = $conv2 >>> ($sub19 >>> 0) & 65535;
     HEAP16[$bi_buf$s1] = $conv21;
-    var $9 = $7 - 11 | 0;
+    var $add = CHECK_OVERFLOW($7 - 11, 32, 0);
+    var $9 = $add;
     var $8 = $conv21;
   } else {
-    var $9 = $0 + 5 | 0;
+    var $add35 = CHECK_OVERFLOW($0 + 5, 32, 0);
+    var $9 = $add35;
     var $8 = $conv5;
   }
   var $8;
   var $9;
   HEAP32[$bi_valid$s2] = $9;
-  var $sub43 = $dcodes - 1 | 0;
+  var $cmp39 = ($9 | 0) > 11;
+  var $sub43 = CHECK_OVERFLOW($dcodes - 1, 32, 0);
   var $conv45 = $sub43 & 65535;
   var $or50 = $8 & 65535 | $conv45 << $9;
   var $conv51 = $or50 & 65535;
   HEAP16[$bi_buf$s1] = $conv51;
-  if (($9 | 0) > 11) {
+  if ($cmp39) {
     var $conv55 = $or50 & 255;
-    var $pending56$s2 = ($s + 20 | 0) >> 2;
+    var $pending56 = CHECK_OVERFLOW($s + 20, 32, 0), $pending56$s2 = $pending56 >> 2;
     var $10 = HEAP32[$pending56$s2];
-    var $inc57 = $10 + 1 | 0;
+    var $inc57 = CHECK_OVERFLOW($10 + 1, 32, 0);
     HEAP32[$pending56$s2] = $inc57;
-    var $pending_buf58 = $s + 8 | 0;
-    HEAP8[HEAP32[$pending_buf58 >> 2] + $10 | 0] = $conv55;
+    var $pending_buf58 = CHECK_OVERFLOW($s + 8, 32, 0);
+    var $11 = HEAP32[$pending_buf58 >> 2];
+    var $arrayidx59 = CHECK_OVERFLOW($11 + $10, 32, 0);
+    HEAP8[$arrayidx59] = $conv55;
     var $conv63 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
     var $13 = HEAPU32[$pending56$s2];
-    HEAP32[$pending56$s2] = $13 + 1 | 0;
-    HEAP8[HEAP32[$pending_buf58 >> 2] + $13 | 0] = $conv63;
+    var $inc65 = CHECK_OVERFLOW($13 + 1, 32, 0);
+    HEAP32[$pending56$s2] = $inc65;
+    var $14 = HEAP32[$pending_buf58 >> 2];
+    var $arrayidx67 = CHECK_OVERFLOW($14 + $13, 32, 0);
+    HEAP8[$arrayidx67] = $conv63;
     var $15 = HEAPU32[$bi_valid$s2];
-    var $conv73 = $conv45 >>> ((16 - $15 | 0) >>> 0) & 65535;
+    var $sub71 = CHECK_OVERFLOW(16 - $15, 32, 0);
+    var $conv73 = $conv45 >>> ($sub71 >>> 0) & 65535;
     HEAP16[$bi_buf$s1] = $conv73;
-    var $17 = $15 - 11 | 0;
+    var $add77 = CHECK_OVERFLOW($15 - 11, 32, 0);
+    var $17 = $add77;
     var $16 = $conv73;
   } else {
-    var $17 = $9 + 5 | 0;
+    var $add89 = CHECK_OVERFLOW($9 + 5, 32, 0);
+    var $17 = $add89;
     var $16 = $conv51;
   }
   var $16;
   var $17;
   HEAP32[$bi_valid$s2] = $17;
-  var $conv100 = $blcodes + 65532 & 65535;
+  var $cmp94 = ($17 | 0) > 12;
+  var $sub98 = CHECK_OVERFLOW($blcodes + 65532, 32, 0);
+  var $conv100 = $sub98 & 65535;
   var $or105 = $16 & 65535 | $conv100 << $17;
   var $conv106 = $or105 & 65535;
   HEAP16[$bi_buf$s1] = $conv106;
-  if (($17 | 0) > 12) {
+  if ($cmp94) {
     var $conv110 = $or105 & 255;
-    var $pending111$s2 = ($s + 20 | 0) >> 2;
+    var $pending111 = CHECK_OVERFLOW($s + 20, 32, 0), $pending111$s2 = $pending111 >> 2;
     var $18 = HEAP32[$pending111$s2];
-    var $inc112 = $18 + 1 | 0;
+    var $inc112 = CHECK_OVERFLOW($18 + 1, 32, 0);
     HEAP32[$pending111$s2] = $inc112;
-    var $pending_buf113 = $s + 8 | 0;
-    HEAP8[HEAP32[$pending_buf113 >> 2] + $18 | 0] = $conv110;
+    var $pending_buf113 = CHECK_OVERFLOW($s + 8, 32, 0);
+    var $19 = HEAP32[$pending_buf113 >> 2];
+    var $arrayidx114 = CHECK_OVERFLOW($19 + $18, 32, 0);
+    HEAP8[$arrayidx114] = $conv110;
     var $conv118 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
     var $21 = HEAPU32[$pending111$s2];
-    HEAP32[$pending111$s2] = $21 + 1 | 0;
-    HEAP8[HEAP32[$pending_buf113 >> 2] + $21 | 0] = $conv118;
+    var $inc120 = CHECK_OVERFLOW($21 + 1, 32, 0);
+    HEAP32[$pending111$s2] = $inc120;
+    var $22 = HEAP32[$pending_buf113 >> 2];
+    var $arrayidx122 = CHECK_OVERFLOW($22 + $21, 32, 0);
+    HEAP8[$arrayidx122] = $conv118;
     var $23 = HEAPU32[$bi_valid$s2];
-    var $conv128 = $conv100 >>> ((16 - $23 | 0) >>> 0) & 65535;
+    var $sub126 = CHECK_OVERFLOW(16 - $23, 32, 0);
+    var $conv128 = $conv100 >>> ($sub126 >>> 0) & 65535;
     HEAP16[$bi_buf$s1] = $conv128;
-    var $storemerge2 = $23 - 12 | 0;
+    var $add132 = CHECK_OVERFLOW($23 - 12, 32, 0);
+    var $storemerge2 = $add132;
     var $24 = $conv128;
   } else {
-    var $storemerge2 = $17 + 4 | 0;
+    var $add144 = CHECK_OVERFLOW($17 + 4, 32, 0);
+    var $storemerge2 = $add144;
     var $24 = $conv106;
   }
   var $24;
@@ -7675,8 +8982,8 @@ function _send_all_trees($s, $lcodes, $dcodes, $blcodes) {
   var $cmp1468 = ($blcodes | 0) > 0;
   $for_body_lr_ph$$for_end$85 : do {
     if ($cmp1468) {
-      var $pending171$s2 = ($s + 20 | 0) >> 2;
-      var $pending_buf173 = $s + 8 | 0;
+      var $pending171 = CHECK_OVERFLOW($s + 20, 32, 0), $pending171$s2 = $pending171 >> 2;
+      var $pending_buf173 = CHECK_OVERFLOW($s + 8, 32, 0);
       var $rank_09 = 0;
       var $26 = $storemerge2;
       var $25 = $24;
@@ -7684,34 +8991,45 @@ function _send_all_trees($s, $lcodes, $dcodes, $blcodes) {
         var $25;
         var $26;
         var $rank_09;
-        var $arrayidx155 = STRING_TABLE._bl_order + $rank_09 | 0;
-        var $conv160 = HEAPU16[$s + ((HEAPU8[$arrayidx155] & 255) << 2) + 2686 >> 1] & 65535;
+        var $cmp151 = ($26 | 0) > 13;
+        var $arrayidx155 = CHECK_OVERFLOW(STRING_TABLE._bl_order + $rank_09, 32, 0);
+        var $idxprom = HEAPU8[$arrayidx155] & 255;
+        var $len157 = CHECK_OVERFLOW(($idxprom << 2) + $s + 2686, 32, 0);
+        var $conv160 = HEAPU16[$len157 >> 1] & 65535;
         var $or165 = $25 & 65535 | $conv160 << $26;
         var $conv166 = $or165 & 65535;
         HEAP16[$bi_buf$s1] = $conv166;
-        if (($26 | 0) > 13) {
+        if ($cmp151) {
           var $conv170 = $or165 & 255;
           var $29 = HEAP32[$pending171$s2];
-          var $inc172 = $29 + 1 | 0;
+          var $inc172 = CHECK_OVERFLOW($29 + 1, 32, 0);
           HEAP32[$pending171$s2] = $inc172;
-          HEAP8[HEAP32[$pending_buf173 >> 2] + $29 | 0] = $conv170;
+          var $30 = HEAP32[$pending_buf173 >> 2];
+          var $arrayidx174 = CHECK_OVERFLOW($30 + $29, 32, 0);
+          HEAP8[$arrayidx174] = $conv170;
           var $conv178 = (HEAPU16[$bi_buf$s1] & 65535) >>> 8 & 255;
           var $32 = HEAPU32[$pending171$s2];
-          HEAP32[$pending171$s2] = $32 + 1 | 0;
-          HEAP8[HEAP32[$pending_buf173 >> 2] + $32 | 0] = $conv178;
+          var $inc180 = CHECK_OVERFLOW($32 + 1, 32, 0);
+          HEAP32[$pending171$s2] = $inc180;
+          var $33 = HEAP32[$pending_buf173 >> 2];
+          var $arrayidx182 = CHECK_OVERFLOW($33 + $32, 32, 0);
+          HEAP8[$arrayidx182] = $conv178;
           var $34 = HEAPU32[$bi_valid$s2];
-          var $conv188 = $conv160 >>> ((16 - $34 | 0) >>> 0) & 65535;
+          var $sub186 = CHECK_OVERFLOW(16 - $34, 32, 0);
+          var $conv188 = $conv160 >>> ($sub186 >>> 0) & 65535;
           HEAP16[$bi_buf$s1] = $conv188;
-          var $storemerge3 = $34 - 13 | 0;
+          var $add192 = CHECK_OVERFLOW($34 - 13, 32, 0);
+          var $storemerge3 = $add192;
           var $35 = $conv188;
         } else {
-          var $storemerge3 = $26 + 3 | 0;
+          var $add208 = CHECK_OVERFLOW($26 + 3, 32, 0);
+          var $storemerge3 = $add208;
           var $35 = $conv166;
         }
         var $35;
         var $storemerge3;
         HEAP32[$bi_valid$s2] = $storemerge3;
-        var $inc210 = $rank_09 + 1 | 0;
+        var $inc210 = CHECK_OVERFLOW($rank_09 + 1, 32, 0);
         if (($inc210 | 0) == ($blcodes | 0)) {
           break $for_body_lr_ph$$for_end$85;
         }
@@ -7721,10 +9039,10 @@ function _send_all_trees($s, $lcodes, $dcodes, $blcodes) {
       }
     }
   } while (0);
-  var $arraydecay = $s + 148 | 0;
-  var $sub211 = $lcodes - 1 | 0;
+  var $arraydecay = CHECK_OVERFLOW($s + 148, 32, 0);
+  var $sub211 = CHECK_OVERFLOW($lcodes - 1, 32, 0);
   _send_tree($s, $arraydecay, $sub211);
-  var $arraydecay212 = $s + 2440 | 0;
+  var $arraydecay212 = CHECK_OVERFLOW($s + 2440, 32, 0);
   _send_tree($s, $arraydecay212, $sub43);
   return;
   return;
@@ -7737,25 +9055,27 @@ function _send_tree($s, $tree, $max_code) {
   var $pending300$s2;
   var $bi_buf292$s1;
   var $bi_valid277$s2;
-  var $0 = HEAPU16[$tree + 2 >> 1];
+  var $len = CHECK_OVERFLOW($tree + 2, 32, 0);
+  var $0 = HEAPU16[$len >> 1];
+  var $conv = $0 & 65535;
   var $cmp = $0 << 16 >> 16 == 0;
   var $max_count_0 = $cmp ? 138 : 7;
   var $min_count_0 = $cmp ? 3 : 4;
-  var $len275 = $s + 2754 | 0;
-  var $bi_valid277$s2 = ($s + 5820 | 0) >> 2;
-  var $code286 = $s + 2752 | 0;
-  var $bi_buf292$s1 = ($s + 5816 | 0) >> 1;
-  var $pending300$s2 = ($s + 20 | 0) >> 2;
-  var $pending_buf302$s2 = ($s + 8 | 0) >> 2;
-  var $len397 = $s + 2758 | 0;
-  var $code408 = $s + 2756 | 0;
-  var $len150 = $s + 2750 | 0;
-  var $code161 = $s + 2748 | 0;
+  var $len275 = CHECK_OVERFLOW($s + 2754, 32, 0);
+  var $bi_valid277 = CHECK_OVERFLOW($s + 5820, 32, 0), $bi_valid277$s2 = $bi_valid277 >> 2;
+  var $code286 = CHECK_OVERFLOW($s + 2752, 32, 0);
+  var $bi_buf292 = CHECK_OVERFLOW($s + 5816, 32, 0), $bi_buf292$s1 = $bi_buf292 >> 1;
+  var $pending300 = CHECK_OVERFLOW($s + 20, 32, 0), $pending300$s2 = $pending300 >> 2;
+  var $pending_buf302 = CHECK_OVERFLOW($s + 8, 32, 0), $pending_buf302$s2 = $pending_buf302 >> 2;
+  var $len397 = CHECK_OVERFLOW($s + 2758, 32, 0);
+  var $code408 = CHECK_OVERFLOW($s + 2756, 32, 0);
+  var $len150 = CHECK_OVERFLOW($s + 2750, 32, 0);
+  var $code161 = CHECK_OVERFLOW($s + 2748, 32, 0);
   var $min_count_1_ph = $min_count_0;
   var $max_count_1_ph = $max_count_0;
   var $n_0_ph = 0;
   var $prevlen_0_ph = -1;
-  var $nextlen_0_ph = $0 & 65535;
+  var $nextlen_0_ph = $conv;
   $for_cond_outer$2 : while (1) {
     var $nextlen_0_ph;
     var $prevlen_0_ph;
@@ -7772,10 +9092,11 @@ function _send_tree($s, $tree, $max_code) {
       if (($n_0 | 0) > ($max_code | 0)) {
         break $for_cond_outer$2;
       }
-      var $add = $n_0 + 1 | 0;
-      var $1 = HEAPU16[$tree + ($add << 2) + 2 >> 1];
+      var $add = CHECK_OVERFLOW($n_0 + 1, 32, 0);
+      var $len6 = CHECK_OVERFLOW(($add << 2) + $tree + 2, 32, 0);
+      var $1 = HEAPU16[$len6 >> 1];
       var $conv7 = $1 & 65535;
-      var $inc = $count_0 + 1 | 0;
+      var $inc = CHECK_OVERFLOW($count_0 + 1, 32, 0);
       var $cmp10 = ($nextlen_0 | 0) == ($conv7 | 0);
       if (!(($inc | 0) < ($max_count_1_ph | 0) & $cmp10)) {
         break;
@@ -7787,8 +9108,8 @@ function _send_tree($s, $tree, $max_code) {
     var $cmp13 = ($inc | 0) < ($min_count_1_ph | 0);
     $do_body_preheader$$if_else71$8 : do {
       if ($cmp13) {
-        var $len19 = ($nextlen_0 << 2) + $s + 2686 | 0;
-        var $code = ($nextlen_0 << 2) + $s + 2684 | 0;
+        var $len19 = CHECK_OVERFLOW(($nextlen_0 << 2) + $s + 2686, 32, 0);
+        var $code = CHECK_OVERFLOW(($nextlen_0 << 2) + $s + 2684, 32, 0);
         var $count_1 = $inc;
         var $3 = HEAP32[$bi_valid277$s2];
         var $2 = HEAP16[$bi_buf292$s1];
@@ -7797,7 +9118,8 @@ function _send_tree($s, $tree, $max_code) {
           var $3;
           var $count_1;
           var $conv20 = HEAPU16[$len19 >> 1] & 65535;
-          var $cmp21 = ($3 | 0) > (16 - $conv20 | 0);
+          var $sub = CHECK_OVERFLOW(16 - $conv20, 32, 0);
+          var $cmp21 = ($3 | 0) > ($sub | 0);
           var $conv28 = HEAPU16[$code >> 1] & 65535;
           var $or = $2 & 65535 | $conv28 << $3;
           var $conv31 = $or & 65535;
@@ -7805,26 +9127,35 @@ function _send_tree($s, $tree, $max_code) {
           if ($cmp21) {
             var $conv34 = $or & 255;
             var $6 = HEAP32[$pending300$s2];
-            var $inc35 = $6 + 1 | 0;
+            var $inc35 = CHECK_OVERFLOW($6 + 1, 32, 0);
             HEAP32[$pending300$s2] = $inc35;
-            HEAP8[HEAP32[$pending_buf302$s2] + $6 | 0] = $conv34;
+            var $7 = HEAP32[$pending_buf302$s2];
+            var $arrayidx36 = CHECK_OVERFLOW($7 + $6, 32, 0);
+            HEAP8[$arrayidx36] = $conv34;
             var $conv39 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
             var $9 = HEAPU32[$pending300$s2];
-            HEAP32[$pending300$s2] = $9 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf302$s2] + $9 | 0] = $conv39;
+            var $inc41 = CHECK_OVERFLOW($9 + 1, 32, 0);
+            HEAP32[$pending300$s2] = $inc41;
+            var $10 = HEAP32[$pending_buf302$s2];
+            var $arrayidx43 = CHECK_OVERFLOW($10 + $9, 32, 0);
+            HEAP8[$arrayidx43] = $conv39;
             var $11 = HEAPU32[$bi_valid277$s2];
-            var $conv49 = $conv28 >>> ((16 - $11 | 0) >>> 0) & 65535;
+            var $sub47 = CHECK_OVERFLOW(16 - $11, 32, 0);
+            var $conv49 = $conv28 >>> ($sub47 >>> 0) & 65535;
             HEAP16[$bi_buf292$s1] = $conv49;
-            var $storemerge11 = $conv20 - 16 + $11 | 0;
+            var $sub51 = CHECK_OVERFLOW($conv20 - 16, 32, 0);
+            var $add53 = CHECK_OVERFLOW($sub51 + $11, 32, 0);
+            var $storemerge11 = $add53;
             var $12 = $conv49;
           } else {
-            var $storemerge11 = $3 + $conv20 | 0;
+            var $add67 = CHECK_OVERFLOW($3 + $conv20, 32, 0);
+            var $storemerge11 = $add67;
             var $12 = $conv31;
           }
           var $12;
           var $storemerge11;
           HEAP32[$bi_valid277$s2] = $storemerge11;
-          var $dec = $count_1 - 1 | 0;
+          var $dec = CHECK_OVERFLOW($count_1 - 1, 32, 0);
           if (($dec | 0) == 0) {
             break $do_body_preheader$$if_else71$8;
           }
@@ -7837,7 +9168,8 @@ function _send_tree($s, $tree, $max_code) {
           if (($inc | 0) < 11) {
             var $conv276 = HEAPU16[$len275 >> 1] & 65535;
             var $43 = HEAPU32[$bi_valid277$s2];
-            var $cmp279 = ($43 | 0) > (16 - $conv276 | 0);
+            var $sub278 = CHECK_OVERFLOW(16 - $conv276, 32, 0);
+            var $cmp279 = ($43 | 0) > ($sub278 | 0);
             var $conv289 = HEAPU16[$code286 >> 1] & 65535;
             var $or294 = HEAPU16[$bi_buf292$s1] & 65535 | $conv289 << $43;
             var $conv295 = $or294 & 65535;
@@ -7845,47 +9177,68 @@ function _send_tree($s, $tree, $max_code) {
             if ($cmp279) {
               var $conv299 = $or294 & 255;
               var $46 = HEAP32[$pending300$s2];
-              var $inc301 = $46 + 1 | 0;
+              var $inc301 = CHECK_OVERFLOW($46 + 1, 32, 0);
               HEAP32[$pending300$s2] = $inc301;
-              HEAP8[HEAP32[$pending_buf302$s2] + $46 | 0] = $conv299;
+              var $47 = HEAP32[$pending_buf302$s2];
+              var $arrayidx303 = CHECK_OVERFLOW($47 + $46, 32, 0);
+              HEAP8[$arrayidx303] = $conv299;
               var $conv307 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
               var $49 = HEAPU32[$pending300$s2];
-              HEAP32[$pending300$s2] = $49 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf302$s2] + $49 | 0] = $conv307;
+              var $inc309 = CHECK_OVERFLOW($49 + 1, 32, 0);
+              HEAP32[$pending300$s2] = $inc309;
+              var $50 = HEAP32[$pending_buf302$s2];
+              var $arrayidx311 = CHECK_OVERFLOW($50 + $49, 32, 0);
+              HEAP8[$arrayidx311] = $conv307;
               var $51 = HEAPU32[$bi_valid277$s2];
-              var $conv317 = $conv289 >>> ((16 - $51 | 0) >>> 0) & 65535;
+              var $sub315 = CHECK_OVERFLOW(16 - $51, 32, 0);
+              var $conv317 = $conv289 >>> ($sub315 >>> 0) & 65535;
               HEAP16[$bi_buf292$s1] = $conv317;
-              var $53 = $conv276 - 16 + $51 | 0;
+              var $sub319 = CHECK_OVERFLOW($conv276 - 16, 32, 0);
+              var $add321 = CHECK_OVERFLOW($sub319 + $51, 32, 0);
+              var $53 = $add321;
               var $52 = $conv317;
             } else {
-              var $53 = $43 + $conv276 | 0;
+              var $add335 = CHECK_OVERFLOW($43 + $conv276, 32, 0);
+              var $53 = $add335;
               var $52 = $conv295;
             }
             var $52;
             var $53;
             HEAP32[$bi_valid277$s2] = $53;
-            var $conv346 = $count_0 + 65534 & 65535;
+            var $cmp340 = ($53 | 0) > 13;
+            var $sub344 = CHECK_OVERFLOW($count_0 + 65534, 32, 0);
+            var $conv346 = $sub344 & 65535;
             var $or351 = $52 & 65535 | $conv346 << $53;
             HEAP16[$bi_buf292$s1] = $or351 & 65535;
-            if (($53 | 0) > 13) {
+            if ($cmp340) {
+              var $conv356 = $or351 & 255;
               var $54 = HEAP32[$pending300$s2];
-              var $inc358 = $54 + 1 | 0;
+              var $inc358 = CHECK_OVERFLOW($54 + 1, 32, 0);
               HEAP32[$pending300$s2] = $inc358;
-              HEAP8[HEAP32[$pending_buf302$s2] + $54 | 0] = $or351 & 255;
+              var $55 = HEAP32[$pending_buf302$s2];
+              var $arrayidx360 = CHECK_OVERFLOW($55 + $54, 32, 0);
+              HEAP8[$arrayidx360] = $conv356;
               var $conv364 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
               var $57 = HEAPU32[$pending300$s2];
-              HEAP32[$pending300$s2] = $57 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf302$s2] + $57 | 0] = $conv364;
+              var $inc366 = CHECK_OVERFLOW($57 + 1, 32, 0);
+              HEAP32[$pending300$s2] = $inc366;
+              var $58 = HEAP32[$pending_buf302$s2];
+              var $arrayidx368 = CHECK_OVERFLOW($58 + $57, 32, 0);
+              HEAP8[$arrayidx368] = $conv364;
               var $59 = HEAPU32[$bi_valid277$s2];
-              HEAP16[$bi_buf292$s1] = $conv346 >>> ((16 - $59 | 0) >>> 0) & 65535;
-              HEAP32[$bi_valid277$s2] = $59 - 13 | 0;
+              var $sub372 = CHECK_OVERFLOW(16 - $59, 32, 0);
+              HEAP16[$bi_buf292$s1] = $conv346 >>> ($sub372 >>> 0) & 65535;
+              var $add378 = CHECK_OVERFLOW($59 - 13, 32, 0);
+              HEAP32[$bi_valid277$s2] = $add378;
             } else {
-              HEAP32[$bi_valid277$s2] = $53 + 3 | 0;
+              var $add390 = CHECK_OVERFLOW($53 + 3, 32, 0);
+              HEAP32[$bi_valid277$s2] = $add390;
             }
           } else {
             var $conv398 = HEAPU16[$len397 >> 1] & 65535;
             var $61 = HEAPU32[$bi_valid277$s2];
-            var $cmp401 = ($61 | 0) > (16 - $conv398 | 0);
+            var $sub400 = CHECK_OVERFLOW(16 - $conv398, 32, 0);
+            var $cmp401 = ($61 | 0) > ($sub400 | 0);
             var $conv411 = HEAPU16[$code408 >> 1] & 65535;
             var $or416 = HEAPU16[$bi_buf292$s1] & 65535 | $conv411 << $61;
             var $conv417 = $or416 & 65535;
@@ -7893,42 +9246,62 @@ function _send_tree($s, $tree, $max_code) {
             if ($cmp401) {
               var $conv421 = $or416 & 255;
               var $64 = HEAP32[$pending300$s2];
-              var $inc423 = $64 + 1 | 0;
+              var $inc423 = CHECK_OVERFLOW($64 + 1, 32, 0);
               HEAP32[$pending300$s2] = $inc423;
-              HEAP8[HEAP32[$pending_buf302$s2] + $64 | 0] = $conv421;
+              var $65 = HEAP32[$pending_buf302$s2];
+              var $arrayidx425 = CHECK_OVERFLOW($65 + $64, 32, 0);
+              HEAP8[$arrayidx425] = $conv421;
               var $conv429 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
               var $67 = HEAPU32[$pending300$s2];
-              HEAP32[$pending300$s2] = $67 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf302$s2] + $67 | 0] = $conv429;
+              var $inc431 = CHECK_OVERFLOW($67 + 1, 32, 0);
+              HEAP32[$pending300$s2] = $inc431;
+              var $68 = HEAP32[$pending_buf302$s2];
+              var $arrayidx433 = CHECK_OVERFLOW($68 + $67, 32, 0);
+              HEAP8[$arrayidx433] = $conv429;
               var $69 = HEAPU32[$bi_valid277$s2];
-              var $conv439 = $conv411 >>> ((16 - $69 | 0) >>> 0) & 65535;
+              var $sub437 = CHECK_OVERFLOW(16 - $69, 32, 0);
+              var $conv439 = $conv411 >>> ($sub437 >>> 0) & 65535;
               HEAP16[$bi_buf292$s1] = $conv439;
-              var $71 = $conv398 - 16 + $69 | 0;
+              var $sub441 = CHECK_OVERFLOW($conv398 - 16, 32, 0);
+              var $add443 = CHECK_OVERFLOW($sub441 + $69, 32, 0);
+              var $71 = $add443;
               var $70 = $conv439;
             } else {
-              var $71 = $61 + $conv398 | 0;
+              var $add457 = CHECK_OVERFLOW($61 + $conv398, 32, 0);
+              var $71 = $add457;
               var $70 = $conv417;
             }
             var $70;
             var $71;
             HEAP32[$bi_valid277$s2] = $71;
-            var $conv468 = $count_0 + 65526 & 65535;
+            var $cmp462 = ($71 | 0) > 9;
+            var $sub466 = CHECK_OVERFLOW($count_0 + 65526, 32, 0);
+            var $conv468 = $sub466 & 65535;
             var $or473 = $70 & 65535 | $conv468 << $71;
             HEAP16[$bi_buf292$s1] = $or473 & 65535;
-            if (($71 | 0) > 9) {
+            if ($cmp462) {
+              var $conv478 = $or473 & 255;
               var $72 = HEAP32[$pending300$s2];
-              var $inc480 = $72 + 1 | 0;
+              var $inc480 = CHECK_OVERFLOW($72 + 1, 32, 0);
               HEAP32[$pending300$s2] = $inc480;
-              HEAP8[HEAP32[$pending_buf302$s2] + $72 | 0] = $or473 & 255;
+              var $73 = HEAP32[$pending_buf302$s2];
+              var $arrayidx482 = CHECK_OVERFLOW($73 + $72, 32, 0);
+              HEAP8[$arrayidx482] = $conv478;
               var $conv486 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
               var $75 = HEAPU32[$pending300$s2];
-              HEAP32[$pending300$s2] = $75 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf302$s2] + $75 | 0] = $conv486;
+              var $inc488 = CHECK_OVERFLOW($75 + 1, 32, 0);
+              HEAP32[$pending300$s2] = $inc488;
+              var $76 = HEAP32[$pending_buf302$s2];
+              var $arrayidx490 = CHECK_OVERFLOW($76 + $75, 32, 0);
+              HEAP8[$arrayidx490] = $conv486;
               var $77 = HEAPU32[$bi_valid277$s2];
-              HEAP16[$bi_buf292$s1] = $conv468 >>> ((16 - $77 | 0) >>> 0) & 65535;
-              HEAP32[$bi_valid277$s2] = $77 - 9 | 0;
+              var $sub494 = CHECK_OVERFLOW(16 - $77, 32, 0);
+              HEAP16[$bi_buf292$s1] = $conv468 >>> ($sub494 >>> 0) & 65535;
+              var $add500 = CHECK_OVERFLOW($77 - 9, 32, 0);
+              HEAP32[$bi_valid277$s2] = $add500;
             } else {
-              HEAP32[$bi_valid277$s2] = $71 + 7 | 0;
+              var $add512 = CHECK_OVERFLOW($71 + 7, 32, 0);
+              HEAP32[$bi_valid277$s2] = $add512;
             }
           }
         } else {
@@ -7937,30 +9310,42 @@ function _send_tree($s, $tree, $max_code) {
             var $25 = HEAP32[$bi_valid277$s2];
             var $24 = HEAP16[$bi_buf292$s1];
           } else {
-            var $conv83 = HEAPU16[$s + ($nextlen_0 << 2) + 2686 >> 1] & 65535;
+            var $len82 = CHECK_OVERFLOW(($nextlen_0 << 2) + $s + 2686, 32, 0);
+            var $conv83 = HEAPU16[$len82 >> 1] & 65535;
             var $14 = HEAPU32[$bi_valid277$s2];
-            var $cmp86 = ($14 | 0) > (16 - $conv83 | 0);
-            var $conv96 = HEAPU16[$s + ($nextlen_0 << 2) + 2684 >> 1] & 65535;
+            var $sub85 = CHECK_OVERFLOW(16 - $conv83, 32, 0);
+            var $cmp86 = ($14 | 0) > ($sub85 | 0);
+            var $code93 = CHECK_OVERFLOW(($nextlen_0 << 2) + $s + 2684, 32, 0);
+            var $conv96 = HEAPU16[$code93 >> 1] & 65535;
             var $or101 = HEAPU16[$bi_buf292$s1] & 65535 | $conv96 << $14;
             var $conv102 = $or101 & 65535;
             HEAP16[$bi_buf292$s1] = $conv102;
             if ($cmp86) {
               var $conv106 = $or101 & 255;
               var $17 = HEAP32[$pending300$s2];
-              var $inc108 = $17 + 1 | 0;
+              var $inc108 = CHECK_OVERFLOW($17 + 1, 32, 0);
               HEAP32[$pending300$s2] = $inc108;
-              HEAP8[HEAP32[$pending_buf302$s2] + $17 | 0] = $conv106;
+              var $18 = HEAP32[$pending_buf302$s2];
+              var $arrayidx110 = CHECK_OVERFLOW($18 + $17, 32, 0);
+              HEAP8[$arrayidx110] = $conv106;
               var $conv114 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
               var $20 = HEAPU32[$pending300$s2];
-              HEAP32[$pending300$s2] = $20 + 1 | 0;
-              HEAP8[HEAP32[$pending_buf302$s2] + $20 | 0] = $conv114;
+              var $inc116 = CHECK_OVERFLOW($20 + 1, 32, 0);
+              HEAP32[$pending300$s2] = $inc116;
+              var $21 = HEAP32[$pending_buf302$s2];
+              var $arrayidx118 = CHECK_OVERFLOW($21 + $20, 32, 0);
+              HEAP8[$arrayidx118] = $conv114;
               var $22 = HEAPU32[$bi_valid277$s2];
-              var $conv124 = $conv96 >>> ((16 - $22 | 0) >>> 0) & 65535;
+              var $sub122 = CHECK_OVERFLOW(16 - $22, 32, 0);
+              var $conv124 = $conv96 >>> ($sub122 >>> 0) & 65535;
               HEAP16[$bi_buf292$s1] = $conv124;
-              var $storemerge9 = $conv83 - 16 + $22 | 0;
+              var $sub126 = CHECK_OVERFLOW($conv83 - 16, 32, 0);
+              var $add128 = CHECK_OVERFLOW($sub126 + $22, 32, 0);
+              var $storemerge9 = $add128;
               var $23 = $conv124;
             } else {
-              var $storemerge9 = $14 + $conv83 | 0;
+              var $add142 = CHECK_OVERFLOW($14 + $conv83, 32, 0);
+              var $storemerge9 = $add142;
               var $23 = $conv102;
             }
             var $23;
@@ -7974,7 +9359,8 @@ function _send_tree($s, $tree, $max_code) {
           var $25;
           var $count_2;
           var $conv151 = HEAPU16[$len150 >> 1] & 65535;
-          var $cmp154 = ($25 | 0) > (16 - $conv151 | 0);
+          var $sub153 = CHECK_OVERFLOW(16 - $conv151, 32, 0);
+          var $cmp154 = ($25 | 0) > ($sub153 | 0);
           var $conv164 = HEAPU16[$code161 >> 1] & 65535;
           var $or169 = $24 & 65535 | $conv164 << $25;
           var $conv170 = $or169 & 65535;
@@ -7982,42 +9368,62 @@ function _send_tree($s, $tree, $max_code) {
           if ($cmp154) {
             var $conv174 = $or169 & 255;
             var $28 = HEAP32[$pending300$s2];
-            var $inc176 = $28 + 1 | 0;
+            var $inc176 = CHECK_OVERFLOW($28 + 1, 32, 0);
             HEAP32[$pending300$s2] = $inc176;
-            HEAP8[HEAP32[$pending_buf302$s2] + $28 | 0] = $conv174;
+            var $29 = HEAP32[$pending_buf302$s2];
+            var $arrayidx178 = CHECK_OVERFLOW($29 + $28, 32, 0);
+            HEAP8[$arrayidx178] = $conv174;
             var $conv182 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
             var $31 = HEAPU32[$pending300$s2];
-            HEAP32[$pending300$s2] = $31 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf302$s2] + $31 | 0] = $conv182;
+            var $inc184 = CHECK_OVERFLOW($31 + 1, 32, 0);
+            HEAP32[$pending300$s2] = $inc184;
+            var $32 = HEAP32[$pending_buf302$s2];
+            var $arrayidx186 = CHECK_OVERFLOW($32 + $31, 32, 0);
+            HEAP8[$arrayidx186] = $conv182;
             var $33 = HEAPU32[$bi_valid277$s2];
-            var $conv192 = $conv164 >>> ((16 - $33 | 0) >>> 0) & 65535;
+            var $sub190 = CHECK_OVERFLOW(16 - $33, 32, 0);
+            var $conv192 = $conv164 >>> ($sub190 >>> 0) & 65535;
             HEAP16[$bi_buf292$s1] = $conv192;
-            var $35 = $conv151 - 16 + $33 | 0;
+            var $sub194 = CHECK_OVERFLOW($conv151 - 16, 32, 0);
+            var $add196 = CHECK_OVERFLOW($sub194 + $33, 32, 0);
+            var $35 = $add196;
             var $34 = $conv192;
           } else {
-            var $35 = $25 + $conv151 | 0;
+            var $add210 = CHECK_OVERFLOW($25 + $conv151, 32, 0);
+            var $35 = $add210;
             var $34 = $conv170;
           }
           var $34;
           var $35;
           HEAP32[$bi_valid277$s2] = $35;
-          var $conv221 = $count_2 + 65533 & 65535;
+          var $cmp215 = ($35 | 0) > 14;
+          var $sub219 = CHECK_OVERFLOW($count_2 + 65533, 32, 0);
+          var $conv221 = $sub219 & 65535;
           var $or226 = $34 & 65535 | $conv221 << $35;
           HEAP16[$bi_buf292$s1] = $or226 & 65535;
-          if (($35 | 0) > 14) {
+          if ($cmp215) {
+            var $conv231 = $or226 & 255;
             var $36 = HEAP32[$pending300$s2];
-            var $inc233 = $36 + 1 | 0;
+            var $inc233 = CHECK_OVERFLOW($36 + 1, 32, 0);
             HEAP32[$pending300$s2] = $inc233;
-            HEAP8[HEAP32[$pending_buf302$s2] + $36 | 0] = $or226 & 255;
+            var $37 = HEAP32[$pending_buf302$s2];
+            var $arrayidx235 = CHECK_OVERFLOW($37 + $36, 32, 0);
+            HEAP8[$arrayidx235] = $conv231;
             var $conv239 = (HEAPU16[$bi_buf292$s1] & 65535) >>> 8 & 255;
             var $39 = HEAPU32[$pending300$s2];
-            HEAP32[$pending300$s2] = $39 + 1 | 0;
-            HEAP8[HEAP32[$pending_buf302$s2] + $39 | 0] = $conv239;
+            var $inc241 = CHECK_OVERFLOW($39 + 1, 32, 0);
+            HEAP32[$pending300$s2] = $inc241;
+            var $40 = HEAP32[$pending_buf302$s2];
+            var $arrayidx243 = CHECK_OVERFLOW($40 + $39, 32, 0);
+            HEAP8[$arrayidx243] = $conv239;
             var $41 = HEAPU32[$bi_valid277$s2];
-            HEAP16[$bi_buf292$s1] = $conv221 >>> ((16 - $41 | 0) >>> 0) & 65535;
-            HEAP32[$bi_valid277$s2] = $41 - 14 | 0;
+            var $sub247 = CHECK_OVERFLOW(16 - $41, 32, 0);
+            HEAP16[$bi_buf292$s1] = $conv221 >>> ($sub247 >>> 0) & 65535;
+            var $add253 = CHECK_OVERFLOW($41 - 14, 32, 0);
+            HEAP32[$bi_valid277$s2] = $add253;
           } else {
-            HEAP32[$bi_valid277$s2] = $35 + 2 | 0;
+            var $add265 = CHECK_OVERFLOW($35 + 2, 32, 0);
+            HEAP32[$bi_valid277$s2] = $add265;
           }
         }
       }
@@ -8045,15 +9451,18 @@ function _send_tree($s, $tree, $max_code) {
 _send_tree["X"] = 1;
 
 function _scan_tree($s, $tree, $max_code) {
-  var $0 = HEAPU16[$tree + 2 >> 1];
+  var $len = CHECK_OVERFLOW($tree + 2, 32, 0);
+  var $0 = HEAPU16[$len >> 1];
   var $conv = $0 & 65535;
   var $cmp = $0 << 16 >> 16 == 0;
   var $max_count_0 = $cmp ? 138 : 7;
   var $min_count_0 = $cmp ? 3 : 4;
-  HEAP16[$tree + ($max_code + 1 << 2) + 2 >> 1] = -1;
-  var $freq49 = $s + 2752 | 0;
-  var $freq55 = $s + 2756 | 0;
-  var $freq40 = $s + 2748 | 0;
+  var $add = CHECK_OVERFLOW($max_code + 1, 32, 0);
+  var $len4 = CHECK_OVERFLOW(($add << 2) + $tree + 2, 32, 0);
+  HEAP16[$len4 >> 1] = -1;
+  var $freq49 = CHECK_OVERFLOW($s + 2752, 32, 0);
+  var $freq55 = CHECK_OVERFLOW($s + 2756, 32, 0);
+  var $freq40 = CHECK_OVERFLOW($s + 2748, 32, 0);
   var $min_count_1_ph = $min_count_0;
   var $max_count_1_ph = $max_count_0;
   var $n_0_ph = 0;
@@ -8075,10 +9484,11 @@ function _scan_tree($s, $tree, $max_code) {
       if (($n_0 | 0) > ($max_code | 0)) {
         break $for_cond_outer$56;
       }
-      var $add7 = $n_0 + 1 | 0;
-      var $1 = HEAPU16[$tree + ($add7 << 2) + 2 >> 1];
+      var $add7 = CHECK_OVERFLOW($n_0 + 1, 32, 0);
+      var $len10 = CHECK_OVERFLOW(($add7 << 2) + $tree + 2, 32, 0);
+      var $1 = HEAPU16[$len10 >> 1];
       var $conv11 = $1 & 65535;
-      var $inc = $count_0 + 1 | 0;
+      var $inc = CHECK_OVERFLOW($count_0 + 1, 32, 0);
       var $cmp14 = ($nextlen_0 | 0) == ($conv11 | 0);
       if (!(($inc | 0) < ($max_count_1_ph | 0) & $cmp14)) {
         break;
@@ -8088,24 +9498,30 @@ function _scan_tree($s, $tree, $max_code) {
       var $nextlen_0 = $conv11;
     }
     if (($inc | 0) < ($min_count_1_ph | 0)) {
-      var $freq = ($nextlen_0 << 2) + $s + 2684 | 0;
-      HEAP16[$freq >> 1] = (HEAPU16[$freq >> 1] & 65535) + $inc & 65535;
+      var $freq = CHECK_OVERFLOW(($nextlen_0 << 2) + $s + 2684, 32, 0);
+      var $conv21 = HEAPU16[$freq >> 1] & 65535;
+      var $add22 = CHECK_OVERFLOW($conv21 + $inc, 32, 0);
+      HEAP16[$freq >> 1] = $add22 & 65535;
     } else {
       if (($nextlen_0 | 0) == 0) {
         if (($inc | 0) < 11) {
-          var $inc50 = HEAP16[$freq49 >> 1] + 1 & 65535;
+          var $5 = HEAP16[$freq49 >> 1];
+          var $inc50 = CHECK_OVERFLOW($5 + 1, 16, 0);
           HEAP16[$freq49 >> 1] = $inc50;
         } else {
-          var $inc56 = HEAP16[$freq55 >> 1] + 1 & 65535;
+          var $6 = HEAP16[$freq55 >> 1];
+          var $inc56 = CHECK_OVERFLOW($6 + 1, 16, 0);
           HEAP16[$freq55 >> 1] = $inc56;
         }
       } else {
         if (($nextlen_0 | 0) != ($prevlen_0_ph | 0)) {
-          var $freq34 = ($nextlen_0 << 2) + $s + 2684 | 0;
-          var $inc35 = HEAP16[$freq34 >> 1] + 1 & 65535;
+          var $freq34 = CHECK_OVERFLOW(($nextlen_0 << 2) + $s + 2684, 32, 0);
+          var $3 = HEAP16[$freq34 >> 1];
+          var $inc35 = CHECK_OVERFLOW($3 + 1, 16, 0);
           HEAP16[$freq34 >> 1] = $inc35;
         }
-        var $inc41 = HEAP16[$freq40 >> 1] + 1 & 65535;
+        var $4 = HEAP16[$freq40 >> 1];
+        var $inc41 = CHECK_OVERFLOW($4 + 1, 16, 0);
         HEAP16[$freq40 >> 1] = $inc41;
       }
     }
@@ -8132,11 +9548,11 @@ function _scan_tree($s, $tree, $max_code) {
 _scan_tree["X"] = 1;
 
 function _pqdownheap($s, $tree, $k) {
-  var $s$s2 = $s >> 2;
-  var $0 = HEAPU32[(($k << 2) + 2908 >> 2) + $s$s2];
-  var $arrayidx69 = $s + ($0 + 5208) | 0;
-  var $heap_len = $s + 5200 | 0;
-  var $freq44 = ($0 << 2) + $tree | 0;
+  var $arrayidx = CHECK_OVERFLOW(($k << 2) + $s + 2908, 32, 0);
+  var $0 = HEAPU32[$arrayidx >> 2];
+  var $arrayidx69 = CHECK_OVERFLOW($s + ($0 + 5208), 32, 0);
+  var $heap_len = CHECK_OVERFLOW($s + 5200, 32, 0);
+  var $freq44 = CHECK_OVERFLOW(($0 << 2) + $tree, 32, 0);
   var $k_addr_0 = $k;
   while (1) {
     var $k_addr_0;
@@ -8149,16 +9565,23 @@ function _pqdownheap($s, $tree, $k) {
     do {
       if ($cmp2) {
         var $add1 = $j_0 | 1;
-        var $2 = HEAPU32[(($add1 << 2) + 2908 >> 2) + $s$s2];
-        var $3 = HEAPU16[$tree + ($2 << 2) >> 1];
-        var $4 = HEAPU32[(($j_0 << 2) + 2908 >> 2) + $s$s2];
-        var $5 = HEAPU16[$tree + ($4 << 2) >> 1];
+        var $arrayidx4 = CHECK_OVERFLOW(($add1 << 2) + $s + 2908, 32, 0);
+        var $2 = HEAPU32[$arrayidx4 >> 2];
+        var $freq = CHECK_OVERFLOW(($2 << 2) + $tree, 32, 0);
+        var $3 = HEAPU16[$freq >> 1];
+        var $arrayidx7 = CHECK_OVERFLOW(($j_0 << 2) + $s + 2908, 32, 0);
+        var $4 = HEAPU32[$arrayidx7 >> 2];
+        var $freq10 = CHECK_OVERFLOW(($4 << 2) + $tree, 32, 0);
+        var $5 = HEAPU16[$freq10 >> 1];
         if (($3 & 65535) >= ($5 & 65535)) {
           if ($3 << 16 >> 16 != $5 << 16 >> 16) {
             var $j_1 = $j_0;
             break;
           }
-          if ((HEAPU8[$s + ($2 + 5208) | 0] & 255) > (HEAPU8[$s + ($4 + 5208) | 0] & 255)) {
+          var $arrayidx33 = CHECK_OVERFLOW($s + ($2 + 5208), 32, 0);
+          var $6 = HEAPU8[$arrayidx33];
+          var $arrayidx38 = CHECK_OVERFLOW($s + ($4 + 5208), 32, 0);
+          if (($6 & 255) > (HEAPU8[$arrayidx38] & 255)) {
             var $j_1 = $j_0;
             break;
           }
@@ -8170,20 +9593,26 @@ function _pqdownheap($s, $tree, $k) {
     } while (0);
     var $j_1;
     var $8 = HEAPU16[$freq44 >> 1];
-    var $9 = HEAPU32[(($j_1 << 2) + 2908 >> 2) + $s$s2];
-    var $10 = HEAPU16[$tree + ($9 << 2) >> 1];
+    var $arrayidx47 = CHECK_OVERFLOW(($j_1 << 2) + $s + 2908, 32, 0);
+    var $9 = HEAPU32[$arrayidx47 >> 2];
+    var $freq50 = CHECK_OVERFLOW(($9 << 2) + $tree, 32, 0);
+    var $10 = HEAPU16[$freq50 >> 1];
     if (($8 & 65535) < ($10 & 65535)) {
       break;
     }
     if ($8 << 16 >> 16 == $10 << 16 >> 16) {
-      if ((HEAPU8[$arrayidx69] & 255) <= (HEAPU8[$s + ($9 + 5208) | 0] & 255)) {
+      var $11 = HEAPU8[$arrayidx69];
+      var $arrayidx74 = CHECK_OVERFLOW($s + ($9 + 5208), 32, 0);
+      if (($11 & 255) <= (HEAPU8[$arrayidx74] & 255)) {
         break;
       }
     }
-    HEAP32[(($k_addr_0 << 2) + 2908 >> 2) + $s$s2] = $9;
+    var $arrayidx83 = CHECK_OVERFLOW(($k_addr_0 << 2) + $s + 2908, 32, 0);
+    HEAP32[$arrayidx83 >> 2] = $9;
     var $k_addr_0 = $j_1;
   }
-  HEAP32[(($k_addr_0 << 2) + 2908 >> 2) + $s$s2] = $0;
+  var $arrayidx86 = CHECK_OVERFLOW(($k_addr_0 << 2) + $s + 2908, 32, 0);
+  HEAP32[$arrayidx86 >> 2] = $0;
   return;
   return;
 }
@@ -8192,22 +9621,31 @@ _pqdownheap["X"] = 1;
 
 function _gen_bitlen($s, $desc_0_0_val, $desc_0_1_val, $desc_0_2_val) {
   var $opt_len$s2;
-  var $desc_0_0_val$s1 = $desc_0_0_val >> 1;
-  var $0 = HEAPU32[$desc_0_2_val >> 2];
-  var $1 = HEAPU32[$desc_0_2_val + 4 >> 2];
-  var $2 = HEAPU32[$desc_0_2_val + 8 >> 2];
-  var $3 = HEAPU32[$desc_0_2_val + 16 >> 2];
-  var $scevgep19 = $s + 2876 | 0;
+  var $static_tree = CHECK_OVERFLOW($desc_0_2_val, 32, 0);
+  var $0 = HEAPU32[$static_tree >> 2];
+  var $extra_bits = CHECK_OVERFLOW($desc_0_2_val + 4, 32, 0);
+  var $1 = HEAPU32[$extra_bits >> 2];
+  var $extra_base = CHECK_OVERFLOW($desc_0_2_val + 8, 32, 0);
+  var $2 = HEAPU32[$extra_base >> 2];
+  var $max_length5 = CHECK_OVERFLOW($desc_0_2_val + 16, 32, 0);
+  var $3 = HEAPU32[$max_length5 >> 2];
+  var $scevgep = CHECK_OVERFLOW($s + 2876, 32, 0);
+  var $scevgep19 = $scevgep;
   _memset($scevgep19, 0, 32, 2);
-  var $heap_max = $s + 5204 | 0;
-  HEAP16[((HEAP32[$s + (HEAP32[$heap_max >> 2] << 2) + 2908 >> 2] << 2) + 2 >> 1) + $desc_0_0_val$s1] = 0;
-  var $h_06 = HEAP32[$heap_max >> 2] + 1 | 0;
+  var $heap_max = CHECK_OVERFLOW($s + 5204, 32, 0);
+  var $4 = HEAP32[$heap_max >> 2];
+  var $arrayidx6 = CHECK_OVERFLOW(($4 << 2) + $s + 2908, 32, 0);
+  var $5 = HEAP32[$arrayidx6 >> 2];
+  var $len = CHECK_OVERFLOW(($5 << 2) + $desc_0_0_val + 2, 32, 0);
+  HEAP16[$len >> 1] = 0;
+  var $6 = HEAP32[$heap_max >> 2];
+  var $h_06 = CHECK_OVERFLOW($6 + 1, 32, 0);
   var $cmp107 = ($h_06 | 0) < 573;
   $for_body11_lr_ph$$for_end127$94 : do {
     if ($cmp107) {
-      var $opt_len$s2 = ($s + 5800 | 0) >> 2;
+      var $opt_len = CHECK_OVERFLOW($s + 5800, 32, 0), $opt_len$s2 = $opt_len >> 2;
       var $tobool = ($0 | 0) == 0;
-      var $static_len = $s + 5804 | 0;
+      var $static_len = CHECK_OVERFLOW($s + 5804, 32, 0);
       $for_body11_us$$for_body11$96 : do {
         if ($tobool) {
           var $overflow_08_us = 0;
@@ -8215,27 +9653,40 @@ function _gen_bitlen($s, $desc_0_0_val, $desc_0_1_val, $desc_0_2_val) {
           while (1) {
             var $h_09_us;
             var $overflow_08_us;
-            var $7 = HEAPU32[$s + ($h_09_us << 2) + 2908 >> 2];
-            var $dad_us = ($7 << 2) + $desc_0_0_val + 2 | 0;
-            var $add19_us = (HEAPU16[(((HEAPU16[$dad_us >> 1] & 65535) << 2) + 2 >> 1) + $desc_0_0_val$s1] & 65535) + 1 | 0;
+            var $arrayidx13_us = CHECK_OVERFLOW(($h_09_us << 2) + $s + 2908, 32, 0);
+            var $7 = HEAPU32[$arrayidx13_us >> 2];
+            var $dad_us = CHECK_OVERFLOW(($7 << 2) + $desc_0_0_val + 2, 32, 0);
+            var $idxprom_us = HEAPU16[$dad_us >> 1] & 65535;
+            var $len18_us = CHECK_OVERFLOW(($idxprom_us << 2) + $desc_0_0_val + 2, 32, 0);
+            var $conv_us = HEAPU16[$len18_us >> 1] & 65535;
+            var $add19_us = CHECK_OVERFLOW($conv_us + 1, 32, 0);
             var $cmp20_us = ($add19_us | 0) > ($3 | 0);
-            var $inc22_overflow_0_us = ($cmp20_us & 1) + $overflow_08_us | 0;
+            var $inc22_us = $cmp20_us & 1;
+            var $inc22_overflow_0_us = CHECK_OVERFLOW($inc22_us + $overflow_08_us, 32, 0);
             var $bits_1_us = $cmp20_us ? $3 : $add19_us;
             HEAP16[$dad_us >> 1] = $bits_1_us & 65535;
             if (($7 | 0) <= ($desc_0_1_val | 0)) {
-              var $arrayidx32_us = ($bits_1_us << 1) + $s + 2876 | 0;
-              var $inc33_us = HEAP16[$arrayidx32_us >> 1] + 1 & 65535;
+              var $arrayidx32_us = CHECK_OVERFLOW(($bits_1_us << 1) + $s + 2876, 32, 0);
+              var $13 = HEAP16[$arrayidx32_us >> 1];
+              var $inc33_us = CHECK_OVERFLOW($13 + 1, 16, 0);
               HEAP16[$arrayidx32_us >> 1] = $inc33_us;
               if (($7 | 0) < ($2 | 0)) {
                 var $xbits_0_us = 0;
               } else {
-                var $xbits_0_us = HEAP32[$1 + ($7 - $2 << 2) >> 2];
+                var $sub_us = CHECK_OVERFLOW($7 - $2, 32, 0);
+                var $arrayidx37_us = CHECK_OVERFLOW(($sub_us << 2) + $1, 32, 0);
+                var $xbits_0_us = HEAP32[$arrayidx37_us >> 2];
               }
               var $xbits_0_us;
-              var $add42_us = (HEAPU16[($7 << 2 >> 1) + $desc_0_0_val$s1] & 65535) * ($xbits_0_us + $bits_1_us) + HEAP32[$opt_len$s2] | 0;
+              var $freq_us = CHECK_OVERFLOW(($7 << 2) + $desc_0_0_val, 32, 0);
+              var $conv40_us = HEAPU16[$freq_us >> 1] & 65535;
+              var $add41_us = CHECK_OVERFLOW($xbits_0_us + $bits_1_us, 32, 0);
+              var $mul_us = CHECK_OVERFLOW($conv40_us * $add41_us, 32, 0);
+              var $11 = HEAP32[$opt_len$s2];
+              var $add42_us = CHECK_OVERFLOW($mul_us + $11, 32, 0);
               HEAP32[$opt_len$s2] = $add42_us;
             }
-            var $h_0_us = $h_09_us + 1 | 0;
+            var $h_0_us = CHECK_OVERFLOW($h_09_us + 1, 32, 0);
             if (($h_0_us | 0) == 573) {
               var $overflow_0_lcssa = $inc22_overflow_0_us;
               break $for_body11_us$$for_body11$96;
@@ -8249,30 +9700,47 @@ function _gen_bitlen($s, $desc_0_0_val, $desc_0_1_val, $desc_0_2_val) {
           while (1) {
             var $h_09;
             var $overflow_08;
-            var $14 = HEAPU32[$s + ($h_09 << 2) + 2908 >> 2];
-            var $dad = ($14 << 2) + $desc_0_0_val + 2 | 0;
-            var $add19 = (HEAPU16[(((HEAPU16[$dad >> 1] & 65535) << 2) + 2 >> 1) + $desc_0_0_val$s1] & 65535) + 1 | 0;
+            var $arrayidx13 = CHECK_OVERFLOW(($h_09 << 2) + $s + 2908, 32, 0);
+            var $14 = HEAPU32[$arrayidx13 >> 2];
+            var $dad = CHECK_OVERFLOW(($14 << 2) + $desc_0_0_val + 2, 32, 0);
+            var $idxprom = HEAPU16[$dad >> 1] & 65535;
+            var $len18 = CHECK_OVERFLOW(($idxprom << 2) + $desc_0_0_val + 2, 32, 0);
+            var $conv = HEAPU16[$len18 >> 1] & 65535;
+            var $add19 = CHECK_OVERFLOW($conv + 1, 32, 0);
             var $cmp20 = ($add19 | 0) > ($3 | 0);
-            var $inc22_overflow_0 = ($cmp20 & 1) + $overflow_08 | 0;
+            var $inc22 = $cmp20 & 1;
+            var $inc22_overflow_0 = CHECK_OVERFLOW($inc22 + $overflow_08, 32, 0);
             var $bits_1 = $cmp20 ? $3 : $add19;
             HEAP16[$dad >> 1] = $bits_1 & 65535;
             if (($14 | 0) <= ($desc_0_1_val | 0)) {
-              var $arrayidx32 = ($bits_1 << 1) + $s + 2876 | 0;
-              var $inc33 = HEAP16[$arrayidx32 >> 1] + 1 & 65535;
+              var $arrayidx32 = CHECK_OVERFLOW(($bits_1 << 1) + $s + 2876, 32, 0);
+              var $17 = HEAP16[$arrayidx32 >> 1];
+              var $inc33 = CHECK_OVERFLOW($17 + 1, 16, 0);
               HEAP16[$arrayidx32 >> 1] = $inc33;
               if (($14 | 0) < ($2 | 0)) {
                 var $xbits_0 = 0;
               } else {
-                var $xbits_0 = HEAP32[$1 + ($14 - $2 << 2) >> 2];
+                var $sub = CHECK_OVERFLOW($14 - $2, 32, 0);
+                var $arrayidx37 = CHECK_OVERFLOW(($sub << 2) + $1, 32, 0);
+                var $xbits_0 = HEAP32[$arrayidx37 >> 2];
               }
               var $xbits_0;
-              var $conv40 = HEAPU16[($14 << 2 >> 1) + $desc_0_0_val$s1] & 65535;
-              var $add42 = $conv40 * ($xbits_0 + $bits_1) + HEAP32[$opt_len$s2] | 0;
+              var $freq = CHECK_OVERFLOW(($14 << 2) + $desc_0_0_val, 32, 0);
+              var $conv40 = HEAPU16[$freq >> 1] & 65535;
+              var $add41 = CHECK_OVERFLOW($xbits_0 + $bits_1, 32, 0);
+              var $mul = CHECK_OVERFLOW($conv40 * $add41, 32, 0);
+              var $20 = HEAP32[$opt_len$s2];
+              var $add42 = CHECK_OVERFLOW($mul + $20, 32, 0);
               HEAP32[$opt_len$s2] = $add42;
-              var $add51 = ((HEAPU16[$0 + ($14 << 2) + 2 >> 1] & 65535) + $xbits_0) * $conv40 + HEAP32[$static_len >> 2] | 0;
+              var $len47 = CHECK_OVERFLOW(($14 << 2) + $0 + 2, 32, 0);
+              var $conv48 = HEAPU16[$len47 >> 1] & 65535;
+              var $add49 = CHECK_OVERFLOW($conv48 + $xbits_0, 32, 0);
+              var $mul50 = CHECK_OVERFLOW($add49 * $conv40, 32, 0);
+              var $22 = HEAP32[$static_len >> 2];
+              var $add51 = CHECK_OVERFLOW($mul50 + $22, 32, 0);
               HEAP32[$static_len >> 2] = $add51;
             }
-            var $h_0 = $h_09 + 1 | 0;
+            var $h_0 = CHECK_OVERFLOW($h_09 + 1, 32, 0);
             if (($h_0 | 0) == 573) {
               var $overflow_0_lcssa = $inc22_overflow_0;
               break $for_body11_us$$for_body11$96;
@@ -8286,29 +9754,31 @@ function _gen_bitlen($s, $desc_0_0_val, $desc_0_1_val, $desc_0_2_val) {
       if (($overflow_0_lcssa | 0) == 0) {
         break;
       }
-      var $arrayidx76 = ($3 << 1) + $s + 2876 | 0;
+      var $arrayidx76 = CHECK_OVERFLOW(($3 << 1) + $s + 2876, 32, 0);
       var $overflow_2 = $overflow_0_lcssa;
       while (1) {
         var $overflow_2;
         var $bits_2_in = $3;
         while (1) {
           var $bits_2_in;
-          var $bits_2 = $bits_2_in - 1 | 0;
-          var $arrayidx62 = ($bits_2 << 1) + $s + 2876 | 0;
+          var $bits_2 = CHECK_OVERFLOW($bits_2_in - 1, 32, 0);
+          var $arrayidx62 = CHECK_OVERFLOW(($bits_2 << 1) + $s + 2876, 32, 0);
           var $23 = HEAP16[$arrayidx62 >> 1];
           if ($23 << 16 >> 16 != 0) {
             break;
           }
           var $bits_2_in = $bits_2;
         }
-        var $dec68 = $23 - 1 & 65535;
+        var $dec68 = CHECK_OVERFLOW($23 - 1, 16, 0);
         HEAP16[$arrayidx62 >> 1] = $dec68;
-        var $arrayidx71 = ($bits_2_in << 1) + $s + 2876 | 0;
-        var $add73 = HEAP16[$arrayidx71 >> 1] + 2 & 65535;
+        var $arrayidx71 = CHECK_OVERFLOW(($bits_2_in << 1) + $s + 2876, 32, 0);
+        var $24 = HEAP16[$arrayidx71 >> 1];
+        var $add73 = CHECK_OVERFLOW($24 + 2, 16, 0);
         HEAP16[$arrayidx71 >> 1] = $add73;
-        var $dec77 = HEAP16[$arrayidx76 >> 1] - 1 & 65535;
+        var $25 = HEAP16[$arrayidx76 >> 1];
+        var $dec77 = CHECK_OVERFLOW($25 - 1, 16, 0);
         HEAP16[$arrayidx76 >> 1] = $dec77;
-        var $sub78 = $overflow_2 - 2 | 0;
+        var $sub78 = CHECK_OVERFLOW($overflow_2 - 2, 32, 0);
         if (($sub78 | 0) <= 0) {
           break;
         }
@@ -8336,28 +9806,36 @@ function _gen_bitlen($s, $desc_0_0_val, $desc_0_1_val, $desc_0_2_val) {
           var $h_2 = $h_2_ph;
           while (1) {
             var $h_2;
-            var $dec92 = $h_2 - 1 | 0;
-            var $27 = HEAPU32[$s + ($dec92 << 2) + 2908 >> 2];
+            var $dec92 = CHECK_OVERFLOW($h_2 - 1, 32, 0);
+            var $arrayidx94 = CHECK_OVERFLOW(($dec92 << 2) + $s + 2908, 32, 0);
+            var $27 = HEAPU32[$arrayidx94 >> 2];
             if (($27 | 0) <= ($desc_0_1_val | 0)) {
               break;
             }
             var $h_2 = $dec92;
           }
-          var $len101 = ($27 << 2) + $desc_0_0_val + 2 | 0;
+          var $len101 = CHECK_OVERFLOW(($27 << 2) + $desc_0_0_val + 2, 32, 0);
           var $conv102 = HEAPU16[$len101 >> 1] & 65535;
           if (($conv102 | 0) != ($bits_34 | 0)) {
-            var $add117 = (HEAPU16[($27 << 2 >> 1) + $desc_0_0_val$s1] & 65535) * ($bits_34 - $conv102) + HEAP32[$opt_len$s2] | 0;
+            var $sub110 = CHECK_OVERFLOW($bits_34 - $conv102, 32, 0);
+            var $freq113 = CHECK_OVERFLOW(($27 << 2) + $desc_0_0_val, 32, 0);
+            var $conv114 = HEAPU16[$freq113 >> 1] & 65535;
+            var $mul115 = CHECK_OVERFLOW($conv114 * $sub110, 32, 0);
+            var $30 = HEAP32[$opt_len$s2];
+            var $add117 = CHECK_OVERFLOW($mul115 + $30, 32, 0);
             HEAP32[$opt_len$s2] = $add117;
             HEAP16[$len101 >> 1] = $conv118;
           }
-          var $n_0_ph = $n_0_ph - 1 | 0;
+          var $dec123 = CHECK_OVERFLOW($n_0_ph - 1, 32, 0);
+          var $n_0_ph = $dec123;
           var $h_2_ph = $dec92;
         }
-        var $dec126 = $bits_34 - 1 | 0;
+        var $dec126 = CHECK_OVERFLOW($bits_34 - 1, 32, 0);
         if (($dec126 | 0) == 0) {
           break $for_body11_lr_ph$$for_end127$94;
         }
-        var $_pre = HEAP16[$s + ($dec126 << 1) + 2876 >> 1];
+        var $arrayidx86_phi_trans_insert = CHECK_OVERFLOW(($dec126 << 1) + $s + 2876, 32, 0);
+        var $_pre = HEAP16[$arrayidx86_phi_trans_insert >> 1];
         var $h_13 = $h_2_ph;
         var $bits_34 = $dec126;
         var $26 = $_pre;
@@ -8379,12 +9857,13 @@ function _bi_reverse($code, $len) {
     var $len_addr_0;
     var $code_addr_0;
     var $or = $code_addr_0 & 1 | $res_0;
+    var $shr = $code_addr_0 >>> 1;
     var $shl = $or << 1;
-    var $dec = $len_addr_0 - 1 | 0;
+    var $dec = CHECK_OVERFLOW($len_addr_0 - 1, 32, 0);
     if (($dec | 0) <= 0) {
       break;
     }
-    var $code_addr_0 = $code_addr_0 >>> 1;
+    var $code_addr_0 = $shr;
     var $len_addr_0 = $dec;
     var $res_0 = $shl;
   }
@@ -8399,10 +9878,14 @@ function _adler32($adler, $buf, $len) {
   var $cmp = ($len | 0) == 1;
   do {
     if ($cmp) {
-      var $add = (HEAPU8[$buf] & 255) + $and1 | 0;
-      var $sub_add = $add >>> 0 > 65520 ? $add - 65521 | 0 : $add;
-      var $add5 = $sub_add + $shr | 0;
-      var $sum2_0 = $add5 >>> 0 > 65520 ? $add5 + 15 | 0 : $add5;
+      var $conv = HEAPU8[$buf] & 255;
+      var $add = CHECK_OVERFLOW($conv + $and1, 32, 0);
+      var $sub = CHECK_OVERFLOW($add - 65521, 32, 0);
+      var $sub_add = $add >>> 0 > 65520 ? $sub : $add;
+      var $add5 = CHECK_OVERFLOW($sub_add + $shr, 32, 0);
+      var $cmp6 = $add5 >>> 0 > 65520;
+      var $sub9 = CHECK_OVERFLOW($add5 + 15, 32, 0);
+      var $sum2_0 = $cmp6 ? $sub9 : $add5;
       var $retval_0 = $sum2_0 << 16 | $sub_add;
     } else {
       if (($buf | 0) == 0) {
@@ -8425,9 +9908,11 @@ function _adler32($adler, $buf, $len) {
               var $buf_addr_028;
               var $len_addr_027;
               var $sum2_126;
-              var $dec = $len_addr_027 - 1 | 0;
-              var $add20 = (HEAPU8[$buf_addr_028] & 255) + $adler_addr_129 | 0;
-              var $add21 = $add20 + $sum2_126 | 0;
+              var $dec = CHECK_OVERFLOW($len_addr_027 - 1, 32, 0);
+              var $incdec_ptr = CHECK_OVERFLOW($buf_addr_028 + 1, 32, 0);
+              var $conv19 = HEAPU8[$buf_addr_028] & 255;
+              var $add20 = CHECK_OVERFLOW($conv19 + $adler_addr_129, 32, 0);
+              var $add21 = CHECK_OVERFLOW($add20 + $sum2_126, 32, 0);
               if (($dec | 0) == 0) {
                 var $sum2_1_lcssa = $add21;
                 var $adler_addr_1_lcssa = $add20;
@@ -8435,14 +9920,15 @@ function _adler32($adler, $buf, $len) {
               }
               var $sum2_126 = $add21;
               var $len_addr_027 = $dec;
-              var $buf_addr_028 = $buf_addr_028 + 1 | 0;
+              var $buf_addr_028 = $incdec_ptr;
               var $adler_addr_129 = $add20;
             }
           }
         } while (0);
         var $adler_addr_1_lcssa;
         var $sum2_1_lcssa;
-        var $sub25_adler_addr_1 = $adler_addr_1_lcssa >>> 0 > 65520 ? $adler_addr_1_lcssa - 65521 | 0 : $adler_addr_1_lcssa;
+        var $sub25 = CHECK_OVERFLOW($adler_addr_1_lcssa - 65521, 32, 0);
+        var $sub25_adler_addr_1 = $adler_addr_1_lcssa >>> 0 > 65520 ? $sub25 : $adler_addr_1_lcssa;
         var $retval_0 = ($sum2_1_lcssa >>> 0) % 65521 << 16 | $sub25_adler_addr_1;
       } else {
         var $cmp3116 = $len >>> 0 > 5551;
@@ -8457,7 +9943,7 @@ function _adler32($adler, $buf, $len) {
               var $buf_addr_119;
               var $len_addr_118;
               var $sum2_217;
-              var $sub34 = $len_addr_118 - 5552 | 0;
+              var $sub34 = CHECK_OVERFLOW($len_addr_118 - 5552, 32, 0);
               var $adler_addr_4 = $adler_addr_320;
               var $buf_addr_2 = $buf_addr_119;
               var $sum2_3 = $sum2_217;
@@ -8467,33 +9953,80 @@ function _adler32($adler, $buf, $len) {
                 var $sum2_3;
                 var $buf_addr_2;
                 var $adler_addr_4;
-                var $add37 = (HEAPU8[$buf_addr_2] & 255) + $adler_addr_4 | 0;
-                var $add41 = $add37 + (HEAPU8[$buf_addr_2 + 1 | 0] & 255) | 0;
-                var $add45 = $add41 + (HEAPU8[$buf_addr_2 + 2 | 0] & 255) | 0;
-                var $add49 = $add45 + (HEAPU8[$buf_addr_2 + 3 | 0] & 255) | 0;
-                var $add53 = $add49 + (HEAPU8[$buf_addr_2 + 4 | 0] & 255) | 0;
-                var $add57 = $add53 + (HEAPU8[$buf_addr_2 + 5 | 0] & 255) | 0;
-                var $add61 = $add57 + (HEAPU8[$buf_addr_2 + 6 | 0] & 255) | 0;
-                var $add65 = $add61 + (HEAPU8[$buf_addr_2 + 7 | 0] & 255) | 0;
-                var $add69 = $add65 + (HEAPU8[$buf_addr_2 + 8 | 0] & 255) | 0;
-                var $add73 = $add69 + (HEAPU8[$buf_addr_2 + 9 | 0] & 255) | 0;
-                var $add77 = $add73 + (HEAPU8[$buf_addr_2 + 10 | 0] & 255) | 0;
-                var $add81 = $add77 + (HEAPU8[$buf_addr_2 + 11 | 0] & 255) | 0;
-                var $add85 = $add81 + (HEAPU8[$buf_addr_2 + 12 | 0] & 255) | 0;
-                var $add89 = $add85 + (HEAPU8[$buf_addr_2 + 13 | 0] & 255) | 0;
-                var $add93 = $add89 + (HEAPU8[$buf_addr_2 + 14 | 0] & 255) | 0;
-                var $add97 = $add93 + (HEAPU8[$buf_addr_2 + 15 | 0] & 255) | 0;
-                var $add98 = $add37 + $sum2_3 + $add41 + $add45 + $add49 + $add53 + $add57 + $add61 + $add65 + $add69 + $add73 + $add77 + $add81 + $add85 + $add89 + $add93 + $add97 | 0;
-                var $dec99 = $n_0 - 1 | 0;
+                var $conv36 = HEAPU8[$buf_addr_2] & 255;
+                var $add37 = CHECK_OVERFLOW($conv36 + $adler_addr_4, 32, 0);
+                var $arrayidx39 = CHECK_OVERFLOW($buf_addr_2 + 1, 32, 0);
+                var $conv40 = HEAPU8[$arrayidx39] & 255;
+                var $add41 = CHECK_OVERFLOW($add37 + $conv40, 32, 0);
+                var $arrayidx43 = CHECK_OVERFLOW($buf_addr_2 + 2, 32, 0);
+                var $conv44 = HEAPU8[$arrayidx43] & 255;
+                var $add45 = CHECK_OVERFLOW($add41 + $conv44, 32, 0);
+                var $arrayidx47 = CHECK_OVERFLOW($buf_addr_2 + 3, 32, 0);
+                var $conv48 = HEAPU8[$arrayidx47] & 255;
+                var $add49 = CHECK_OVERFLOW($add45 + $conv48, 32, 0);
+                var $arrayidx51 = CHECK_OVERFLOW($buf_addr_2 + 4, 32, 0);
+                var $conv52 = HEAPU8[$arrayidx51] & 255;
+                var $add53 = CHECK_OVERFLOW($add49 + $conv52, 32, 0);
+                var $arrayidx55 = CHECK_OVERFLOW($buf_addr_2 + 5, 32, 0);
+                var $conv56 = HEAPU8[$arrayidx55] & 255;
+                var $add57 = CHECK_OVERFLOW($add53 + $conv56, 32, 0);
+                var $arrayidx59 = CHECK_OVERFLOW($buf_addr_2 + 6, 32, 0);
+                var $conv60 = HEAPU8[$arrayidx59] & 255;
+                var $add61 = CHECK_OVERFLOW($add57 + $conv60, 32, 0);
+                var $arrayidx63 = CHECK_OVERFLOW($buf_addr_2 + 7, 32, 0);
+                var $conv64 = HEAPU8[$arrayidx63] & 255;
+                var $add65 = CHECK_OVERFLOW($add61 + $conv64, 32, 0);
+                var $arrayidx67 = CHECK_OVERFLOW($buf_addr_2 + 8, 32, 0);
+                var $conv68 = HEAPU8[$arrayidx67] & 255;
+                var $add69 = CHECK_OVERFLOW($add65 + $conv68, 32, 0);
+                var $arrayidx71 = CHECK_OVERFLOW($buf_addr_2 + 9, 32, 0);
+                var $conv72 = HEAPU8[$arrayidx71] & 255;
+                var $add73 = CHECK_OVERFLOW($add69 + $conv72, 32, 0);
+                var $arrayidx75 = CHECK_OVERFLOW($buf_addr_2 + 10, 32, 0);
+                var $conv76 = HEAPU8[$arrayidx75] & 255;
+                var $add77 = CHECK_OVERFLOW($add73 + $conv76, 32, 0);
+                var $arrayidx79 = CHECK_OVERFLOW($buf_addr_2 + 11, 32, 0);
+                var $conv80 = HEAPU8[$arrayidx79] & 255;
+                var $add81 = CHECK_OVERFLOW($add77 + $conv80, 32, 0);
+                var $arrayidx83 = CHECK_OVERFLOW($buf_addr_2 + 12, 32, 0);
+                var $conv84 = HEAPU8[$arrayidx83] & 255;
+                var $add85 = CHECK_OVERFLOW($add81 + $conv84, 32, 0);
+                var $arrayidx87 = CHECK_OVERFLOW($buf_addr_2 + 13, 32, 0);
+                var $conv88 = HEAPU8[$arrayidx87] & 255;
+                var $add89 = CHECK_OVERFLOW($add85 + $conv88, 32, 0);
+                var $arrayidx91 = CHECK_OVERFLOW($buf_addr_2 + 14, 32, 0);
+                var $conv92 = HEAPU8[$arrayidx91] & 255;
+                var $add93 = CHECK_OVERFLOW($add89 + $conv92, 32, 0);
+                var $arrayidx95 = CHECK_OVERFLOW($buf_addr_2 + 15, 32, 0);
+                var $conv96 = HEAPU8[$arrayidx95] & 255;
+                var $add97 = CHECK_OVERFLOW($add93 + $conv96, 32, 0);
+                var $add38 = CHECK_OVERFLOW($add37 + $sum2_3, 32, 0);
+                var $add42 = CHECK_OVERFLOW($add38 + $add41, 32, 0);
+                var $add46 = CHECK_OVERFLOW($add42 + $add45, 32, 0);
+                var $add50 = CHECK_OVERFLOW($add46 + $add49, 32, 0);
+                var $add54 = CHECK_OVERFLOW($add50 + $add53, 32, 0);
+                var $add58 = CHECK_OVERFLOW($add54 + $add57, 32, 0);
+                var $add62 = CHECK_OVERFLOW($add58 + $add61, 32, 0);
+                var $add66 = CHECK_OVERFLOW($add62 + $add65, 32, 0);
+                var $add70 = CHECK_OVERFLOW($add66 + $add69, 32, 0);
+                var $add74 = CHECK_OVERFLOW($add70 + $add73, 32, 0);
+                var $add78 = CHECK_OVERFLOW($add74 + $add77, 32, 0);
+                var $add82 = CHECK_OVERFLOW($add78 + $add81, 32, 0);
+                var $add86 = CHECK_OVERFLOW($add82 + $add85, 32, 0);
+                var $add90 = CHECK_OVERFLOW($add86 + $add89, 32, 0);
+                var $add94 = CHECK_OVERFLOW($add90 + $add93, 32, 0);
+                var $add98 = CHECK_OVERFLOW($add94 + $add97, 32, 0);
+                var $add_ptr = CHECK_OVERFLOW($buf_addr_2 + 16, 32, 0);
+                var $dec99 = CHECK_OVERFLOW($n_0 - 1, 32, 0);
                 if (($dec99 | 0) == 0) {
                   break;
                 }
                 var $adler_addr_4 = $add97;
-                var $buf_addr_2 = $buf_addr_2 + 16 | 0;
+                var $buf_addr_2 = $add_ptr;
                 var $sum2_3 = $add98;
                 var $n_0 = $dec99;
               }
-              var $scevgep = $buf_addr_119 + 5552 | 0;
+              var $scevgep = CHECK_OVERFLOW($buf_addr_119 + 5552, 32, 0);
               var $rem101 = ($add97 >>> 0) % 65521;
               var $rem102 = ($add98 >>> 0) % 65521;
               if ($sub34 >>> 0 <= 5551) {
@@ -8539,25 +10072,71 @@ function _adler32($adler, $buf, $len) {
               var $buf_addr_310;
               var $len_addr_29;
               var $sum2_48;
-              var $sub110 = $len_addr_29 - 16 | 0;
-              var $add113 = (HEAPU8[$buf_addr_310] & 255) + $adler_addr_511 | 0;
-              var $add117 = $add113 + (HEAPU8[$buf_addr_310 + 1 | 0] & 255) | 0;
-              var $add121 = $add117 + (HEAPU8[$buf_addr_310 + 2 | 0] & 255) | 0;
-              var $add125 = $add121 + (HEAPU8[$buf_addr_310 + 3 | 0] & 255) | 0;
-              var $add129 = $add125 + (HEAPU8[$buf_addr_310 + 4 | 0] & 255) | 0;
-              var $add133 = $add129 + (HEAPU8[$buf_addr_310 + 5 | 0] & 255) | 0;
-              var $add137 = $add133 + (HEAPU8[$buf_addr_310 + 6 | 0] & 255) | 0;
-              var $add141 = $add137 + (HEAPU8[$buf_addr_310 + 7 | 0] & 255) | 0;
-              var $add145 = $add141 + (HEAPU8[$buf_addr_310 + 8 | 0] & 255) | 0;
-              var $add149 = $add145 + (HEAPU8[$buf_addr_310 + 9 | 0] & 255) | 0;
-              var $add153 = $add149 + (HEAPU8[$buf_addr_310 + 10 | 0] & 255) | 0;
-              var $add157 = $add153 + (HEAPU8[$buf_addr_310 + 11 | 0] & 255) | 0;
-              var $add161 = $add157 + (HEAPU8[$buf_addr_310 + 12 | 0] & 255) | 0;
-              var $add165 = $add161 + (HEAPU8[$buf_addr_310 + 13 | 0] & 255) | 0;
-              var $add169 = $add165 + (HEAPU8[$buf_addr_310 + 14 | 0] & 255) | 0;
-              var $add173 = $add169 + (HEAPU8[$buf_addr_310 + 15 | 0] & 255) | 0;
-              var $add174 = $add113 + $sum2_48 + $add117 + $add121 + $add125 + $add129 + $add133 + $add137 + $add141 + $add145 + $add149 + $add153 + $add157 + $add161 + $add165 + $add169 + $add173 | 0;
-              var $add_ptr175 = $buf_addr_310 + 16 | 0;
+              var $sub110 = CHECK_OVERFLOW($len_addr_29 - 16, 32, 0);
+              var $conv112 = HEAPU8[$buf_addr_310] & 255;
+              var $add113 = CHECK_OVERFLOW($conv112 + $adler_addr_511, 32, 0);
+              var $arrayidx115 = CHECK_OVERFLOW($buf_addr_310 + 1, 32, 0);
+              var $conv116 = HEAPU8[$arrayidx115] & 255;
+              var $add117 = CHECK_OVERFLOW($add113 + $conv116, 32, 0);
+              var $arrayidx119 = CHECK_OVERFLOW($buf_addr_310 + 2, 32, 0);
+              var $conv120 = HEAPU8[$arrayidx119] & 255;
+              var $add121 = CHECK_OVERFLOW($add117 + $conv120, 32, 0);
+              var $arrayidx123 = CHECK_OVERFLOW($buf_addr_310 + 3, 32, 0);
+              var $conv124 = HEAPU8[$arrayidx123] & 255;
+              var $add125 = CHECK_OVERFLOW($add121 + $conv124, 32, 0);
+              var $arrayidx127 = CHECK_OVERFLOW($buf_addr_310 + 4, 32, 0);
+              var $conv128 = HEAPU8[$arrayidx127] & 255;
+              var $add129 = CHECK_OVERFLOW($add125 + $conv128, 32, 0);
+              var $arrayidx131 = CHECK_OVERFLOW($buf_addr_310 + 5, 32, 0);
+              var $conv132 = HEAPU8[$arrayidx131] & 255;
+              var $add133 = CHECK_OVERFLOW($add129 + $conv132, 32, 0);
+              var $arrayidx135 = CHECK_OVERFLOW($buf_addr_310 + 6, 32, 0);
+              var $conv136 = HEAPU8[$arrayidx135] & 255;
+              var $add137 = CHECK_OVERFLOW($add133 + $conv136, 32, 0);
+              var $arrayidx139 = CHECK_OVERFLOW($buf_addr_310 + 7, 32, 0);
+              var $conv140 = HEAPU8[$arrayidx139] & 255;
+              var $add141 = CHECK_OVERFLOW($add137 + $conv140, 32, 0);
+              var $arrayidx143 = CHECK_OVERFLOW($buf_addr_310 + 8, 32, 0);
+              var $conv144 = HEAPU8[$arrayidx143] & 255;
+              var $add145 = CHECK_OVERFLOW($add141 + $conv144, 32, 0);
+              var $arrayidx147 = CHECK_OVERFLOW($buf_addr_310 + 9, 32, 0);
+              var $conv148 = HEAPU8[$arrayidx147] & 255;
+              var $add149 = CHECK_OVERFLOW($add145 + $conv148, 32, 0);
+              var $arrayidx151 = CHECK_OVERFLOW($buf_addr_310 + 10, 32, 0);
+              var $conv152 = HEAPU8[$arrayidx151] & 255;
+              var $add153 = CHECK_OVERFLOW($add149 + $conv152, 32, 0);
+              var $arrayidx155 = CHECK_OVERFLOW($buf_addr_310 + 11, 32, 0);
+              var $conv156 = HEAPU8[$arrayidx155] & 255;
+              var $add157 = CHECK_OVERFLOW($add153 + $conv156, 32, 0);
+              var $arrayidx159 = CHECK_OVERFLOW($buf_addr_310 + 12, 32, 0);
+              var $conv160 = HEAPU8[$arrayidx159] & 255;
+              var $add161 = CHECK_OVERFLOW($add157 + $conv160, 32, 0);
+              var $arrayidx163 = CHECK_OVERFLOW($buf_addr_310 + 13, 32, 0);
+              var $conv164 = HEAPU8[$arrayidx163] & 255;
+              var $add165 = CHECK_OVERFLOW($add161 + $conv164, 32, 0);
+              var $arrayidx167 = CHECK_OVERFLOW($buf_addr_310 + 14, 32, 0);
+              var $conv168 = HEAPU8[$arrayidx167] & 255;
+              var $add169 = CHECK_OVERFLOW($add165 + $conv168, 32, 0);
+              var $arrayidx171 = CHECK_OVERFLOW($buf_addr_310 + 15, 32, 0);
+              var $conv172 = HEAPU8[$arrayidx171] & 255;
+              var $add173 = CHECK_OVERFLOW($add169 + $conv172, 32, 0);
+              var $add114 = CHECK_OVERFLOW($add113 + $sum2_48, 32, 0);
+              var $add118 = CHECK_OVERFLOW($add114 + $add117, 32, 0);
+              var $add122 = CHECK_OVERFLOW($add118 + $add121, 32, 0);
+              var $add126 = CHECK_OVERFLOW($add122 + $add125, 32, 0);
+              var $add130 = CHECK_OVERFLOW($add126 + $add129, 32, 0);
+              var $add134 = CHECK_OVERFLOW($add130 + $add133, 32, 0);
+              var $add138 = CHECK_OVERFLOW($add134 + $add137, 32, 0);
+              var $add142 = CHECK_OVERFLOW($add138 + $add141, 32, 0);
+              var $add146 = CHECK_OVERFLOW($add142 + $add145, 32, 0);
+              var $add150 = CHECK_OVERFLOW($add146 + $add149, 32, 0);
+              var $add154 = CHECK_OVERFLOW($add150 + $add153, 32, 0);
+              var $add158 = CHECK_OVERFLOW($add154 + $add157, 32, 0);
+              var $add162 = CHECK_OVERFLOW($add158 + $add161, 32, 0);
+              var $add166 = CHECK_OVERFLOW($add162 + $add165, 32, 0);
+              var $add170 = CHECK_OVERFLOW($add166 + $add169, 32, 0);
+              var $add174 = CHECK_OVERFLOW($add170 + $add173, 32, 0);
+              var $add_ptr175 = CHECK_OVERFLOW($buf_addr_310 + 16, 32, 0);
               if ($sub110 >>> 0 <= 15) {
                 break;
               }
@@ -8587,9 +10166,11 @@ function _adler32($adler, $buf, $len) {
               var $buf_addr_44;
               var $len_addr_33;
               var $sum2_52;
-              var $dec178 = $len_addr_33 - 1 | 0;
-              var $add183 = (HEAPU8[$buf_addr_44] & 255) + $adler_addr_65 | 0;
-              var $add184 = $add183 + $sum2_52 | 0;
+              var $dec178 = CHECK_OVERFLOW($len_addr_33 - 1, 32, 0);
+              var $incdec_ptr181 = CHECK_OVERFLOW($buf_addr_44 + 1, 32, 0);
+              var $conv182 = HEAPU8[$buf_addr_44] & 255;
+              var $add183 = CHECK_OVERFLOW($conv182 + $adler_addr_65, 32, 0);
+              var $add184 = CHECK_OVERFLOW($add183 + $sum2_52, 32, 0);
               if (($dec178 | 0) == 0) {
                 var $sum2_5_lcssa = $add184;
                 var $adler_addr_6_lcssa = $add183;
@@ -8598,7 +10179,7 @@ function _adler32($adler, $buf, $len) {
               }
               var $sum2_52 = $add184;
               var $len_addr_33 = $dec178;
-              var $buf_addr_44 = $buf_addr_44 + 1 | 0;
+              var $buf_addr_44 = $incdec_ptr181;
               var $adler_addr_65 = $add183;
             }
           }
@@ -8623,7 +10204,6 @@ function _adler32($adler, $buf, $len) {
 _adler32["X"] = 1;
 
 function _crc32_little($crc, $buf, $len) {
-  var $buf4_010$s2;
   var __label__;
   var $buf_addr_0 = $buf;
   var $len_addr_0 = $len;
@@ -8641,9 +10221,13 @@ function _crc32_little($crc, $buf, $len) {
       __label__ = 4;
       break;
     }
-    var $xor3 = HEAP32[_crc_table + ((HEAPU8[$buf_addr_0] & 255 ^ $c_0 & 255) << 2) >> 2] ^ $c_0 >>> 8;
-    var $buf_addr_0 = $buf_addr_0 + 1 | 0;
-    var $len_addr_0 = $len_addr_0 - 1 | 0;
+    var $incdec_ptr = CHECK_OVERFLOW($buf_addr_0 + 1, 32, 0);
+    var $and2 = HEAPU8[$buf_addr_0] & 255 ^ $c_0 & 255;
+    var $arrayidx = CHECK_OVERFLOW(($and2 << 2) + _crc_table, 32, 0);
+    var $xor3 = HEAP32[$arrayidx >> 2] ^ $c_0 >>> 8;
+    var $dec = CHECK_OVERFLOW($len_addr_0 - 1, 32, 0);
+    var $buf_addr_0 = $incdec_ptr;
+    var $len_addr_0 = $dec;
     var $c_0 = $xor3;
   }
   $while_end$$if_end$54 : do {
@@ -8654,22 +10238,124 @@ function _crc32_little($crc, $buf, $len) {
         if ($cmp7) {
           var $c_18 = $c_0;
           var $len_addr_19 = $len_addr_0;
-          var $buf4_010 = $3, $buf4_010$s2 = $buf4_010 >> 2;
+          var $buf4_010 = $3;
           while (1) {
             var $buf4_010;
             var $len_addr_19;
             var $c_18;
-            var $xor8 = HEAP32[$buf4_010$s2] ^ $c_18;
-            var $xor23 = HEAP32[_crc_table + (($xor8 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor8 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor8 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor8 >>> 24 << 2) >> 2] ^ HEAP32[$buf4_010$s2 + 1];
-            var $xor38 = HEAP32[_crc_table + (($xor23 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor23 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor23 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor23 >>> 24 << 2) >> 2] ^ HEAP32[$buf4_010$s2 + 2];
-            var $xor53 = HEAP32[_crc_table + (($xor38 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor38 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor38 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor38 >>> 24 << 2) >> 2] ^ HEAP32[$buf4_010$s2 + 3];
-            var $xor68 = HEAP32[_crc_table + (($xor53 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor53 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor53 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor53 >>> 24 << 2) >> 2] ^ HEAP32[$buf4_010$s2 + 4];
-            var $xor83 = HEAP32[_crc_table + (($xor68 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor68 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor68 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor68 >>> 24 << 2) >> 2] ^ HEAP32[$buf4_010$s2 + 5];
-            var $xor98 = HEAP32[_crc_table + (($xor83 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor83 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor83 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor83 >>> 24 << 2) >> 2] ^ HEAP32[$buf4_010$s2 + 6];
-            var $incdec_ptr112 = $buf4_010 + 32 | 0;
-            var $xor113 = HEAP32[_crc_table + (($xor98 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor98 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor98 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor98 >>> 24 << 2) >> 2] ^ HEAP32[$buf4_010$s2 + 7];
-            var $xor126 = HEAP32[_crc_table + (($xor113 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor113 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor113 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor113 >>> 24 << 2) >> 2];
-            var $sub = $len_addr_19 - 32 | 0;
+            var $incdec_ptr7 = CHECK_OVERFLOW($buf4_010 + 4, 32, 0);
+            var $xor8 = HEAP32[$buf4_010 >> 2] ^ $c_18;
+            var $and9 = $xor8 & 255;
+            var $arrayidx10 = CHECK_OVERFLOW(($and9 << 2) + _crc_table + 3072, 32, 0);
+            var $5 = HEAP32[$arrayidx10 >> 2];
+            var $and12 = $xor8 >>> 8 & 255;
+            var $arrayidx13 = CHECK_OVERFLOW(($and12 << 2) + _crc_table + 2048, 32, 0);
+            var $6 = HEAP32[$arrayidx13 >> 2];
+            var $and16 = $xor8 >>> 16 & 255;
+            var $arrayidx17 = CHECK_OVERFLOW(($and16 << 2) + _crc_table + 1024, 32, 0);
+            var $7 = HEAP32[$arrayidx17 >> 2];
+            var $shr19 = $xor8 >>> 24;
+            var $arrayidx20 = CHECK_OVERFLOW(($shr19 << 2) + _crc_table, 32, 0);
+            var $8 = HEAP32[$arrayidx20 >> 2];
+            var $incdec_ptr22 = CHECK_OVERFLOW($buf4_010 + 8, 32, 0);
+            var $xor23 = $6 ^ $5 ^ $7 ^ $8 ^ HEAP32[$incdec_ptr7 >> 2];
+            var $and24 = $xor23 & 255;
+            var $arrayidx25 = CHECK_OVERFLOW(($and24 << 2) + _crc_table + 3072, 32, 0);
+            var $10 = HEAP32[$arrayidx25 >> 2];
+            var $and27 = $xor23 >>> 8 & 255;
+            var $arrayidx28 = CHECK_OVERFLOW(($and27 << 2) + _crc_table + 2048, 32, 0);
+            var $11 = HEAP32[$arrayidx28 >> 2];
+            var $and31 = $xor23 >>> 16 & 255;
+            var $arrayidx32 = CHECK_OVERFLOW(($and31 << 2) + _crc_table + 1024, 32, 0);
+            var $12 = HEAP32[$arrayidx32 >> 2];
+            var $shr34 = $xor23 >>> 24;
+            var $arrayidx35 = CHECK_OVERFLOW(($shr34 << 2) + _crc_table, 32, 0);
+            var $13 = HEAP32[$arrayidx35 >> 2];
+            var $incdec_ptr37 = CHECK_OVERFLOW($buf4_010 + 12, 32, 0);
+            var $xor38 = $11 ^ $10 ^ $12 ^ $13 ^ HEAP32[$incdec_ptr22 >> 2];
+            var $and39 = $xor38 & 255;
+            var $arrayidx40 = CHECK_OVERFLOW(($and39 << 2) + _crc_table + 3072, 32, 0);
+            var $15 = HEAP32[$arrayidx40 >> 2];
+            var $and42 = $xor38 >>> 8 & 255;
+            var $arrayidx43 = CHECK_OVERFLOW(($and42 << 2) + _crc_table + 2048, 32, 0);
+            var $16 = HEAP32[$arrayidx43 >> 2];
+            var $and46 = $xor38 >>> 16 & 255;
+            var $arrayidx47 = CHECK_OVERFLOW(($and46 << 2) + _crc_table + 1024, 32, 0);
+            var $17 = HEAP32[$arrayidx47 >> 2];
+            var $shr49 = $xor38 >>> 24;
+            var $arrayidx50 = CHECK_OVERFLOW(($shr49 << 2) + _crc_table, 32, 0);
+            var $18 = HEAP32[$arrayidx50 >> 2];
+            var $incdec_ptr52 = CHECK_OVERFLOW($buf4_010 + 16, 32, 0);
+            var $xor53 = $16 ^ $15 ^ $17 ^ $18 ^ HEAP32[$incdec_ptr37 >> 2];
+            var $and54 = $xor53 & 255;
+            var $arrayidx55 = CHECK_OVERFLOW(($and54 << 2) + _crc_table + 3072, 32, 0);
+            var $20 = HEAP32[$arrayidx55 >> 2];
+            var $and57 = $xor53 >>> 8 & 255;
+            var $arrayidx58 = CHECK_OVERFLOW(($and57 << 2) + _crc_table + 2048, 32, 0);
+            var $21 = HEAP32[$arrayidx58 >> 2];
+            var $and61 = $xor53 >>> 16 & 255;
+            var $arrayidx62 = CHECK_OVERFLOW(($and61 << 2) + _crc_table + 1024, 32, 0);
+            var $22 = HEAP32[$arrayidx62 >> 2];
+            var $shr64 = $xor53 >>> 24;
+            var $arrayidx65 = CHECK_OVERFLOW(($shr64 << 2) + _crc_table, 32, 0);
+            var $23 = HEAP32[$arrayidx65 >> 2];
+            var $incdec_ptr67 = CHECK_OVERFLOW($buf4_010 + 20, 32, 0);
+            var $xor68 = $21 ^ $20 ^ $22 ^ $23 ^ HEAP32[$incdec_ptr52 >> 2];
+            var $and69 = $xor68 & 255;
+            var $arrayidx70 = CHECK_OVERFLOW(($and69 << 2) + _crc_table + 3072, 32, 0);
+            var $25 = HEAP32[$arrayidx70 >> 2];
+            var $and72 = $xor68 >>> 8 & 255;
+            var $arrayidx73 = CHECK_OVERFLOW(($and72 << 2) + _crc_table + 2048, 32, 0);
+            var $26 = HEAP32[$arrayidx73 >> 2];
+            var $and76 = $xor68 >>> 16 & 255;
+            var $arrayidx77 = CHECK_OVERFLOW(($and76 << 2) + _crc_table + 1024, 32, 0);
+            var $27 = HEAP32[$arrayidx77 >> 2];
+            var $shr79 = $xor68 >>> 24;
+            var $arrayidx80 = CHECK_OVERFLOW(($shr79 << 2) + _crc_table, 32, 0);
+            var $28 = HEAP32[$arrayidx80 >> 2];
+            var $incdec_ptr82 = CHECK_OVERFLOW($buf4_010 + 24, 32, 0);
+            var $xor83 = $26 ^ $25 ^ $27 ^ $28 ^ HEAP32[$incdec_ptr67 >> 2];
+            var $and84 = $xor83 & 255;
+            var $arrayidx85 = CHECK_OVERFLOW(($and84 << 2) + _crc_table + 3072, 32, 0);
+            var $30 = HEAP32[$arrayidx85 >> 2];
+            var $and87 = $xor83 >>> 8 & 255;
+            var $arrayidx88 = CHECK_OVERFLOW(($and87 << 2) + _crc_table + 2048, 32, 0);
+            var $31 = HEAP32[$arrayidx88 >> 2];
+            var $and91 = $xor83 >>> 16 & 255;
+            var $arrayidx92 = CHECK_OVERFLOW(($and91 << 2) + _crc_table + 1024, 32, 0);
+            var $32 = HEAP32[$arrayidx92 >> 2];
+            var $shr94 = $xor83 >>> 24;
+            var $arrayidx95 = CHECK_OVERFLOW(($shr94 << 2) + _crc_table, 32, 0);
+            var $33 = HEAP32[$arrayidx95 >> 2];
+            var $incdec_ptr97 = CHECK_OVERFLOW($buf4_010 + 28, 32, 0);
+            var $xor98 = $31 ^ $30 ^ $32 ^ $33 ^ HEAP32[$incdec_ptr82 >> 2];
+            var $and99 = $xor98 & 255;
+            var $arrayidx100 = CHECK_OVERFLOW(($and99 << 2) + _crc_table + 3072, 32, 0);
+            var $35 = HEAP32[$arrayidx100 >> 2];
+            var $and102 = $xor98 >>> 8 & 255;
+            var $arrayidx103 = CHECK_OVERFLOW(($and102 << 2) + _crc_table + 2048, 32, 0);
+            var $36 = HEAP32[$arrayidx103 >> 2];
+            var $and106 = $xor98 >>> 16 & 255;
+            var $arrayidx107 = CHECK_OVERFLOW(($and106 << 2) + _crc_table + 1024, 32, 0);
+            var $37 = HEAP32[$arrayidx107 >> 2];
+            var $shr109 = $xor98 >>> 24;
+            var $arrayidx110 = CHECK_OVERFLOW(($shr109 << 2) + _crc_table, 32, 0);
+            var $38 = HEAP32[$arrayidx110 >> 2];
+            var $incdec_ptr112 = CHECK_OVERFLOW($buf4_010 + 32, 32, 0);
+            var $xor113 = $36 ^ $35 ^ $37 ^ $38 ^ HEAP32[$incdec_ptr97 >> 2];
+            var $and114 = $xor113 & 255;
+            var $arrayidx115 = CHECK_OVERFLOW(($and114 << 2) + _crc_table + 3072, 32, 0);
+            var $40 = HEAP32[$arrayidx115 >> 2];
+            var $and117 = $xor113 >>> 8 & 255;
+            var $arrayidx118 = CHECK_OVERFLOW(($and117 << 2) + _crc_table + 2048, 32, 0);
+            var $41 = HEAP32[$arrayidx118 >> 2];
+            var $and121 = $xor113 >>> 16 & 255;
+            var $arrayidx122 = CHECK_OVERFLOW(($and121 << 2) + _crc_table + 1024, 32, 0);
+            var $42 = HEAP32[$arrayidx122 >> 2];
+            var $shr124 = $xor113 >>> 24;
+            var $arrayidx125 = CHECK_OVERFLOW(($shr124 << 2) + _crc_table, 32, 0);
+            var $xor126 = $41 ^ $40 ^ $42 ^ HEAP32[$arrayidx125 >> 2];
+            var $sub = CHECK_OVERFLOW($len_addr_19 - 32, 32, 0);
             if ($sub >>> 0 <= 31) {
               var $c_1_lcssa = $xor126;
               var $len_addr_1_lcssa = $sub;
@@ -8678,7 +10364,7 @@ function _crc32_little($crc, $buf, $len) {
             }
             var $c_18 = $xor126;
             var $len_addr_19 = $sub;
-            var $buf4_010 = $incdec_ptr112, $buf4_010$s2 = $buf4_010 >> 2;
+            var $buf4_010 = $incdec_ptr112;
           }
         } else {
           var $c_1_lcssa = $c_0;
@@ -8699,10 +10385,21 @@ function _crc32_little($crc, $buf, $len) {
             var $buf4_14;
             var $len_addr_23;
             var $c_22;
-            var $incdec_ptr132 = $buf4_14 + 4 | 0;
+            var $incdec_ptr132 = CHECK_OVERFLOW($buf4_14 + 4, 32, 0);
             var $xor133 = HEAP32[$buf4_14 >> 2] ^ $c_22;
-            var $xor146 = HEAP32[_crc_table + (($xor133 >>> 8 & 255) << 2) + 2048 >> 2] ^ HEAP32[_crc_table + (($xor133 & 255) << 2) + 3072 >> 2] ^ HEAP32[_crc_table + (($xor133 >>> 16 & 255) << 2) + 1024 >> 2] ^ HEAP32[_crc_table + ($xor133 >>> 24 << 2) >> 2];
-            var $sub147 = $len_addr_23 - 4 | 0;
+            var $and134 = $xor133 & 255;
+            var $arrayidx135 = CHECK_OVERFLOW(($and134 << 2) + _crc_table + 3072, 32, 0);
+            var $45 = HEAP32[$arrayidx135 >> 2];
+            var $and137 = $xor133 >>> 8 & 255;
+            var $arrayidx138 = CHECK_OVERFLOW(($and137 << 2) + _crc_table + 2048, 32, 0);
+            var $46 = HEAP32[$arrayidx138 >> 2];
+            var $and141 = $xor133 >>> 16 & 255;
+            var $arrayidx142 = CHECK_OVERFLOW(($and141 << 2) + _crc_table + 1024, 32, 0);
+            var $47 = HEAP32[$arrayidx142 >> 2];
+            var $shr144 = $xor133 >>> 24;
+            var $arrayidx145 = CHECK_OVERFLOW(($shr144 << 2) + _crc_table, 32, 0);
+            var $xor146 = $46 ^ $45 ^ $47 ^ HEAP32[$arrayidx145 >> 2];
+            var $sub147 = CHECK_OVERFLOW($len_addr_23 - 4, 32, 0);
             if ($sub147 >>> 0 <= 3) {
               var $c_2_lcssa = $xor146;
               var $len_addr_2_lcssa = $sub147;
@@ -8733,13 +10430,16 @@ function _crc32_little($crc, $buf, $len) {
         var $c_3;
         var $len_addr_3;
         var $buf_addr_1;
-        var $xor156 = HEAP32[_crc_table + ((HEAPU8[$buf_addr_1] & 255 ^ $c_3 & 255) << 2) >> 2] ^ $c_3 >>> 8;
-        var $dec157 = $len_addr_3 - 1 | 0;
+        var $incdec_ptr150 = CHECK_OVERFLOW($buf_addr_1 + 1, 32, 0);
+        var $and153 = HEAPU8[$buf_addr_1] & 255 ^ $c_3 & 255;
+        var $arrayidx154 = CHECK_OVERFLOW(($and153 << 2) + _crc_table, 32, 0);
+        var $xor156 = HEAP32[$arrayidx154 >> 2] ^ $c_3 >>> 8;
+        var $dec157 = CHECK_OVERFLOW($len_addr_3 - 1, 32, 0);
         if (($dec157 | 0) == 0) {
           var $c_4 = $xor156;
           break $while_end$$if_end$54;
         }
-        var $buf_addr_1 = $buf_addr_1 + 1 | 0;
+        var $buf_addr_1 = $incdec_ptr150;
         var $len_addr_3 = $dec157;
         var $c_3 = $xor156;
       }
@@ -8753,59 +10453,118 @@ function _crc32_little($crc, $buf, $len) {
 _crc32_little["X"] = 1;
 
 function _gen_codes($tree, $max_code, $bl_count) {
-  var $next_code$s1;
-  var $bl_count$s1 = $bl_count >> 1;
   var __stackBase__ = STACKTOP;
   STACKTOP += 32;
-  var $next_code = __stackBase__, $next_code$s1 = $next_code >> 1;
-  var $shl = HEAP16[$bl_count$s1] << 1;
-  HEAP16[$next_code$s1 + 1] = $shl;
-  var $shl_1 = (HEAP16[$bl_count$s1 + 1] + $shl & 65535) << 1;
-  HEAP16[$next_code$s1 + 2] = $shl_1;
-  var $shl_2 = (HEAP16[$bl_count$s1 + 2] + $shl_1 & 65535) << 1;
-  HEAP16[$next_code$s1 + 3] = $shl_2;
-  var $shl_3 = (HEAP16[$bl_count$s1 + 3] + $shl_2 & 65535) << 1;
-  HEAP16[$next_code$s1 + 4] = $shl_3;
-  var $shl_4 = (HEAP16[$bl_count$s1 + 4] + $shl_3 & 65535) << 1;
-  HEAP16[$next_code$s1 + 5] = $shl_4;
-  var $shl_5 = (HEAP16[$bl_count$s1 + 5] + $shl_4 & 65535) << 1;
-  HEAP16[$next_code$s1 + 6] = $shl_5;
-  var $shl_6 = (HEAP16[$bl_count$s1 + 6] + $shl_5 & 65535) << 1;
-  HEAP16[$next_code$s1 + 7] = $shl_6;
-  var $shl_7 = (HEAP16[$bl_count$s1 + 7] + $shl_6 & 65535) << 1;
-  HEAP16[$next_code$s1 + 8] = $shl_7;
-  var $shl_8 = (HEAP16[$bl_count$s1 + 8] + $shl_7 & 65535) << 1;
-  HEAP16[$next_code$s1 + 9] = $shl_8;
-  var $shl_9 = (HEAP16[$bl_count$s1 + 9] + $shl_8 & 65535) << 1;
-  HEAP16[$next_code$s1 + 10] = $shl_9;
-  var $shl_10 = (HEAP16[$bl_count$s1 + 10] + $shl_9 & 65535) << 1;
-  HEAP16[$next_code$s1 + 11] = $shl_10;
-  var $shl_11 = (HEAP16[$bl_count$s1 + 11] + $shl_10 & 65535) << 1;
-  HEAP16[$next_code$s1 + 12] = $shl_11;
-  var $shl_12 = (HEAP16[$bl_count$s1 + 12] + $shl_11 & 65535) << 1;
-  HEAP16[$next_code$s1 + 13] = $shl_12;
-  var $shl_13 = (HEAP16[$bl_count$s1 + 13] + $shl_12 & 65535) << 1;
-  HEAP16[$next_code$s1 + 14] = $shl_13;
-  var $shl_14 = (HEAP16[$bl_count$s1 + 14] + $shl_13 & 65535) << 1;
-  HEAP16[$next_code$s1 + 15] = $shl_14;
+  var $next_code = __stackBase__;
+  var $shl = HEAP16[$bl_count >> 1] << 1;
+  var $arrayidx3 = CHECK_OVERFLOW($next_code + 2, 32, 0);
+  HEAP16[$arrayidx3 >> 1] = $shl;
+  var $arrayidx_1 = CHECK_OVERFLOW($bl_count + 2, 32, 0);
+  var $1 = HEAP16[$arrayidx_1 >> 1];
+  var $add_1 = CHECK_OVERFLOW($1 + $shl, 16, 0);
+  var $shl_1 = $add_1 << 1;
+  var $arrayidx3_1 = CHECK_OVERFLOW($next_code + 4, 32, 0);
+  HEAP16[$arrayidx3_1 >> 1] = $shl_1;
+  var $arrayidx_2 = CHECK_OVERFLOW($bl_count + 4, 32, 0);
+  var $2 = HEAP16[$arrayidx_2 >> 1];
+  var $add_2 = CHECK_OVERFLOW($2 + $shl_1, 16, 0);
+  var $shl_2 = $add_2 << 1;
+  var $arrayidx3_2 = CHECK_OVERFLOW($next_code + 6, 32, 0);
+  HEAP16[$arrayidx3_2 >> 1] = $shl_2;
+  var $arrayidx_3 = CHECK_OVERFLOW($bl_count + 6, 32, 0);
+  var $3 = HEAP16[$arrayidx_3 >> 1];
+  var $add_3 = CHECK_OVERFLOW($3 + $shl_2, 16, 0);
+  var $shl_3 = $add_3 << 1;
+  var $arrayidx3_3 = CHECK_OVERFLOW($next_code + 8, 32, 0);
+  HEAP16[$arrayidx3_3 >> 1] = $shl_3;
+  var $arrayidx_4 = CHECK_OVERFLOW($bl_count + 8, 32, 0);
+  var $4 = HEAP16[$arrayidx_4 >> 1];
+  var $add_4 = CHECK_OVERFLOW($4 + $shl_3, 16, 0);
+  var $shl_4 = $add_4 << 1;
+  var $arrayidx3_4 = CHECK_OVERFLOW($next_code + 10, 32, 0);
+  HEAP16[$arrayidx3_4 >> 1] = $shl_4;
+  var $arrayidx_5 = CHECK_OVERFLOW($bl_count + 10, 32, 0);
+  var $5 = HEAP16[$arrayidx_5 >> 1];
+  var $add_5 = CHECK_OVERFLOW($5 + $shl_4, 16, 0);
+  var $shl_5 = $add_5 << 1;
+  var $arrayidx3_5 = CHECK_OVERFLOW($next_code + 12, 32, 0);
+  HEAP16[$arrayidx3_5 >> 1] = $shl_5;
+  var $arrayidx_6 = CHECK_OVERFLOW($bl_count + 12, 32, 0);
+  var $6 = HEAP16[$arrayidx_6 >> 1];
+  var $add_6 = CHECK_OVERFLOW($6 + $shl_5, 16, 0);
+  var $shl_6 = $add_6 << 1;
+  var $arrayidx3_6 = CHECK_OVERFLOW($next_code + 14, 32, 0);
+  HEAP16[$arrayidx3_6 >> 1] = $shl_6;
+  var $arrayidx_7 = CHECK_OVERFLOW($bl_count + 14, 32, 0);
+  var $7 = HEAP16[$arrayidx_7 >> 1];
+  var $add_7 = CHECK_OVERFLOW($7 + $shl_6, 16, 0);
+  var $shl_7 = $add_7 << 1;
+  var $arrayidx3_7 = CHECK_OVERFLOW($next_code + 16, 32, 0);
+  HEAP16[$arrayidx3_7 >> 1] = $shl_7;
+  var $arrayidx_8 = CHECK_OVERFLOW($bl_count + 16, 32, 0);
+  var $8 = HEAP16[$arrayidx_8 >> 1];
+  var $add_8 = CHECK_OVERFLOW($8 + $shl_7, 16, 0);
+  var $shl_8 = $add_8 << 1;
+  var $arrayidx3_8 = CHECK_OVERFLOW($next_code + 18, 32, 0);
+  HEAP16[$arrayidx3_8 >> 1] = $shl_8;
+  var $arrayidx_9 = CHECK_OVERFLOW($bl_count + 18, 32, 0);
+  var $9 = HEAP16[$arrayidx_9 >> 1];
+  var $add_9 = CHECK_OVERFLOW($9 + $shl_8, 16, 0);
+  var $shl_9 = $add_9 << 1;
+  var $arrayidx3_9 = CHECK_OVERFLOW($next_code + 20, 32, 0);
+  HEAP16[$arrayidx3_9 >> 1] = $shl_9;
+  var $arrayidx_10 = CHECK_OVERFLOW($bl_count + 20, 32, 0);
+  var $10 = HEAP16[$arrayidx_10 >> 1];
+  var $add_10 = CHECK_OVERFLOW($10 + $shl_9, 16, 0);
+  var $shl_10 = $add_10 << 1;
+  var $arrayidx3_10 = CHECK_OVERFLOW($next_code + 22, 32, 0);
+  HEAP16[$arrayidx3_10 >> 1] = $shl_10;
+  var $arrayidx_11 = CHECK_OVERFLOW($bl_count + 22, 32, 0);
+  var $11 = HEAP16[$arrayidx_11 >> 1];
+  var $add_11 = CHECK_OVERFLOW($11 + $shl_10, 16, 0);
+  var $shl_11 = $add_11 << 1;
+  var $arrayidx3_11 = CHECK_OVERFLOW($next_code + 24, 32, 0);
+  HEAP16[$arrayidx3_11 >> 1] = $shl_11;
+  var $arrayidx_12 = CHECK_OVERFLOW($bl_count + 24, 32, 0);
+  var $12 = HEAP16[$arrayidx_12 >> 1];
+  var $add_12 = CHECK_OVERFLOW($12 + $shl_11, 16, 0);
+  var $shl_12 = $add_12 << 1;
+  var $arrayidx3_12 = CHECK_OVERFLOW($next_code + 26, 32, 0);
+  HEAP16[$arrayidx3_12 >> 1] = $shl_12;
+  var $arrayidx_13 = CHECK_OVERFLOW($bl_count + 26, 32, 0);
+  var $13 = HEAP16[$arrayidx_13 >> 1];
+  var $add_13 = CHECK_OVERFLOW($13 + $shl_12, 16, 0);
+  var $shl_13 = $add_13 << 1;
+  var $arrayidx3_13 = CHECK_OVERFLOW($next_code + 28, 32, 0);
+  HEAP16[$arrayidx3_13 >> 1] = $shl_13;
+  var $arrayidx_14 = CHECK_OVERFLOW($bl_count + 28, 32, 0);
+  var $14 = HEAP16[$arrayidx_14 >> 1];
+  var $add_14 = CHECK_OVERFLOW($14 + $shl_13, 16, 0);
+  var $shl_14 = $add_14 << 1;
+  var $arrayidx3_14 = CHECK_OVERFLOW($next_code + 30, 32, 0);
+  HEAP16[$arrayidx3_14 >> 1] = $shl_14;
   var $cmp51 = ($max_code | 0) < 0;
   $for_end21$$for_body7_lr_ph$2 : do {
     if (!$cmp51) {
-      var $15 = $max_code + 1 | 0;
+      var $15 = CHECK_OVERFLOW($max_code + 1, 32, 0);
       var $n_02 = 0;
       while (1) {
         var $n_02;
-        var $16 = HEAPU16[$tree + ($n_02 << 2) + 2 >> 1];
+        var $len9 = CHECK_OVERFLOW(($n_02 << 2) + $tree + 2, 32, 0);
+        var $16 = HEAPU16[$len9 >> 1];
         var $conv10 = $16 & 65535;
         if ($16 << 16 >> 16 != 0) {
-          var $arrayidx13 = ($conv10 << 1) + $next_code | 0;
+          var $arrayidx13 = CHECK_OVERFLOW(($conv10 << 1) + $next_code, 32, 0);
           var $17 = HEAPU16[$arrayidx13 >> 1];
-          HEAP16[$arrayidx13 >> 1] = $17 + 1 & 65535;
+          var $inc14 = CHECK_OVERFLOW($17 + 1, 16, 0);
+          HEAP16[$arrayidx13 >> 1] = $inc14;
           var $conv15 = $17 & 65535;
           var $call = _bi_reverse($conv15, $conv10);
-          HEAP16[$tree + ($n_02 << 2) >> 1] = $call & 65535;
+          var $conv16 = $call & 65535;
+          var $code18 = CHECK_OVERFLOW(($n_02 << 2) + $tree, 32, 0);
+          HEAP16[$code18 >> 1] = $conv16;
         }
-        var $inc20 = $n_02 + 1 | 0;
+        var $inc20 = CHECK_OVERFLOW($n_02 + 1, 32, 0);
         if (($inc20 | 0) == ($15 | 0)) {
           break $for_end21$$for_body7_lr_ph$2;
         }
@@ -8833,15 +10592,13 @@ function _crc32($crc, $buf, $len) {
 }
 
 function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
-  var $offs$s1;
-  var $count$s1;
   var $table$s2 = $table >> 2;
   var __stackBase__ = STACKTOP;
   STACKTOP += 32;
   var __label__;
-  var $count = __stackBase__, $count$s1 = $count >> 1;
+  var $count = __stackBase__;
   var $count89 = $count;
-  var $offs = STACKTOP, $offs$s1 = $offs >> 1;
+  var $offs = STACKTOP;
   STACKTOP += 32;
   _memset($count89, 0, 32, 2);
   var $cmp269 = ($codes | 0) == 0;
@@ -8850,10 +10607,13 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
       var $sym_070 = 0;
       while (1) {
         var $sym_070;
-        var $arrayidx5 = ((HEAPU16[$lens + ($sym_070 << 1) >> 1] & 65535) << 1) + $count | 0;
-        var $inc6 = HEAP16[$arrayidx5 >> 1] + 1 & 65535;
+        var $arrayidx4 = CHECK_OVERFLOW(($sym_070 << 1) + $lens, 32, 0);
+        var $idxprom = HEAPU16[$arrayidx4 >> 1] & 65535;
+        var $arrayidx5 = CHECK_OVERFLOW(($idxprom << 1) + $count, 32, 0);
+        var $1 = HEAP16[$arrayidx5 >> 1];
+        var $inc6 = CHECK_OVERFLOW($1 + 1, 16, 0);
         HEAP16[$arrayidx5 >> 1] = $inc6;
-        var $inc8 = $sym_070 + 1 | 0;
+        var $inc8 = CHECK_OVERFLOW($sym_070 + 1, 32, 0);
         if (($inc8 | 0) == ($codes | 0)) {
           break $for_end9$$for_body3$2;
         }
@@ -8867,26 +10627,35 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
     var $max_0;
     if (($max_0 | 0) == 0) {
       var $4 = HEAPU32[$table$s2];
-      HEAP32[$table$s2] = $4 + 4 | 0;
-      HEAP8[$4 | 0] = 64;
-      HEAP8[$4 + 1 | 0] = 1;
-      HEAP16[$4 + 2 >> 1] = 0;
+      var $incdec_ptr = CHECK_OVERFLOW($4 + 4, 32, 0);
+      HEAP32[$table$s2] = $incdec_ptr;
+      var $_09 = CHECK_OVERFLOW($4, 32, 0);
+      HEAP8[$_09] = 64;
+      var $_111 = CHECK_OVERFLOW($4 + 1, 32, 0);
+      HEAP8[$_111] = 1;
+      var $_213 = CHECK_OVERFLOW($4 + 2, 32, 0);
+      HEAP16[$_213 >> 1] = 0;
       var $5 = HEAP32[$table$s2];
-      var $incdec_ptr26 = $5 + 4 | 0;
+      var $incdec_ptr26 = CHECK_OVERFLOW($5 + 4, 32, 0);
       HEAP32[$table$s2] = $incdec_ptr26;
-      HEAP8[$5 | 0] = 64;
-      HEAP8[$5 + 1 | 0] = 1;
-      HEAP16[$5 + 2 >> 1] = 0;
+      var $_0 = CHECK_OVERFLOW($5, 32, 0);
+      HEAP8[$_0] = 64;
+      var $_1 = CHECK_OVERFLOW($5 + 1, 32, 0);
+      HEAP8[$_1] = 1;
+      var $_2 = CHECK_OVERFLOW($5 + 2, 32, 0);
+      HEAP16[$_2 >> 1] = 0;
       HEAP32[$bits >> 2] = 1;
       var $retval_0 = 0;
       __label__ = 57;
       break;
     }
-    if (HEAP16[($max_0 << 1 >> 1) + $count$s1] << 16 >> 16 != 0) {
+    var $arrayidx13 = CHECK_OVERFLOW(($max_0 << 1) + $count, 32, 0);
+    if (HEAP16[$arrayidx13 >> 1] << 16 >> 16 != 0) {
       __label__ = 6;
       break;
     }
-    var $max_0 = $max_0 - 1 | 0;
+    var $dec = CHECK_OVERFLOW($max_0 - 1, 32, 0);
+    var $max_0 = $dec;
   }
   $for_end17$$return$12 : do {
     if (__label__ == 6) {
@@ -8897,10 +10666,12 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
         if ($min_0 >>> 0 >= $max_0 >>> 0) {
           break;
         }
-        if (HEAP16[($min_0 << 1 >> 1) + $count$s1] << 16 >> 16 != 0) {
+        var $arrayidx32 = CHECK_OVERFLOW(($min_0 << 1) + $count, 32, 0);
+        if (HEAP16[$arrayidx32 >> 1] << 16 >> 16 != 0) {
           break;
         }
-        var $min_0 = $min_0 + 1 | 0;
+        var $inc39 = CHECK_OVERFLOW($min_0 + 1, 32, 0);
+        var $min_0 = $inc39;
       }
       var $root_1 = $root_0 >>> 0 < $min_0 >>> 0 ? $min_0 : $root_0;
       var $len_1 = 1;
@@ -8911,12 +10682,16 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
         if ($len_1 >>> 0 >= 16) {
           break;
         }
-        var $sub = ($left_0 << 1) - (HEAPU16[($len_1 << 1 >> 1) + $count$s1] & 65535) | 0;
+        var $shl = $left_0 << 1;
+        var $arrayidx49 = CHECK_OVERFLOW(($len_1 << 1) + $count, 32, 0);
+        var $conv50 = HEAPU16[$arrayidx49 >> 1] & 65535;
+        var $sub = CHECK_OVERFLOW($shl - $conv50, 32, 0);
         if (($sub | 0) < 0) {
           var $retval_0 = -1;
           break $for_end17$$return$12;
         }
-        var $len_1 = $len_1 + 1 | 0;
+        var $inc56 = CHECK_OVERFLOW($len_1 + 1, 32, 0);
+        var $len_1 = $inc56;
         var $left_0 = $sub;
       }
       if (($left_0 | 0) > 0) {
@@ -8925,35 +10700,77 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           break;
         }
       }
-      HEAP16[$offs$s1 + 1] = 0;
-      var $8 = HEAP16[$count$s1 + 1];
-      HEAP16[$offs$s1 + 2] = $8;
-      var $add_1 = HEAP16[$count$s1 + 2] + $8 & 65535;
-      HEAP16[$offs$s1 + 3] = $add_1;
-      var $add_2 = HEAP16[$count$s1 + 3] + $add_1 & 65535;
-      HEAP16[$offs$s1 + 4] = $add_2;
-      var $add_3 = HEAP16[$count$s1 + 4] + $add_2 & 65535;
-      HEAP16[$offs$s1 + 5] = $add_3;
-      var $add_4 = HEAP16[$count$s1 + 5] + $add_3 & 65535;
-      HEAP16[$offs$s1 + 6] = $add_4;
-      var $add_5 = HEAP16[$count$s1 + 6] + $add_4 & 65535;
-      HEAP16[$offs$s1 + 7] = $add_5;
-      var $add_6 = HEAP16[$count$s1 + 7] + $add_5 & 65535;
-      HEAP16[$offs$s1 + 8] = $add_6;
-      var $add_7 = HEAP16[$count$s1 + 8] + $add_6 & 65535;
-      HEAP16[$offs$s1 + 9] = $add_7;
-      var $add_8 = HEAP16[$count$s1 + 9] + $add_7 & 65535;
-      HEAP16[$offs$s1 + 10] = $add_8;
-      var $add_9 = HEAP16[$count$s1 + 10] + $add_8 & 65535;
-      HEAP16[$offs$s1 + 11] = $add_9;
-      var $add_10 = HEAP16[$count$s1 + 11] + $add_9 & 65535;
-      HEAP16[$offs$s1 + 12] = $add_10;
-      var $add_11 = HEAP16[$count$s1 + 12] + $add_10 & 65535;
-      HEAP16[$offs$s1 + 13] = $add_11;
-      var $add_12 = HEAP16[$count$s1 + 13] + $add_11 & 65535;
-      HEAP16[$offs$s1 + 14] = $add_12;
-      var $add_13 = HEAP16[$count$s1 + 14] + $add_12 & 65535;
-      HEAP16[$offs$s1 + 15] = $add_13;
+      var $arrayidx66 = CHECK_OVERFLOW($offs + 2, 32, 0);
+      HEAP16[$arrayidx66 >> 1] = 0;
+      var $arrayidx73 = CHECK_OVERFLOW($count + 2, 32, 0);
+      var $8 = HEAP16[$arrayidx73 >> 1];
+      var $arrayidx77 = CHECK_OVERFLOW($offs + 4, 32, 0);
+      HEAP16[$arrayidx77 >> 1] = $8;
+      var $arrayidx73_1 = CHECK_OVERFLOW($count + 4, 32, 0);
+      var $9 = HEAP16[$arrayidx73_1 >> 1];
+      var $add_1 = CHECK_OVERFLOW($9 + $8, 16, 0);
+      var $arrayidx77_1 = CHECK_OVERFLOW($offs + 6, 32, 0);
+      HEAP16[$arrayidx77_1 >> 1] = $add_1;
+      var $arrayidx73_2 = CHECK_OVERFLOW($count + 6, 32, 0);
+      var $10 = HEAP16[$arrayidx73_2 >> 1];
+      var $add_2 = CHECK_OVERFLOW($10 + $add_1, 16, 0);
+      var $arrayidx77_2 = CHECK_OVERFLOW($offs + 8, 32, 0);
+      HEAP16[$arrayidx77_2 >> 1] = $add_2;
+      var $arrayidx73_3 = CHECK_OVERFLOW($count + 8, 32, 0);
+      var $11 = HEAP16[$arrayidx73_3 >> 1];
+      var $add_3 = CHECK_OVERFLOW($11 + $add_2, 16, 0);
+      var $arrayidx77_3 = CHECK_OVERFLOW($offs + 10, 32, 0);
+      HEAP16[$arrayidx77_3 >> 1] = $add_3;
+      var $arrayidx73_4 = CHECK_OVERFLOW($count + 10, 32, 0);
+      var $12 = HEAP16[$arrayidx73_4 >> 1];
+      var $add_4 = CHECK_OVERFLOW($12 + $add_3, 16, 0);
+      var $arrayidx77_4 = CHECK_OVERFLOW($offs + 12, 32, 0);
+      HEAP16[$arrayidx77_4 >> 1] = $add_4;
+      var $arrayidx73_5 = CHECK_OVERFLOW($count + 12, 32, 0);
+      var $13 = HEAP16[$arrayidx73_5 >> 1];
+      var $add_5 = CHECK_OVERFLOW($13 + $add_4, 16, 0);
+      var $arrayidx77_5 = CHECK_OVERFLOW($offs + 14, 32, 0);
+      HEAP16[$arrayidx77_5 >> 1] = $add_5;
+      var $arrayidx73_6 = CHECK_OVERFLOW($count + 14, 32, 0);
+      var $14 = HEAP16[$arrayidx73_6 >> 1];
+      var $add_6 = CHECK_OVERFLOW($14 + $add_5, 16, 0);
+      var $arrayidx77_6 = CHECK_OVERFLOW($offs + 16, 32, 0);
+      HEAP16[$arrayidx77_6 >> 1] = $add_6;
+      var $arrayidx73_7 = CHECK_OVERFLOW($count + 16, 32, 0);
+      var $15 = HEAP16[$arrayidx73_7 >> 1];
+      var $add_7 = CHECK_OVERFLOW($15 + $add_6, 16, 0);
+      var $arrayidx77_7 = CHECK_OVERFLOW($offs + 18, 32, 0);
+      HEAP16[$arrayidx77_7 >> 1] = $add_7;
+      var $arrayidx73_8 = CHECK_OVERFLOW($count + 18, 32, 0);
+      var $16 = HEAP16[$arrayidx73_8 >> 1];
+      var $add_8 = CHECK_OVERFLOW($16 + $add_7, 16, 0);
+      var $arrayidx77_8 = CHECK_OVERFLOW($offs + 20, 32, 0);
+      HEAP16[$arrayidx77_8 >> 1] = $add_8;
+      var $arrayidx73_9 = CHECK_OVERFLOW($count + 20, 32, 0);
+      var $17 = HEAP16[$arrayidx73_9 >> 1];
+      var $add_9 = CHECK_OVERFLOW($17 + $add_8, 16, 0);
+      var $arrayidx77_9 = CHECK_OVERFLOW($offs + 22, 32, 0);
+      HEAP16[$arrayidx77_9 >> 1] = $add_9;
+      var $arrayidx73_10 = CHECK_OVERFLOW($count + 22, 32, 0);
+      var $18 = HEAP16[$arrayidx73_10 >> 1];
+      var $add_10 = CHECK_OVERFLOW($18 + $add_9, 16, 0);
+      var $arrayidx77_10 = CHECK_OVERFLOW($offs + 24, 32, 0);
+      HEAP16[$arrayidx77_10 >> 1] = $add_10;
+      var $arrayidx73_11 = CHECK_OVERFLOW($count + 24, 32, 0);
+      var $19 = HEAP16[$arrayidx73_11 >> 1];
+      var $add_11 = CHECK_OVERFLOW($19 + $add_10, 16, 0);
+      var $arrayidx77_11 = CHECK_OVERFLOW($offs + 26, 32, 0);
+      HEAP16[$arrayidx77_11 >> 1] = $add_11;
+      var $arrayidx73_12 = CHECK_OVERFLOW($count + 26, 32, 0);
+      var $20 = HEAP16[$arrayidx73_12 >> 1];
+      var $add_12 = CHECK_OVERFLOW($20 + $add_11, 16, 0);
+      var $arrayidx77_12 = CHECK_OVERFLOW($offs + 28, 32, 0);
+      HEAP16[$arrayidx77_12 >> 1] = $add_12;
+      var $arrayidx73_13 = CHECK_OVERFLOW($count + 28, 32, 0);
+      var $21 = HEAP16[$arrayidx73_13 >> 1];
+      var $add_13 = CHECK_OVERFLOW($21 + $add_12, 16, 0);
+      var $arrayidx77_13 = CHECK_OVERFLOW($offs + 30, 32, 0);
+      HEAP16[$arrayidx77_13 >> 1] = $add_13;
       $for_end100$$for_body84$27 : do {
         if ($cmp269) {
           __label__ = 21;
@@ -8961,14 +10778,20 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           var $sym_164 = 0;
           while (1) {
             var $sym_164;
-            var $22 = HEAPU16[$lens + ($sym_164 << 1) >> 1];
+            var $arrayidx85 = CHECK_OVERFLOW(($sym_164 << 1) + $lens, 32, 0);
+            var $22 = HEAPU16[$arrayidx85 >> 1];
             if ($22 << 16 >> 16 != 0) {
-              var $arrayidx93 = (($22 & 65535) << 1) + $offs | 0;
+              var $conv86 = $22 & 65535;
+              var $conv90 = $sym_164 & 65535;
+              var $arrayidx93 = CHECK_OVERFLOW(($conv86 << 1) + $offs, 32, 0);
               var $23 = HEAPU16[$arrayidx93 >> 1];
-              HEAP16[$arrayidx93 >> 1] = $23 + 1 & 65535;
-              HEAP16[$work + (($23 & 65535) << 1) >> 1] = $sym_164 & 65535;
+              var $inc94 = CHECK_OVERFLOW($23 + 1, 16, 0);
+              HEAP16[$arrayidx93 >> 1] = $inc94;
+              var $idxprom95 = $23 & 65535;
+              var $arrayidx96 = CHECK_OVERFLOW(($idxprom95 << 1) + $work, 32, 0);
+              HEAP16[$arrayidx96 >> 1] = $conv90;
             }
-            var $inc99 = $sym_164 + 1 | 0;
+            var $inc99 = CHECK_OVERFLOW($sym_164 + 1, 32, 0);
             if (($inc99 | 0) == ($codes | 0)) {
               break $for_end100$$for_body84$27;
             }
@@ -8988,13 +10811,13 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           break;
         } else if ($type == 1) {
           var $end_0 = 256;
-          var $extra_0 = _inflate_table_lext + 4294966782 | 0;
-          var $base_0 = _inflate_table_lbase + 4294966782 | 0;
+          var $extra_0 = CHECK_OVERFLOW(_inflate_table_lext + 4294966782, 32, 0);
+          var $base_0 = CHECK_OVERFLOW(_inflate_table_lbase + 4294966782, 32, 0);
           __label__ = 24;
         } else {
           var $end_0 = -1;
-          var $extra_0 = _inflate_table_dext | 0;
-          var $base_0 = _inflate_table_dbase | 0;
+          var $extra_0 = CHECK_OVERFLOW(_inflate_table_dext, 32, 0);
+          var $base_0 = CHECK_OVERFLOW(_inflate_table_dbase, 32, 0);
           __label__ = 24;
           break;
         }
@@ -9027,9 +10850,10 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
       var $end_03039_ph;
       var $sub1043238_ph_in;
       var $cmp1053337_ph;
-      var $sub1043238_ph = $sub1043238_ph_in - 1 | 0;
+      var $next_0_ph = HEAP32[$table$s2];
+      var $sub1043238_ph = CHECK_OVERFLOW($sub1043238_ph_in - 1, 32, 0);
       var $conv233 = $root_1 & 255;
-      var $next_0_ph57 = HEAP32[$table$s2];
+      var $next_0_ph57 = $next_0_ph;
       var $low_0_ph = -1;
       var $len_3_ph = $min_0;
       var $sym_2_ph = 0;
@@ -9054,9 +10878,10 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           var $huff_0;
           var $sym_2;
           var $len_3;
-          var $sub119 = $len_3 - $drop_0_ph | 0;
+          var $sub119 = CHECK_OVERFLOW($len_3 - $drop_0_ph, 32, 0);
           var $conv120 = $sub119 & 255;
-          var $24 = HEAPU16[$work + ($sym_2 << 1) >> 1];
+          var $arrayidx122 = CHECK_OVERFLOW(($sym_2 << 1) + $work, 32, 0);
+          var $24 = HEAPU16[$arrayidx122 >> 1];
           var $conv123 = $24 & 65535;
           var $cmp124 = ($conv123 | 0) < ($end_03039_ph | 0);
           do {
@@ -9069,8 +10894,11 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
                 var $here_2_0 = 0;
                 break;
               }
-              var $here_0_0 = HEAP16[$extra_02940_ph + ($conv123 << 1) >> 1] & 255;
-              var $here_2_0 = HEAP16[$base_02841_ph + ($conv123 << 1) >> 1];
+              var $arrayidx137 = CHECK_OVERFLOW(($conv123 << 1) + $extra_02940_ph, 32, 0);
+              var $conv138 = HEAP16[$arrayidx137 >> 1] & 255;
+              var $arrayidx142 = CHECK_OVERFLOW(($conv123 << 1) + $base_02841_ph, 32, 0);
+              var $here_0_0 = $conv138;
+              var $here_2_0 = HEAP16[$arrayidx142 >> 1];
             }
           } while (0);
           var $here_2_0;
@@ -9080,17 +10908,21 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           var $fill_0 = $shl151;
           while (1) {
             var $fill_0;
-            var $sub152 = $fill_0 - $shl150 | 0;
-            var $add153 = $sub152 + $shr | 0;
-            HEAP8[($add153 << 2) + $next_0_ph57 | 0] = $here_0_0;
-            HEAP8[($add153 << 2) + $next_0_ph57 + 1 | 0] = $conv120;
-            HEAP16[$next_0_ph57 + ($add153 << 2) + 2 >> 1] = $here_2_0;
+            var $sub152 = CHECK_OVERFLOW($fill_0 - $shl150, 32, 0);
+            var $add153 = CHECK_OVERFLOW($sub152 + $shr, 32, 0);
+            var $arrayidx154_0 = CHECK_OVERFLOW(($add153 << 2) + $next_0_ph57, 32, 0);
+            HEAP8[$arrayidx154_0] = $here_0_0;
+            var $arrayidx154_1 = CHECK_OVERFLOW(($add153 << 2) + $next_0_ph57 + 1, 32, 0);
+            HEAP8[$arrayidx154_1] = $conv120;
+            var $arrayidx154_2 = CHECK_OVERFLOW(($add153 << 2) + $next_0_ph57 + 2, 32, 0);
+            HEAP16[$arrayidx154_2 >> 1] = $here_2_0;
             if (($fill_0 | 0) == ($shl150 | 0)) {
               break;
             }
             var $fill_0 = $sub152;
           }
-          var $shl158 = 1 << $len_3 - 1;
+          var $sub157 = CHECK_OVERFLOW($len_3 - 1, 32, 0);
+          var $shl158 = 1 << $sub157;
           var $tobool53 = ($shl158 & $huff_0 | 0) == 0;
           do {
             if ($tobool53) {
@@ -9118,18 +10950,25 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           } while (0);
           if (__label__ == 36) {
             var $incr_0_lcssa91;
-            var $huff_1 = ($incr_0_lcssa91 - 1 & $huff_0) + $incr_0_lcssa91 | 0;
+            var $sub163 = CHECK_OVERFLOW($incr_0_lcssa91 - 1, 32, 0);
+            var $and164 = $sub163 & $huff_0;
+            var $add165 = CHECK_OVERFLOW($and164 + $incr_0_lcssa91, 32, 0);
+            var $huff_1 = $add165;
           }
           var $huff_1;
-          var $inc168 = $sym_2 + 1 | 0;
-          var $arrayidx169 = ($len_3 << 1) + $count | 0;
-          var $dec170 = HEAP16[$arrayidx169 >> 1] - 1 & 65535;
+          var $inc168 = CHECK_OVERFLOW($sym_2 + 1, 32, 0);
+          var $arrayidx169 = CHECK_OVERFLOW(($len_3 << 1) + $count, 32, 0);
+          var $27 = HEAP16[$arrayidx169 >> 1];
+          var $dec170 = CHECK_OVERFLOW($27 - 1, 16, 0);
           HEAP16[$arrayidx169 >> 1] = $dec170;
           if ($dec170 << 16 >> 16 == 0) {
             if (($len_3 | 0) == ($max_0 | 0)) {
               break $for_cond118_outer$41;
             }
-            var $len_4 = HEAPU16[$lens + ((HEAPU16[$work + ($inc168 << 1) >> 1] & 65535) << 1) >> 1] & 65535;
+            var $arrayidx179 = CHECK_OVERFLOW(($inc168 << 1) + $work, 32, 0);
+            var $idxprom180 = HEAPU16[$arrayidx179 >> 1] & 65535;
+            var $arrayidx181 = CHECK_OVERFLOW(($idxprom180 << 1) + $lens, 32, 0);
+            var $len_4 = HEAPU16[$arrayidx181 >> 1] & 65535;
           } else {
             var $len_4 = $len_3;
           }
@@ -9149,34 +10988,47 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           var $huff_0 = $huff_1;
         }
         var $drop_1 = ($drop_0_ph | 0) == 0 ? $root_1 : $drop_0_ph;
-        var $add_ptr195 = ($shl151 << 2) + $next_0_ph57 | 0;
-        var $sub196 = $len_4 - $drop_1 | 0;
+        var $add_ptr195 = CHECK_OVERFLOW(($shl151 << 2) + $next_0_ph57, 32, 0);
+        var $sub196 = CHECK_OVERFLOW($len_4 - $drop_1, 32, 0);
         var $curr_1 = $sub196;
         var $left_1 = 1 << $sub196;
         while (1) {
           var $left_1;
           var $curr_1;
-          var $add199 = $curr_1 + $drop_1 | 0;
+          var $add199 = CHECK_OVERFLOW($curr_1 + $drop_1, 32, 0);
           if ($add199 >>> 0 >= $max_0 >>> 0) {
             break;
           }
-          var $sub206 = $left_1 - (HEAPU16[($add199 << 1 >> 1) + $count$s1] & 65535) | 0;
+          var $arrayidx204 = CHECK_OVERFLOW(($add199 << 1) + $count, 32, 0);
+          var $conv205 = HEAPU16[$arrayidx204 >> 1] & 65535;
+          var $sub206 = CHECK_OVERFLOW($left_1 - $conv205, 32, 0);
           if (($sub206 | 0) < 1) {
             break;
           }
+          var $inc211 = CHECK_OVERFLOW($curr_1 + 1, 32, 0);
           var $shl212 = $sub206 << 1;
-          var $curr_1 = $curr_1 + 1 | 0;
+          var $curr_1 = $inc211;
           var $left_1 = $shl212;
         }
-        var $add215 = (1 << $curr_1) + $used_0_ph56 | 0;
+        var $add215 = CHECK_OVERFLOW((1 << $curr_1) + $used_0_ph56, 32, 0);
         if ($cmp1053337_ph & $add215 >>> 0 > 851 | $cmp11142_ph & $add215 >>> 0 > 591) {
           var $retval_0 = 1;
           break $for_end17$$return$12;
         }
-        HEAP8[($and187 << 2) + HEAP32[$table$s2] | 0] = $curr_1 & 255;
-        HEAP8[($and187 << 2) + HEAP32[$table$s2] + 1 | 0] = $conv233;
+        var $conv230 = $curr_1 & 255;
+        var $31 = HEAP32[$table$s2];
+        var $op232 = CHECK_OVERFLOW(($and187 << 2) + $31, 32, 0);
+        HEAP8[$op232] = $conv230;
+        var $32 = HEAP32[$table$s2];
+        var $bits235 = CHECK_OVERFLOW(($and187 << 2) + $32 + 1, 32, 0);
+        HEAP8[$bits235] = $conv233;
         var $33 = HEAPU32[$table$s2];
-        HEAP16[$33 + ($and187 << 2) + 2 >> 1] = ($add_ptr195 - $33 | 0) >>> 2 & 65535;
+        var $sub_ptr_lhs_cast = $add_ptr195;
+        var $sub_ptr_rhs_cast = $33;
+        var $sub_ptr_sub = CHECK_OVERFLOW($sub_ptr_lhs_cast - $sub_ptr_rhs_cast, 32, 0);
+        var $conv236 = $sub_ptr_sub >>> 2 & 65535;
+        var $val238 = CHECK_OVERFLOW(($and187 << 2) + $33 + 2, 32, 0);
+        HEAP16[$val238 >> 1] = $conv236;
         var $next_0_ph57 = $add_ptr195;
         var $low_0_ph = $and187;
         var $len_3_ph = $len_4;
@@ -9226,10 +11078,14 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
             var $len_6;
             var $next_2;
             var $shr260 = $huff_248 >>> ($drop_3 >>> 0);
-            HEAP8[($shr260 << 2) + $next_2 | 0] = 64;
-            HEAP8[($shr260 << 2) + $next_2 + 1 | 0] = $here_1_1;
-            HEAP16[$next_2 + ($shr260 << 2) + 2 >> 1] = 0;
-            var $shl263 = 1 << $len_6 - 1;
+            var $arrayidx261_0 = CHECK_OVERFLOW(($shr260 << 2) + $next_2, 32, 0);
+            HEAP8[$arrayidx261_0] = 64;
+            var $arrayidx261_1 = CHECK_OVERFLOW(($shr260 << 2) + $next_2 + 1, 32, 0);
+            HEAP8[$arrayidx261_1] = $here_1_1;
+            var $arrayidx261_2 = CHECK_OVERFLOW(($shr260 << 2) + $next_2 + 2, 32, 0);
+            HEAP16[$arrayidx261_2 >> 1] = 0;
+            var $sub262 = CHECK_OVERFLOW($len_6 - 1, 32, 0);
+            var $shl263 = 1 << $sub262;
             if (($shl263 & $huff_248 | 0) == 0) {
               var $incr_1_lcssa93 = $shl263;
             } else {
@@ -9248,7 +11104,9 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
               var $incr_1_lcssa93 = $shr268;
             }
             var $incr_1_lcssa93;
-            var $add275 = ($incr_1_lcssa93 - 1 & $huff_248) + $incr_1_lcssa93 | 0;
+            var $sub273 = CHECK_OVERFLOW($incr_1_lcssa93 - 1, 32, 0);
+            var $and274 = $sub273 & $huff_248;
+            var $add275 = CHECK_OVERFLOW($and274 + $incr_1_lcssa93, 32, 0);
             if (($add275 | 0) == 0) {
               break $while_end278$$while_body249$72;
             }
@@ -9260,7 +11118,8 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
           }
         }
       } while (0);
-      var $add_ptr279 = ($used_0_ph56 << 2) + HEAP32[$table$s2] | 0;
+      var $35 = HEAP32[$table$s2];
+      var $add_ptr279 = CHECK_OVERFLOW(($used_0_ph56 << 2) + $35, 32, 0);
       HEAP32[$table$s2] = $add_ptr279;
       HEAP32[$bits >> 2] = $root_1;
       var $retval_0 = 0;
@@ -9275,50 +11134,78 @@ function _inflate_table($type, $lens, $codes, $table, $bits, $work) {
 _inflate_table["X"] = 1;
 
 function _inflate_fast($strm, $start) {
-  var $0$s2;
   var __label__;
-  var $0 = HEAPU32[$strm + 28 >> 2], $0$s2 = $0 >> 2;
-  var $next_in = $strm | 0;
+  var $state1 = CHECK_OVERFLOW($strm + 28, 32, 0);
+  var $0 = HEAPU32[$state1 >> 2];
+  var $next_in = CHECK_OVERFLOW($strm, 32, 0);
   var $1 = HEAP32[$next_in >> 2];
-  var $avail_in = $strm + 4 | 0;
-  var $add_ptr2 = $1 + (HEAP32[$avail_in >> 2] - 6) | 0;
-  var $next_out = $strm + 12 | 0;
+  var $add_ptr = CHECK_OVERFLOW($1 - 1, 32, 0);
+  var $avail_in = CHECK_OVERFLOW($strm + 4, 32, 0);
+  var $2 = HEAP32[$avail_in >> 2];
+  var $add_ptr_sum = CHECK_OVERFLOW($2 - 6, 32, 0);
+  var $add_ptr2 = CHECK_OVERFLOW($1 + $add_ptr_sum, 32, 0);
+  var $next_out = CHECK_OVERFLOW($strm + 12, 32, 0);
   var $3 = HEAP32[$next_out >> 2];
-  var $avail_out = $strm + 16 | 0;
+  var $add_ptr3 = CHECK_OVERFLOW($3 - 1, 32, 0);
+  var $avail_out = CHECK_OVERFLOW($strm + 16, 32, 0);
   var $4 = HEAP32[$avail_out >> 2];
-  var $add_ptr8 = $3 + ($4 - 258) | 0;
-  var $8 = HEAPU32[$0$s2 + 11];
-  var $10 = HEAPU32[$0$s2 + 12];
-  var $12 = HEAPU32[$0$s2 + 13];
-  var $13 = $0 + 56 | 0;
-  var $15 = $0 + 60 | 0;
-  var $18 = HEAP32[$0$s2 + 19];
-  var $20 = HEAP32[$0$s2 + 20];
-  var $sub15 = (1 << HEAP32[$0$s2 + 21]) - 1 | 0;
-  var $sub17 = (1 << HEAP32[$0$s2 + 22]) - 1 | 0;
-  var $sub_ptr_rhs_cast = $3 + $4 + ($start ^ -1) | 0;
-  var $25 = $0 + 7104 | 0;
-  var $add_ptr121 = $12 - 1 | 0;
+  var $sub412 = $start ^ -1;
+  var $add_ptr3_sum = CHECK_OVERFLOW($4 + $sub412, 32, 0);
+  var $add_ptr5 = CHECK_OVERFLOW($3 + $add_ptr3_sum, 32, 0);
+  var $add_ptr3_sum13 = CHECK_OVERFLOW($4 - 258, 32, 0);
+  var $add_ptr8 = CHECK_OVERFLOW($3 + $add_ptr3_sum13, 32, 0);
+  var $5 = CHECK_OVERFLOW($0 + 40, 32, 0);
+  var $6 = HEAP32[$5 >> 2];
+  var $7 = CHECK_OVERFLOW($0 + 44, 32, 0);
+  var $8 = HEAPU32[$7 >> 2];
+  var $9 = CHECK_OVERFLOW($0 + 48, 32, 0);
+  var $10 = HEAPU32[$9 >> 2];
+  var $window12 = CHECK_OVERFLOW($0 + 52, 32, 0);
+  var $12 = HEAPU32[$window12 >> 2];
+  var $13 = CHECK_OVERFLOW($0 + 56, 32, 0);
+  var $14 = HEAP32[$13 >> 2];
+  var $15 = CHECK_OVERFLOW($0 + 60, 32, 0);
+  var $16 = HEAP32[$15 >> 2];
+  var $lencode = CHECK_OVERFLOW($0 + 76, 32, 0);
+  var $18 = HEAP32[$lencode >> 2];
+  var $distcode = CHECK_OVERFLOW($0 + 80, 32, 0);
+  var $20 = HEAP32[$distcode >> 2];
+  var $21 = CHECK_OVERFLOW($0 + 84, 32, 0);
+  var $shl = 1 << HEAP32[$21 >> 2];
+  var $sub15 = CHECK_OVERFLOW($shl - 1, 32, 0);
+  var $23 = CHECK_OVERFLOW($0 + 88, 32, 0);
+  var $shl16 = 1 << HEAP32[$23 >> 2];
+  var $sub17 = CHECK_OVERFLOW($shl16 - 1, 32, 0);
+  var $sub_ptr_rhs_cast = $add_ptr5;
+  var $25 = CHECK_OVERFLOW($0 + 7104, 32, 0);
+  var $add_ptr121 = CHECK_OVERFLOW($12 - 1, 32, 0);
   var $cmp122 = ($10 | 0) == 0;
-  var $sub125 = HEAP32[$0$s2 + 10] - 1 | 0;
-  var $sub143 = $sub125 + $10 | 0;
-  var $sub174 = $10 - 1 | 0;
-  var $26 = $sub_ptr_rhs_cast - 1 | 0;
-  var $27 = $sub_ptr_rhs_cast - $10 | 0;
-  var $in_0 = $1 - 1 | 0;
-  var $out_0 = $3 - 1 | 0;
-  var $bits_0 = HEAP32[$15 >> 2];
-  var $hold_0 = HEAP32[$13 >> 2];
+  var $sub125 = CHECK_OVERFLOW($6 - 1, 32, 0);
+  var $sub143 = CHECK_OVERFLOW($sub125 + $10, 32, 0);
+  var $sub174 = CHECK_OVERFLOW($10 - 1, 32, 0);
+  var $26 = CHECK_OVERFLOW($sub_ptr_rhs_cast - 1, 32, 0);
+  var $27 = CHECK_OVERFLOW($sub_ptr_rhs_cast - $10, 32, 0);
+  var $in_0 = $add_ptr;
+  var $out_0 = $add_ptr3;
+  var $bits_0 = $16;
+  var $hold_0 = $14;
   $do_body$2 : while (1) {
     var $hold_0;
     var $bits_0;
     var $out_0;
     var $in_0;
     if ($bits_0 >>> 0 < 15) {
-      var $incdec_ptr20 = $in_0 + 2 | 0;
+      var $incdec_ptr = CHECK_OVERFLOW($in_0 + 1, 32, 0);
+      var $shl18 = (HEAPU8[$incdec_ptr] & 255) << $bits_0;
+      var $add19 = CHECK_OVERFLOW($bits_0 + 8, 32, 0);
+      var $incdec_ptr20 = CHECK_OVERFLOW($in_0 + 2, 32, 0);
+      var $shl22 = (HEAPU8[$incdec_ptr20] & 255) << $add19;
+      var $add = CHECK_OVERFLOW($shl18 + $hold_0, 32, 0);
+      var $add23 = CHECK_OVERFLOW($add + $shl22, 32, 0);
+      var $add24 = CHECK_OVERFLOW($bits_0 + 16, 32, 0);
       var $in_1 = $incdec_ptr20;
-      var $bits_1 = $bits_0 + 16 | 0;
-      var $hold_1 = ((HEAPU8[$in_0 + 1 | 0] & 255) << $bits_0) + ((HEAPU8[$incdec_ptr20] & 255) << $bits_0 + 8) + $hold_0 | 0;
+      var $bits_1 = $add24;
+      var $hold_1 = $add23;
     } else {
       var $in_1 = $in_0;
       var $bits_1 = $bits_0;
@@ -9334,15 +11221,19 @@ function _inflate_fast($strm, $start) {
       var $and_pn;
       var $hold_2;
       var $bits_2;
-      var $here_0_0 = HEAPU8[($and_pn << 2) + $18 | 0];
-      var $here_2_0 = HEAPU16[$18 + ($and_pn << 2) + 2 >> 1];
-      var $conv26 = HEAPU8[($and_pn << 2) + $18 + 1 | 0] & 255;
+      var $here_0_0_in = CHECK_OVERFLOW(($and_pn << 2) + $18, 32, 0);
+      var $here_1_0_in = CHECK_OVERFLOW(($and_pn << 2) + $18 + 1, 32, 0);
+      var $here_2_0_in = CHECK_OVERFLOW(($and_pn << 2) + $18 + 2, 32, 0);
+      var $here_0_0 = HEAPU8[$here_0_0_in];
+      var $here_2_0 = HEAPU16[$here_2_0_in >> 1];
+      var $conv26 = HEAPU8[$here_1_0_in] & 255;
       var $shr = $hold_2 >>> ($conv26 >>> 0);
-      var $sub27 = $bits_2 - $conv26 | 0;
+      var $sub27 = CHECK_OVERFLOW($bits_2 - $conv26, 32, 0);
       var $conv29 = $here_0_0 & 255;
       if ($here_0_0 << 24 >> 24 == 0) {
-        var $incdec_ptr34 = $out_0 + 1 | 0;
-        HEAP8[$incdec_ptr34] = $here_2_0 & 255;
+        var $conv33 = $here_2_0 & 255;
+        var $incdec_ptr34 = CHECK_OVERFLOW($out_0 + 1, 32, 0);
+        HEAP8[$incdec_ptr34] = $conv33;
         var $in_6 = $in_1;
         var $out_7 = $incdec_ptr34;
         var $bits_8 = $sub27;
@@ -9355,21 +11246,28 @@ function _inflate_fast($strm, $start) {
         break;
       }
       if (($conv29 & 64 | 0) == 0) {
-        var $add265 = ($shr & (1 << $conv29) - 1) + ($here_2_0 & 65535) | 0;
+        var $conv261 = $here_2_0 & 65535;
+        var $shl262 = 1 << $conv29;
+        var $sub263 = CHECK_OVERFLOW($shl262 - 1, 32, 0);
+        var $and264 = $shr & $sub263;
+        var $add265 = CHECK_OVERFLOW($and264 + $conv261, 32, 0);
         var $bits_2 = $sub27;
         var $hold_2 = $shr;
         var $and_pn = $add265;
       } else {
         if (($conv29 & 32 | 0) == 0) {
-          HEAP32[$strm + 24 >> 2] = STRING_TABLE.__str255 | 0;
-          HEAP32[$0$s2] = 29;
+          var $msg273 = CHECK_OVERFLOW($strm + 24, 32, 0);
+          HEAP32[$msg273 >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str259, 32, 0);
+          var $mode274 = CHECK_OVERFLOW($0, 32, 0);
+          HEAP32[$mode274 >> 2] = 29;
           var $in_7 = $in_1;
           var $out_8 = $out_0;
           var $bits_9 = $sub27;
           var $hold_9 = $shr;
           break $do_body$2;
         }
-        HEAP32[$0$s2] = 11;
+        var $mode271 = CHECK_OVERFLOW($0, 32, 0);
+        HEAP32[$mode271 >> 2] = 11;
         var $in_7 = $in_1;
         var $out_8 = $out_0;
         var $bits_9 = $sub27;
@@ -9388,10 +11286,13 @@ function _inflate_fast($strm, $start) {
           var $hold_4 = $shr;
         } else {
           if ($sub27 >>> 0 < $and39 >>> 0) {
-            var $incdec_ptr45 = $in_1 + 1 | 0;
+            var $incdec_ptr45 = CHECK_OVERFLOW($in_1 + 1, 32, 0);
+            var $shl47 = (HEAPU8[$incdec_ptr45] & 255) << $sub27;
+            var $add48 = CHECK_OVERFLOW($shl47 + $shr, 32, 0);
+            var $add49 = CHECK_OVERFLOW($sub27 + 8, 32, 0);
             var $in_2 = $incdec_ptr45;
-            var $bits_3 = $sub27 + 8 | 0;
-            var $hold_3 = ((HEAPU8[$incdec_ptr45] & 255) << $sub27) + $shr | 0;
+            var $bits_3 = $add49;
+            var $hold_3 = $add48;
           } else {
             var $in_2 = $in_1;
             var $bits_3 = $sub27;
@@ -9400,20 +11301,33 @@ function _inflate_fast($strm, $start) {
           var $hold_3;
           var $bits_3;
           var $in_2;
-          var $len_0 = ($hold_3 & (1 << $and39) - 1) + $conv38 | 0;
+          var $shl51 = 1 << $and39;
+          var $sub52 = CHECK_OVERFLOW($shl51 - 1, 32, 0);
+          var $and53 = $hold_3 & $sub52;
+          var $add54 = CHECK_OVERFLOW($and53 + $conv38, 32, 0);
+          var $shr55 = $hold_3 >>> ($and39 >>> 0);
+          var $sub56 = CHECK_OVERFLOW($bits_3 - $and39, 32, 0);
+          var $len_0 = $add54;
           var $in_3 = $in_2;
-          var $bits_4 = $bits_3 - $and39 | 0;
-          var $hold_4 = $hold_3 >>> ($and39 >>> 0);
+          var $bits_4 = $sub56;
+          var $hold_4 = $shr55;
         }
         var $hold_4;
         var $bits_4;
         var $in_3;
         var $len_0;
         if ($bits_4 >>> 0 < 15) {
-          var $incdec_ptr66 = $in_3 + 2 | 0;
+          var $incdec_ptr61 = CHECK_OVERFLOW($in_3 + 1, 32, 0);
+          var $shl63 = (HEAPU8[$incdec_ptr61] & 255) << $bits_4;
+          var $add65 = CHECK_OVERFLOW($bits_4 + 8, 32, 0);
+          var $incdec_ptr66 = CHECK_OVERFLOW($in_3 + 2, 32, 0);
+          var $shl68 = (HEAPU8[$incdec_ptr66] & 255) << $add65;
+          var $add64 = CHECK_OVERFLOW($shl63 + $hold_4, 32, 0);
+          var $add69 = CHECK_OVERFLOW($add64 + $shl68, 32, 0);
+          var $add70 = CHECK_OVERFLOW($bits_4 + 16, 32, 0);
           var $in_4 = $incdec_ptr66;
-          var $bits_5 = $bits_4 + 16 | 0;
-          var $hold_5 = ((HEAPU8[$in_3 + 1 | 0] & 255) << $bits_4) + ((HEAPU8[$incdec_ptr66] & 255) << $bits_4 + 8) + $hold_4 | 0;
+          var $bits_5 = $add70;
+          var $hold_5 = $add69;
         } else {
           var $in_4 = $in_3;
           var $bits_5 = $bits_4;
@@ -9429,24 +11343,34 @@ function _inflate_fast($strm, $start) {
           var $and72_pn;
           var $hold_6;
           var $bits_6;
-          var $here_2_1 = HEAPU16[$20 + ($and72_pn << 2) + 2 >> 1];
-          var $conv75 = HEAPU8[($and72_pn << 2) + $20 + 1 | 0] & 255;
+          var $here_0_1_in = CHECK_OVERFLOW(($and72_pn << 2) + $20, 32, 0);
+          var $here_1_1_in = CHECK_OVERFLOW(($and72_pn << 2) + $20 + 1, 32, 0);
+          var $here_2_1_in = CHECK_OVERFLOW(($and72_pn << 2) + $20 + 2, 32, 0);
+          var $here_0_1 = HEAPU8[$here_0_1_in];
+          var $here_2_1 = HEAPU16[$here_2_1_in >> 1];
+          var $conv75 = HEAPU8[$here_1_1_in] & 255;
           var $shr76 = $hold_6 >>> ($conv75 >>> 0);
-          var $sub77 = $bits_6 - $conv75 | 0;
-          var $conv79 = HEAPU8[($and72_pn << 2) + $20 | 0] & 255;
+          var $sub77 = CHECK_OVERFLOW($bits_6 - $conv75, 32, 0);
+          var $conv79 = $here_0_1 & 255;
           if (($conv79 & 16 | 0) != 0) {
             break;
           }
           if (($conv79 & 64 | 0) != 0) {
-            HEAP32[$strm + 24 >> 2] = STRING_TABLE.__str154 | 0;
-            HEAP32[$0$s2] = 29;
+            var $msg252 = CHECK_OVERFLOW($strm + 24, 32, 0);
+            HEAP32[$msg252 >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str158, 32, 0);
+            var $mode253 = CHECK_OVERFLOW($0, 32, 0);
+            HEAP32[$mode253 >> 2] = 29;
             var $in_7 = $in_4;
             var $out_8 = $out_0;
             var $bits_9 = $sub77;
             var $hold_9 = $shr76;
             break $do_body$2;
           }
-          var $add249 = ($shr76 & (1 << $conv79) - 1) + ($here_2_1 & 65535) | 0;
+          var $conv245 = $here_2_1 & 65535;
+          var $shl246 = 1 << $conv79;
+          var $sub247 = CHECK_OVERFLOW($shl246 - 1, 32, 0);
+          var $and248 = $shr76 & $sub247;
+          var $add249 = CHECK_OVERFLOW($and248 + $conv245, 32, 0);
           var $bits_6 = $sub77;
           var $hold_6 = $shr76;
           var $and72_pn = $add249;
@@ -9456,19 +11380,23 @@ function _inflate_fast($strm, $start) {
         var $cmp86 = $sub77 >>> 0 < $and85 >>> 0;
         do {
           if ($cmp86) {
-            var $incdec_ptr89 = $in_4 + 1 | 0;
-            var $add92 = ((HEAPU8[$incdec_ptr89] & 255) << $sub77) + $shr76 | 0;
-            var $add93 = $sub77 + 8 | 0;
+            var $incdec_ptr89 = CHECK_OVERFLOW($in_4 + 1, 32, 0);
+            var $shl91 = (HEAPU8[$incdec_ptr89] & 255) << $sub77;
+            var $add92 = CHECK_OVERFLOW($shl91 + $shr76, 32, 0);
+            var $add93 = CHECK_OVERFLOW($sub77 + 8, 32, 0);
             if ($add93 >>> 0 >= $and85 >>> 0) {
               var $in_5 = $incdec_ptr89;
               var $bits_7 = $add93;
               var $hold_7 = $add92;
               break;
             }
-            var $incdec_ptr97 = $in_4 + 2 | 0;
+            var $incdec_ptr97 = CHECK_OVERFLOW($in_4 + 2, 32, 0);
+            var $shl99 = (HEAPU8[$incdec_ptr97] & 255) << $add93;
+            var $add100 = CHECK_OVERFLOW($shl99 + $add92, 32, 0);
+            var $add101 = CHECK_OVERFLOW($sub77 + 16, 32, 0);
             var $in_5 = $incdec_ptr97;
-            var $bits_7 = $sub77 + 16 | 0;
-            var $hold_7 = ((HEAPU8[$incdec_ptr97] & 255) << $add93) + $add92 | 0;
+            var $bits_7 = $add101;
+            var $hold_7 = $add100;
           } else {
             var $in_5 = $in_4;
             var $bits_7 = $sub77;
@@ -9478,22 +11406,26 @@ function _inflate_fast($strm, $start) {
         var $hold_7;
         var $bits_7;
         var $in_5;
-        var $and106 = $hold_7 & (1 << $and85) - 1;
-        var $add107 = $and106 + $conv84 | 0;
+        var $shl104 = 1 << $and85;
+        var $sub105 = CHECK_OVERFLOW($shl104 - 1, 32, 0);
+        var $and106 = $hold_7 & $sub105;
+        var $add107 = CHECK_OVERFLOW($and106 + $conv84, 32, 0);
         var $shr108 = $hold_7 >>> ($and85 >>> 0);
-        var $sub109 = $bits_7 - $and85 | 0;
+        var $sub109 = CHECK_OVERFLOW($bits_7 - $and85, 32, 0);
         var $sub_ptr_lhs_cast = $out_0;
-        var $sub_ptr_sub = $sub_ptr_lhs_cast - $sub_ptr_rhs_cast | 0;
+        var $sub_ptr_sub = CHECK_OVERFLOW($sub_ptr_lhs_cast - $sub_ptr_rhs_cast, 32, 0);
         if ($add107 >>> 0 > $sub_ptr_sub >>> 0) {
-          var $sub113 = $add107 - $sub_ptr_sub | 0;
+          var $sub113 = CHECK_OVERFLOW($add107 - $sub_ptr_sub, 32, 0);
           var $cmp114 = $sub113 >>> 0 > $8 >>> 0;
           do {
             if ($cmp114) {
               if ((HEAP32[$25 >> 2] | 0) == 0) {
                 break;
               }
-              HEAP32[$strm + 24 >> 2] = STRING_TABLE.__str53 | 0;
-              HEAP32[$0$s2] = 29;
+              var $msg = CHECK_OVERFLOW($strm + 24, 32, 0);
+              HEAP32[$msg >> 2] = CHECK_OVERFLOW(STRING_TABLE.__str57, 32, 0);
+              var $mode = CHECK_OVERFLOW($0, 32, 0);
+              HEAP32[$mode >> 2] = 29;
               var $in_7 = $in_5;
               var $out_8 = $out_0;
               var $bits_9 = $sub109;
@@ -9504,16 +11436,17 @@ function _inflate_fast($strm, $start) {
           } while (0);
           do {
             if ($cmp122) {
-              var $add_ptr126 = $12 + ($sub125 - $sub113) | 0;
+              var $add_ptr121_sum17 = CHECK_OVERFLOW($sub125 - $sub113, 32, 0);
+              var $add_ptr126 = CHECK_OVERFLOW($12 + $add_ptr121_sum17, 32, 0);
               if ($sub113 >>> 0 >= $len_0 >>> 0) {
                 var $from_4_ph = $add_ptr126;
                 var $len_1_ph = $len_0;
                 var $out_5_ph = $out_0;
                 break;
               }
-              var $sub130 = $len_0 - $sub113 | 0;
-              var $36 = $and106 - $sub_ptr_lhs_cast | 0;
-              var $scevgep49_sum = $26 + $36 | 0;
+              var $sub130 = CHECK_OVERFLOW($len_0 - $sub113, 32, 0);
+              var $36 = CHECK_OVERFLOW($and106 - $sub_ptr_lhs_cast, 32, 0);
+              var $scevgep49_sum = CHECK_OVERFLOW($26 + $36, 32, 0);
               var $from_0 = $add_ptr126;
               var $op_0 = $sub113;
               var $out_1 = $out_0;
@@ -9521,11 +11454,11 @@ function _inflate_fast($strm, $start) {
                 var $out_1;
                 var $op_0;
                 var $from_0;
-                var $incdec_ptr132 = $from_0 + 1 | 0;
+                var $incdec_ptr132 = CHECK_OVERFLOW($from_0 + 1, 32, 0);
                 var $37 = HEAP8[$incdec_ptr132];
-                var $incdec_ptr133 = $out_1 + 1 | 0;
+                var $incdec_ptr133 = CHECK_OVERFLOW($out_1 + 1, 32, 0);
                 HEAP8[$incdec_ptr133] = $37;
-                var $dec = $op_0 - 1 | 0;
+                var $dec = CHECK_OVERFLOW($op_0 - 1, 32, 0);
                 if (($dec | 0) == 0) {
                   break;
                 }
@@ -9533,21 +11466,29 @@ function _inflate_fast($strm, $start) {
                 var $op_0 = $dec;
                 var $out_1 = $incdec_ptr133;
               }
-              var $from_4_ph = $out_0 + $scevgep49_sum + $conv84 + (1 - $add107) | 0;
+              var $scevgep_sum = CHECK_OVERFLOW($sub_ptr_rhs_cast + $36, 32, 0);
+              var $scevgep47_sum = CHECK_OVERFLOW($scevgep_sum + $conv84, 32, 0);
+              var $scevgep48 = CHECK_OVERFLOW($out_0 + $scevgep47_sum, 32, 0);
+              var $scevgep50_sum = CHECK_OVERFLOW($scevgep49_sum + $conv84, 32, 0);
+              var $incdec_ptr133_sum = CHECK_OVERFLOW(1 - $add107, 32, 0);
+              var $scevgep51_sum = CHECK_OVERFLOW($scevgep50_sum + $incdec_ptr133_sum, 32, 0);
+              var $add_ptr136 = CHECK_OVERFLOW($out_0 + $scevgep51_sum, 32, 0);
+              var $from_4_ph = $add_ptr136;
               var $len_1_ph = $sub130;
-              var $out_5_ph = $out_0 + $sub_ptr_rhs_cast + $36 + $conv84 | 0;
+              var $out_5_ph = $scevgep48;
             } else {
               if ($10 >>> 0 < $sub113 >>> 0) {
-                var $add_ptr144 = $12 + ($sub143 - $sub113) | 0;
-                var $sub145 = $sub113 - $10 | 0;
+                var $add_ptr121_sum16 = CHECK_OVERFLOW($sub143 - $sub113, 32, 0);
+                var $add_ptr144 = CHECK_OVERFLOW($12 + $add_ptr121_sum16, 32, 0);
+                var $sub145 = CHECK_OVERFLOW($sub113 - $10, 32, 0);
                 if ($sub145 >>> 0 >= $len_0 >>> 0) {
                   var $from_4_ph = $add_ptr144;
                   var $len_1_ph = $len_0;
                   var $out_5_ph = $out_0;
                   break;
                 }
-                var $sub149 = $len_0 - $sub145 | 0;
-                var $38 = $and106 - $sub_ptr_lhs_cast | 0;
+                var $sub149 = CHECK_OVERFLOW($len_0 - $sub145, 32, 0);
+                var $38 = CHECK_OVERFLOW($and106 - $sub_ptr_lhs_cast, 32, 0);
                 var $from_1 = $add_ptr144;
                 var $op_1 = $sub145;
                 var $out_2 = $out_0;
@@ -9555,11 +11496,11 @@ function _inflate_fast($strm, $start) {
                   var $out_2;
                   var $op_1;
                   var $from_1;
-                  var $incdec_ptr151 = $from_1 + 1 | 0;
+                  var $incdec_ptr151 = CHECK_OVERFLOW($from_1 + 1, 32, 0);
                   var $39 = HEAP8[$incdec_ptr151];
-                  var $incdec_ptr152 = $out_2 + 1 | 0;
+                  var $incdec_ptr152 = CHECK_OVERFLOW($out_2 + 1, 32, 0);
                   HEAP8[$incdec_ptr152] = $39;
-                  var $dec154 = $op_1 - 1 | 0;
+                  var $dec154 = CHECK_OVERFLOW($op_1 - 1, 32, 0);
                   if (($dec154 | 0) == 0) {
                     break;
                   }
@@ -9567,15 +11508,17 @@ function _inflate_fast($strm, $start) {
                   var $op_1 = $dec154;
                   var $out_2 = $incdec_ptr152;
                 }
-                var $scevgep81 = $out_0 + $27 + $38 + $conv84 | 0;
+                var $scevgep79_sum = CHECK_OVERFLOW($27 + $38, 32, 0);
+                var $scevgep80_sum = CHECK_OVERFLOW($scevgep79_sum + $conv84, 32, 0);
+                var $scevgep81 = CHECK_OVERFLOW($out_0 + $scevgep80_sum, 32, 0);
                 if ($10 >>> 0 >= $sub149 >>> 0) {
                   var $from_4_ph = $add_ptr121;
                   var $len_1_ph = $sub149;
                   var $out_5_ph = $scevgep81;
                   break;
                 }
-                var $sub161 = $sub149 - $10 | 0;
-                var $scevgep63_sum = $26 + $38 | 0;
+                var $sub161 = CHECK_OVERFLOW($sub149 - $10, 32, 0);
+                var $scevgep63_sum = CHECK_OVERFLOW($26 + $38, 32, 0);
                 var $from_2 = $add_ptr121;
                 var $op_2 = $10;
                 var $out_3 = $scevgep81;
@@ -9583,11 +11526,11 @@ function _inflate_fast($strm, $start) {
                   var $out_3;
                   var $op_2;
                   var $from_2;
-                  var $incdec_ptr163 = $from_2 + 1 | 0;
+                  var $incdec_ptr163 = CHECK_OVERFLOW($from_2 + 1, 32, 0);
                   var $40 = HEAP8[$incdec_ptr163];
-                  var $incdec_ptr164 = $out_3 + 1 | 0;
+                  var $incdec_ptr164 = CHECK_OVERFLOW($out_3 + 1, 32, 0);
                   HEAP8[$incdec_ptr164] = $40;
-                  var $dec166 = $op_2 - 1 | 0;
+                  var $dec166 = CHECK_OVERFLOW($op_2 - 1, 32, 0);
                   if (($dec166 | 0) == 0) {
                     break;
                   }
@@ -9595,20 +11538,28 @@ function _inflate_fast($strm, $start) {
                   var $op_2 = $dec166;
                   var $out_3 = $incdec_ptr164;
                 }
-                var $from_4_ph = $out_0 + $scevgep63_sum + $conv84 + (1 - $add107) | 0;
+                var $scevgep60_sum = CHECK_OVERFLOW($sub_ptr_rhs_cast + $38, 32, 0);
+                var $scevgep61_sum = CHECK_OVERFLOW($scevgep60_sum + $conv84, 32, 0);
+                var $scevgep62 = CHECK_OVERFLOW($out_0 + $scevgep61_sum, 32, 0);
+                var $scevgep64_sum = CHECK_OVERFLOW($scevgep63_sum + $conv84, 32, 0);
+                var $incdec_ptr164_sum = CHECK_OVERFLOW(1 - $add107, 32, 0);
+                var $scevgep65_sum = CHECK_OVERFLOW($scevgep64_sum + $incdec_ptr164_sum, 32, 0);
+                var $add_ptr170 = CHECK_OVERFLOW($out_0 + $scevgep65_sum, 32, 0);
+                var $from_4_ph = $add_ptr170;
                 var $len_1_ph = $sub161;
-                var $out_5_ph = $out_0 + $sub_ptr_rhs_cast + $38 + $conv84 | 0;
+                var $out_5_ph = $scevgep62;
               } else {
-                var $add_ptr175 = $12 + ($sub174 - $sub113) | 0;
+                var $add_ptr121_sum = CHECK_OVERFLOW($sub174 - $sub113, 32, 0);
+                var $add_ptr175 = CHECK_OVERFLOW($12 + $add_ptr121_sum, 32, 0);
                 if ($sub113 >>> 0 >= $len_0 >>> 0) {
                   var $from_4_ph = $add_ptr175;
                   var $len_1_ph = $len_0;
                   var $out_5_ph = $out_0;
                   break;
                 }
-                var $sub179 = $len_0 - $sub113 | 0;
-                var $41 = $and106 - $sub_ptr_lhs_cast | 0;
-                var $scevgep56_sum = $26 + $41 | 0;
+                var $sub179 = CHECK_OVERFLOW($len_0 - $sub113, 32, 0);
+                var $41 = CHECK_OVERFLOW($and106 - $sub_ptr_lhs_cast, 32, 0);
+                var $scevgep56_sum = CHECK_OVERFLOW($26 + $41, 32, 0);
                 var $from_3 = $add_ptr175;
                 var $op_3 = $sub113;
                 var $out_4 = $out_0;
@@ -9616,11 +11567,11 @@ function _inflate_fast($strm, $start) {
                   var $out_4;
                   var $op_3;
                   var $from_3;
-                  var $incdec_ptr181 = $from_3 + 1 | 0;
+                  var $incdec_ptr181 = CHECK_OVERFLOW($from_3 + 1, 32, 0);
                   var $42 = HEAP8[$incdec_ptr181];
-                  var $incdec_ptr182 = $out_4 + 1 | 0;
+                  var $incdec_ptr182 = CHECK_OVERFLOW($out_4 + 1, 32, 0);
                   HEAP8[$incdec_ptr182] = $42;
-                  var $dec184 = $op_3 - 1 | 0;
+                  var $dec184 = CHECK_OVERFLOW($op_3 - 1, 32, 0);
                   if (($dec184 | 0) == 0) {
                     break;
                   }
@@ -9628,9 +11579,16 @@ function _inflate_fast($strm, $start) {
                   var $op_3 = $dec184;
                   var $out_4 = $incdec_ptr182;
                 }
-                var $from_4_ph = $out_0 + $scevgep56_sum + $conv84 + (1 - $add107) | 0;
+                var $scevgep53_sum = CHECK_OVERFLOW($sub_ptr_rhs_cast + $41, 32, 0);
+                var $scevgep54_sum = CHECK_OVERFLOW($scevgep53_sum + $conv84, 32, 0);
+                var $scevgep55 = CHECK_OVERFLOW($out_0 + $scevgep54_sum, 32, 0);
+                var $scevgep57_sum = CHECK_OVERFLOW($scevgep56_sum + $conv84, 32, 0);
+                var $incdec_ptr182_sum = CHECK_OVERFLOW(1 - $add107, 32, 0);
+                var $scevgep58_sum = CHECK_OVERFLOW($scevgep57_sum + $incdec_ptr182_sum, 32, 0);
+                var $add_ptr188 = CHECK_OVERFLOW($out_0 + $scevgep58_sum, 32, 0);
+                var $from_4_ph = $add_ptr188;
                 var $len_1_ph = $sub179;
-                var $out_5_ph = $out_0 + $sub_ptr_rhs_cast + $41 + $conv84 | 0;
+                var $out_5_ph = $scevgep55;
               }
             }
           } while (0);
@@ -9647,15 +11605,19 @@ function _inflate_fast($strm, $start) {
                 var $from_437;
                 var $len_136;
                 var $out_535;
-                var $43 = HEAP8[$from_437 + 1 | 0];
-                HEAP8[$out_535 + 1 | 0] = $43;
-                var $44 = HEAP8[$from_437 + 2 | 0];
-                HEAP8[$out_535 + 2 | 0] = $44;
-                var $incdec_ptr198 = $from_437 + 3 | 0;
+                var $incdec_ptr194 = CHECK_OVERFLOW($from_437 + 1, 32, 0);
+                var $43 = HEAP8[$incdec_ptr194];
+                var $incdec_ptr195 = CHECK_OVERFLOW($out_535 + 1, 32, 0);
+                HEAP8[$incdec_ptr195] = $43;
+                var $incdec_ptr196 = CHECK_OVERFLOW($from_437 + 2, 32, 0);
+                var $44 = HEAP8[$incdec_ptr196];
+                var $incdec_ptr197 = CHECK_OVERFLOW($out_535 + 2, 32, 0);
+                HEAP8[$incdec_ptr197] = $44;
+                var $incdec_ptr198 = CHECK_OVERFLOW($from_437 + 3, 32, 0);
                 var $45 = HEAP8[$incdec_ptr198];
-                var $incdec_ptr199 = $out_535 + 3 | 0;
+                var $incdec_ptr199 = CHECK_OVERFLOW($out_535 + 3, 32, 0);
                 HEAP8[$incdec_ptr199] = $45;
-                var $sub200 = $len_136 - 3 | 0;
+                var $sub200 = CHECK_OVERFLOW($len_136 - 3, 32, 0);
                 if ($sub200 >>> 0 <= 2) {
                   var $out_5_lcssa = $incdec_ptr199;
                   var $len_1_lcssa = $sub200;
@@ -9682,8 +11644,9 @@ function _inflate_fast($strm, $start) {
             var $hold_8 = $shr108;
             break;
           }
-          var $46 = HEAP8[$from_4_lcssa + 1 | 0];
-          var $incdec_ptr204 = $out_5_lcssa + 1 | 0;
+          var $incdec_ptr203 = CHECK_OVERFLOW($from_4_lcssa + 1, 32, 0);
+          var $46 = HEAP8[$incdec_ptr203];
+          var $incdec_ptr204 = CHECK_OVERFLOW($out_5_lcssa + 1, 32, 0);
           HEAP8[$incdec_ptr204] = $46;
           if ($len_1_lcssa >>> 0 <= 1) {
             var $in_6 = $in_5;
@@ -9692,30 +11655,37 @@ function _inflate_fast($strm, $start) {
             var $hold_8 = $shr108;
             break;
           }
-          var $47 = HEAP8[$from_4_lcssa + 2 | 0];
-          var $incdec_ptr209 = $out_5_lcssa + 2 | 0;
+          var $incdec_ptr208 = CHECK_OVERFLOW($from_4_lcssa + 2, 32, 0);
+          var $47 = HEAP8[$incdec_ptr208];
+          var $incdec_ptr209 = CHECK_OVERFLOW($out_5_lcssa + 2, 32, 0);
           HEAP8[$incdec_ptr209] = $47;
           var $in_6 = $in_5;
           var $out_7 = $incdec_ptr209;
           var $bits_8 = $sub109;
           var $hold_8 = $shr108;
         } else {
-          var $from_5 = $out_0 + -$add107 | 0;
+          var $idx_neg213 = CHECK_OVERFLOW(-$add107, 32, 0);
+          var $add_ptr214 = CHECK_OVERFLOW($out_0 + $idx_neg213, 32, 0);
+          var $from_5 = $add_ptr214;
           var $len_2 = $len_0;
           var $out_6 = $out_0;
           while (1) {
             var $out_6;
             var $len_2;
             var $from_5;
-            var $48 = HEAP8[$from_5 + 1 | 0];
-            HEAP8[$out_6 + 1 | 0] = $48;
-            var $49 = HEAP8[$from_5 + 2 | 0];
-            HEAP8[$out_6 + 2 | 0] = $49;
-            var $incdec_ptr220 = $from_5 + 3 | 0;
+            var $incdec_ptr216 = CHECK_OVERFLOW($from_5 + 1, 32, 0);
+            var $48 = HEAP8[$incdec_ptr216];
+            var $incdec_ptr217 = CHECK_OVERFLOW($out_6 + 1, 32, 0);
+            HEAP8[$incdec_ptr217] = $48;
+            var $incdec_ptr218 = CHECK_OVERFLOW($from_5 + 2, 32, 0);
+            var $49 = HEAP8[$incdec_ptr218];
+            var $incdec_ptr219 = CHECK_OVERFLOW($out_6 + 2, 32, 0);
+            HEAP8[$incdec_ptr219] = $49;
+            var $incdec_ptr220 = CHECK_OVERFLOW($from_5 + 3, 32, 0);
             var $50 = HEAP8[$incdec_ptr220];
-            var $incdec_ptr221 = $out_6 + 3 | 0;
+            var $incdec_ptr221 = CHECK_OVERFLOW($out_6 + 3, 32, 0);
             HEAP8[$incdec_ptr221] = $50;
-            var $sub222 = $len_2 - 3 | 0;
+            var $sub222 = CHECK_OVERFLOW($len_2 - 3, 32, 0);
             if ($sub222 >>> 0 <= 2) {
               break;
             }
@@ -9730,8 +11700,9 @@ function _inflate_fast($strm, $start) {
             var $hold_8 = $shr108;
             break;
           }
-          var $51 = HEAP8[$from_5 + 4 | 0];
-          var $incdec_ptr230 = $out_6 + 4 | 0;
+          var $incdec_ptr229 = CHECK_OVERFLOW($from_5 + 4, 32, 0);
+          var $51 = HEAP8[$incdec_ptr229];
+          var $incdec_ptr230 = CHECK_OVERFLOW($out_6 + 4, 32, 0);
           HEAP8[$incdec_ptr230] = $51;
           if ($sub222 >>> 0 <= 1) {
             var $in_6 = $in_5;
@@ -9740,8 +11711,9 @@ function _inflate_fast($strm, $start) {
             var $hold_8 = $shr108;
             break;
           }
-          var $52 = HEAP8[$from_5 + 5 | 0];
-          var $incdec_ptr235 = $out_6 + 5 | 0;
+          var $incdec_ptr234 = CHECK_OVERFLOW($from_5 + 5, 32, 0);
+          var $52 = HEAP8[$incdec_ptr234];
+          var $incdec_ptr235 = CHECK_OVERFLOW($out_6 + 5, 32, 0);
           HEAP8[$incdec_ptr235] = $52;
           var $in_6 = $in_5;
           var $out_7 = $incdec_ptr235;
@@ -9771,25 +11743,43 @@ function _inflate_fast($strm, $start) {
   var $out_8;
   var $in_7;
   var $shr283 = $bits_9 >>> 3;
-  var $add_ptr285 = $in_7 + -$shr283 | 0;
+  var $idx_neg284 = CHECK_OVERFLOW(-$shr283, 32, 0);
+  var $add_ptr285 = CHECK_OVERFLOW($in_7 + $idx_neg284, 32, 0);
   var $sub287 = $bits_9 & 7;
-  HEAP32[$next_in >> 2] = $in_7 + (1 - $shr283) | 0;
-  HEAP32[$next_out >> 2] = $out_8 + 1 | 0;
+  var $sub289 = CHECK_OVERFLOW((1 << $sub287) - 1, 32, 0);
+  var $and290 = $sub289 & $hold_9;
+  var $add_ptr285_sum = CHECK_OVERFLOW(1 - $shr283, 32, 0);
+  var $add_ptr291 = CHECK_OVERFLOW($in_7 + $add_ptr285_sum, 32, 0);
+  HEAP32[$next_in >> 2] = $add_ptr291;
+  var $add_ptr293 = CHECK_OVERFLOW($out_8 + 1, 32, 0);
+  HEAP32[$next_out >> 2] = $add_ptr293;
   if ($add_ptr285 >>> 0 < $add_ptr2 >>> 0) {
-    var $cond_in = $add_ptr2 - $add_ptr285 | 0;
+    var $sub_ptr_lhs_cast297 = $add_ptr2;
+    var $sub_ptr_rhs_cast298 = $add_ptr285;
+    var $sub_ptr_sub299 = CHECK_OVERFLOW($sub_ptr_lhs_cast297 - $sub_ptr_rhs_cast298, 32, 0);
+    var $cond_in = $sub_ptr_sub299;
   } else {
-    var $cond_in = $add_ptr2 - $add_ptr285 | 0;
+    var $sub_ptr_lhs_cast301 = $add_ptr285;
+    var $sub_ptr_rhs_cast302 = $add_ptr2;
+    var $sub_ptr_sub30314 = CHECK_OVERFLOW($sub_ptr_rhs_cast302 - $sub_ptr_lhs_cast301, 32, 0);
+    var $cond_in = $sub_ptr_sub30314;
   }
   var $cond_in;
-  HEAP32[$avail_in >> 2] = $cond_in + 5 | 0;
+  var $cond = CHECK_OVERFLOW($cond_in + 5, 32, 0);
+  HEAP32[$avail_in >> 2] = $cond;
   if ($out_8 >>> 0 < $add_ptr8 >>> 0) {
-    var $cond319_in = $add_ptr8 - $out_8 | 0;
+    var $sub_ptr_lhs_cast309 = $add_ptr8;
+    var $sub_ptr_sub311 = CHECK_OVERFLOW($sub_ptr_lhs_cast309 - $out_8, 32, 0);
+    var $cond319_in = $sub_ptr_sub311;
   } else {
-    var $cond319_in = $add_ptr8 - $out_8 | 0;
+    var $sub_ptr_rhs_cast315 = $add_ptr8;
+    var $sub_ptr_sub31615 = CHECK_OVERFLOW($sub_ptr_rhs_cast315 - $out_8, 32, 0);
+    var $cond319_in = $sub_ptr_sub31615;
   }
   var $cond319_in;
-  HEAP32[$avail_out >> 2] = $cond319_in + 257 | 0;
-  HEAP32[$13 >> 2] = (1 << $sub287) - 1 & $hold_9;
+  var $cond319 = CHECK_OVERFLOW($cond319_in + 257, 32, 0);
+  HEAP32[$avail_out >> 2] = $cond319;
+  HEAP32[$13 >> 2] = $and290;
   HEAP32[$15 >> 2] = $sub287;
   return;
   return;
@@ -9798,7 +11788,7 @@ function _inflate_fast($strm, $start) {
 _inflate_fast["X"] = 1;
 
 function _zcalloc($opaque, $items, $size) {
-  var $mul = $size * $items | 0;
+  var $mul = CHECK_OVERFLOW($size * $items, 32, 0);
   var $call = _malloc($mul);
   return $call;
   return null;
@@ -9818,49 +11808,67 @@ function _malloc($bytes) {
       if ($bytes >>> 0 < 11) {
         var $cond = 16;
       } else {
-        var $cond = $bytes + 11 & -8;
+        var $add2 = CHECK_OVERFLOW($bytes + 11, 32, 0);
+        var $cond = $add2 & -8;
       }
       var $cond;
       var $shr = $cond >>> 3;
-      var $0 = HEAPU32[__gm_ >> 2];
+      var $0 = HEAPU32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
       var $shr3 = $0 >>> ($shr >>> 0);
       if (($shr3 & 3 | 0) != 0) {
-        var $add8 = ($shr3 & 1 ^ 1) + $shr | 0;
+        var $and7 = $shr3 & 1 ^ 1;
+        var $add8 = CHECK_OVERFLOW($and7 + $shr, 32, 0);
         var $shl = $add8 << 1;
-        var $1 = ($shl << 2) + __gm_ + 40 | 0;
-        var $2 = ($shl + 2 << 2) + __gm_ + 40 | 0;
+        var $arrayidx = CHECK_OVERFLOW(($shl << 2) + __gm_ + 40, 32, 0);
+        var $1 = $arrayidx;
+        var $arrayidx_sum = CHECK_OVERFLOW($shl + 2, 32, 0);
+        var $2 = CHECK_OVERFLOW(($arrayidx_sum << 2) + __gm_ + 40, 32, 0);
         var $3 = HEAPU32[$2 >> 2];
-        var $fd9 = $3 + 8 | 0;
+        var $fd9 = CHECK_OVERFLOW($3 + 8, 32, 0);
         var $4 = HEAPU32[$fd9 >> 2];
         if (($1 | 0) == ($4 | 0)) {
-          HEAP32[__gm_ >> 2] = $0 & (1 << $add8 ^ -1);
+          var $and14 = $0 & (1 << $add8 ^ -1);
+          HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $and14;
         } else {
-          if ($4 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+          var $5 = $4;
+          var $6 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+          if ($5 >>> 0 < $6 >>> 0) {
             _abort();
             throw "Reached an unreachable!";
           } else {
             HEAP32[$2 >> 2] = $4;
-            HEAP32[$4 + 12 >> 2] = $1;
+            var $bk = CHECK_OVERFLOW($4 + 12, 32, 0);
+            HEAP32[$bk >> 2] = $1;
           }
         }
         var $shl20 = $add8 << 3;
-        HEAP32[$3 + 4 >> 2] = $shl20 | 3;
-        var $8 = $3 + ($shl20 | 4) | 0;
+        var $or21 = $shl20 | 3;
+        var $head = CHECK_OVERFLOW($3 + 4, 32, 0);
+        HEAP32[$head >> 2] = $or21;
+        var $7 = $3;
+        var $add_ptr_sum4 = $shl20 | 4;
+        var $head23 = CHECK_OVERFLOW($7 + $add_ptr_sum4, 32, 0);
+        var $8 = $head23;
         var $or24 = HEAP32[$8 >> 2] | 1;
         HEAP32[$8 >> 2] = $or24;
         var $mem_0 = $fd9;
         __label__ = 37;
         break;
       }
-      if ($cond >>> 0 <= HEAPU32[__gm_ + 8 >> 2] >>> 0) {
+      var $11 = HEAPU32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2];
+      if ($cond >>> 0 <= $11 >>> 0) {
         var $nb_0 = $cond;
         __label__ = 29;
         break;
       }
       if (($shr3 | 0) != 0) {
+        var $shl35 = $shr3 << $shr;
         var $shl37 = 2 << $shr;
-        var $and41 = $shr3 << $shr & ($shl37 | -$shl37);
-        var $sub44 = ($and41 & -$and41) - 1 | 0;
+        var $sub = CHECK_OVERFLOW(-$shl37, 32, 0);
+        var $and41 = $shl35 & ($shl37 | $sub);
+        var $sub42 = CHECK_OVERFLOW(-$and41, 32, 0);
+        var $and43 = $and41 & $sub42;
+        var $sub44 = CHECK_OVERFLOW($and43 - 1, 32, 0);
         var $and46 = $sub44 >>> 12 & 16;
         var $shr47 = $sub44 >>> ($and46 >>> 0);
         var $and49 = $shr47 >>> 5 & 8;
@@ -9870,48 +11878,70 @@ function _malloc($bytes) {
         var $and57 = $shr55 >>> 1 & 2;
         var $shr59 = $shr55 >>> ($and57 >>> 0);
         var $and61 = $shr59 >>> 1 & 1;
-        var $add64 = ($and49 | $and46 | $and53 | $and57 | $and61) + ($shr59 >>> ($and61 >>> 0)) | 0;
+        var $add62 = $and49 | $and46 | $and53 | $and57 | $and61;
+        var $shr63 = $shr59 >>> ($and61 >>> 0);
+        var $add64 = CHECK_OVERFLOW($add62 + $shr63, 32, 0);
         var $shl65 = $add64 << 1;
-        var $12 = ($shl65 << 2) + __gm_ + 40 | 0;
-        var $13 = ($shl65 + 2 << 2) + __gm_ + 40 | 0;
+        var $arrayidx66 = CHECK_OVERFLOW(($shl65 << 2) + __gm_ + 40, 32, 0);
+        var $12 = $arrayidx66;
+        var $arrayidx66_sum = CHECK_OVERFLOW($shl65 + 2, 32, 0);
+        var $13 = CHECK_OVERFLOW(($arrayidx66_sum << 2) + __gm_ + 40, 32, 0);
         var $14 = HEAPU32[$13 >> 2];
-        var $fd69 = $14 + 8 | 0;
+        var $fd69 = CHECK_OVERFLOW($14 + 8, 32, 0);
         var $15 = HEAPU32[$fd69 >> 2];
         if (($12 | 0) == ($15 | 0)) {
-          HEAP32[__gm_ >> 2] = $0 & (1 << $add64 ^ -1);
+          var $and75 = $0 & (1 << $add64 ^ -1);
+          HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $and75;
         } else {
-          if ($15 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+          var $16 = $15;
+          var $17 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+          if ($16 >>> 0 < $17 >>> 0) {
             _abort();
             throw "Reached an unreachable!";
           } else {
             HEAP32[$13 >> 2] = $15;
-            HEAP32[$15 + 12 >> 2] = $12;
+            var $bk83 = CHECK_OVERFLOW($15 + 12, 32, 0);
+            HEAP32[$bk83 >> 2] = $12;
           }
         }
         var $shl87 = $add64 << 3;
-        var $sub88 = $shl87 - $cond | 0;
-        HEAP32[$14 + 4 >> 2] = $cond | 3;
+        var $sub88 = CHECK_OVERFLOW($shl87 - $cond, 32, 0);
+        var $or90 = $cond | 3;
+        var $head91 = CHECK_OVERFLOW($14 + 4, 32, 0);
+        HEAP32[$head91 >> 2] = $or90;
         var $18 = $14;
-        var $19 = $18 + $cond | 0;
-        HEAP32[$18 + ($cond | 4) >> 2] = $sub88 | 1;
-        HEAP32[$18 + $shl87 >> 2] = $sub88;
-        var $21 = HEAPU32[__gm_ + 8 >> 2];
+        var $add_ptr92 = CHECK_OVERFLOW($18 + $cond, 32, 0);
+        var $19 = $add_ptr92;
+        var $or93 = $sub88 | 1;
+        var $head94 = CHECK_OVERFLOW($18 + ($cond | 4), 32, 0);
+        HEAP32[$head94 >> 2] = $or93;
+        var $add_ptr95 = CHECK_OVERFLOW($18 + $shl87, 32, 0);
+        HEAP32[$add_ptr95 >> 2] = $sub88;
+        var $21 = HEAPU32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2];
         if (($21 | 0) != 0) {
-          var $22 = HEAP32[__gm_ + 20 >> 2];
+          var $22 = HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
+          var $shr99 = $21 >>> 3;
           var $shl100 = $21 >>> 2 & 1073741822;
-          var $24 = ($shl100 << 2) + __gm_ + 40 | 0;
-          var $25 = HEAPU32[__gm_ >> 2];
-          var $shl103 = 1 << ($21 >>> 3);
+          var $arrayidx101 = CHECK_OVERFLOW(($shl100 << 2) + __gm_ + 40, 32, 0);
+          var $24 = $arrayidx101;
+          var $25 = HEAPU32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+          var $shl103 = 1 << $shr99;
           var $tobool105 = ($25 & $shl103 | 0) == 0;
           do {
             if ($tobool105) {
-              HEAP32[__gm_ >> 2] = $25 | $shl103;
+              var $or108 = $25 | $shl103;
+              HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $or108;
+              var $arrayidx101_sum_pre = CHECK_OVERFLOW($shl100 + 2, 32, 0);
+              var $_pre = CHECK_OVERFLOW(($arrayidx101_sum_pre << 2) + __gm_ + 40, 32, 0);
               var $F102_0 = $24;
-              var $_pre_phi = ($shl100 + 2 << 2) + __gm_ + 40 | 0;
+              var $_pre_phi = $_pre;
             } else {
-              var $26 = ($shl100 + 2 << 2) + __gm_ + 40 | 0;
+              var $arrayidx101_sum3 = CHECK_OVERFLOW($shl100 + 2, 32, 0);
+              var $26 = CHECK_OVERFLOW(($arrayidx101_sum3 << 2) + __gm_ + 40, 32, 0);
               var $27 = HEAPU32[$26 >> 2];
-              if ($27 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+              var $28 = $27;
+              var $29 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+              if ($28 >>> 0 >= $29 >>> 0) {
                 var $F102_0 = $27;
                 var $_pre_phi = $26;
                 break;
@@ -9923,19 +11953,21 @@ function _malloc($bytes) {
           var $_pre_phi;
           var $F102_0;
           HEAP32[$_pre_phi >> 2] = $22;
-          HEAP32[$F102_0 + 12 >> 2] = $22;
-          var $fd122 = $22 + 8 | 0;
+          var $bk121 = CHECK_OVERFLOW($F102_0 + 12, 32, 0);
+          HEAP32[$bk121 >> 2] = $22;
+          var $fd122 = CHECK_OVERFLOW($22 + 8, 32, 0);
           HEAP32[$fd122 >> 2] = $F102_0;
-          var $bk123 = $22 + 12 | 0;
+          var $bk123 = CHECK_OVERFLOW($22 + 12, 32, 0);
           HEAP32[$bk123 >> 2] = $24;
         }
-        HEAP32[__gm_ + 8 >> 2] = $sub88;
-        HEAP32[__gm_ + 20 >> 2] = $19;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = $sub88;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2] = $19;
         var $mem_0 = $fd69;
         __label__ = 37;
         break;
       }
-      if ((HEAP32[__gm_ + 4 >> 2] | 0) == 0) {
+      var $31 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+      if (($31 | 0) == 0) {
         var $nb_0 = $cond;
         __label__ = 29;
         break;
@@ -9955,8 +11987,10 @@ function _malloc($bytes) {
         __label__ = 29;
         break;
       }
-      var $and143 = $bytes + 11 & -8;
-      if ((HEAP32[__gm_ + 4 >> 2] | 0) == 0) {
+      var $add142 = CHECK_OVERFLOW($bytes + 11, 32, 0);
+      var $and143 = $add142 & -8;
+      var $32 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+      if (($32 | 0) == 0) {
         var $nb_0 = $and143;
         __label__ = 29;
         break;
@@ -9974,41 +12008,63 @@ function _malloc($bytes) {
   } while (0);
   if (__label__ == 29) {
     var $nb_0;
-    var $33 = HEAPU32[__gm_ + 8 >> 2];
+    var $33 = HEAPU32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2];
     if ($nb_0 >>> 0 > $33 >>> 0) {
-      var $42 = HEAPU32[__gm_ + 12 >> 2];
+      var $42 = HEAPU32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
       if ($nb_0 >>> 0 < $42 >>> 0) {
-        var $sub186 = $42 - $nb_0 | 0;
-        HEAP32[__gm_ + 12 >> 2] = $sub186;
-        var $43 = HEAPU32[__gm_ + 24 >> 2];
+        var $sub186 = CHECK_OVERFLOW($42 - $nb_0, 32, 0);
+        HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2] = $sub186;
+        var $43 = HEAPU32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
         var $44 = $43;
-        HEAP32[__gm_ + 24 >> 2] = $44 + $nb_0 | 0;
-        HEAP32[$nb_0 + ($44 + 4) >> 2] = $sub186 | 1;
-        HEAP32[$43 + 4 >> 2] = $nb_0 | 3;
-        var $mem_0 = $43 + 8 | 0;
+        var $add_ptr189 = CHECK_OVERFLOW($44 + $nb_0, 32, 0);
+        var $45 = $add_ptr189;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2] = $45;
+        var $or190 = $sub186 | 1;
+        var $add_ptr189_sum = CHECK_OVERFLOW($nb_0 + 4, 32, 0);
+        var $head191 = CHECK_OVERFLOW($44 + $add_ptr189_sum, 32, 0);
+        HEAP32[$head191 >> 2] = $or190;
+        var $or193 = $nb_0 | 3;
+        var $head194 = CHECK_OVERFLOW($43 + 4, 32, 0);
+        HEAP32[$head194 >> 2] = $or193;
+        var $add_ptr195 = CHECK_OVERFLOW($43 + 8, 32, 0);
+        var $mem_0 = $add_ptr195;
       } else {
         var $call198 = _sys_alloc($nb_0);
         var $mem_0 = $call198;
       }
     } else {
-      var $sub158 = $33 - $nb_0 | 0;
-      var $34 = HEAPU32[__gm_ + 20 >> 2];
+      var $sub158 = CHECK_OVERFLOW($33 - $nb_0, 32, 0);
+      var $34 = HEAPU32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
       if ($sub158 >>> 0 > 15) {
         var $35 = $34;
-        HEAP32[__gm_ + 20 >> 2] = $35 + $nb_0 | 0;
-        HEAP32[__gm_ + 8 >> 2] = $sub158;
-        HEAP32[$nb_0 + ($35 + 4) >> 2] = $sub158 | 1;
-        HEAP32[$35 + $33 >> 2] = $sub158;
-        HEAP32[$34 + 4 >> 2] = $nb_0 | 3;
+        var $add_ptr164 = CHECK_OVERFLOW($35 + $nb_0, 32, 0);
+        var $36 = $add_ptr164;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2] = $36;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = $sub158;
+        var $or165 = $sub158 | 1;
+        var $add_ptr164_sum = CHECK_OVERFLOW($nb_0 + 4, 32, 0);
+        var $head166 = CHECK_OVERFLOW($35 + $add_ptr164_sum, 32, 0);
+        HEAP32[$head166 >> 2] = $or165;
+        var $add_ptr167 = CHECK_OVERFLOW($35 + $33, 32, 0);
+        HEAP32[$add_ptr167 >> 2] = $sub158;
+        var $or170 = $nb_0 | 3;
+        var $head171 = CHECK_OVERFLOW($34 + 4, 32, 0);
+        HEAP32[$head171 >> 2] = $or170;
       } else {
-        HEAP32[__gm_ + 8 >> 2] = 0;
-        HEAP32[__gm_ + 20 >> 2] = 0;
-        HEAP32[$34 + 4 >> 2] = $33 | 3;
-        var $39 = $33 + ($34 + 4) | 0;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = 0;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2] = 0;
+        var $or174 = $33 | 3;
+        var $head175 = CHECK_OVERFLOW($34 + 4, 32, 0);
+        HEAP32[$head175 >> 2] = $or174;
+        var $38 = $34;
+        var $add_ptr176_sum = CHECK_OVERFLOW($33 + 4, 32, 0);
+        var $head177 = CHECK_OVERFLOW($38 + $add_ptr176_sum, 32, 0);
+        var $39 = $head177;
         var $or178 = HEAP32[$39 >> 2] | 1;
         HEAP32[$39 >> 2] = $or178;
       }
-      var $mem_0 = $34 + 8 | 0;
+      var $add_ptr180 = CHECK_OVERFLOW($34 + 8, 32, 0);
+      var $mem_0 = $add_ptr180;
     }
   }
   var $mem_0;
@@ -10019,11 +12075,11 @@ function _malloc($bytes) {
 _malloc["X"] = 1;
 
 function _tmalloc_small($nb) {
-  var $R_1$s2;
-  var $v_0_ph$s2;
   var __label__;
-  var $0 = HEAP32[__gm_ + 4 >> 2];
-  var $sub2 = ($0 & -$0) - 1 | 0;
+  var $0 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+  var $sub = CHECK_OVERFLOW(-$0, 32, 0);
+  var $and = $0 & $sub;
+  var $sub2 = CHECK_OVERFLOW($and - 1, 32, 0);
   var $and3 = $sub2 >>> 12 & 16;
   var $shr4 = $sub2 >>> ($and3 >>> 0);
   var $and6 = $shr4 >>> 5 & 8;
@@ -10033,18 +12089,27 @@ function _tmalloc_small($nb) {
   var $and13 = $shr11 >>> 1 & 2;
   var $shr15 = $shr11 >>> ($and13 >>> 0);
   var $and17 = $shr15 >>> 1 & 1;
-  var $1 = HEAPU32[__gm_ + (($and6 | $and3 | $and9 | $and13 | $and17) + ($shr15 >>> ($and17 >>> 0)) << 2) + 304 >> 2];
-  var $v_0_ph = $1, $v_0_ph$s2 = $v_0_ph >> 2;
-  var $rsize_0_ph = (HEAP32[$1 + 4 >> 2] & -8) - $nb | 0;
+  var $add18 = $and6 | $and3 | $and9 | $and13 | $and17;
+  var $shr19 = $shr15 >>> ($and17 >>> 0);
+  var $add20 = CHECK_OVERFLOW($add18 + $shr19, 32, 0);
+  var $arrayidx = CHECK_OVERFLOW(($add20 << 2) + __gm_ + 304, 32, 0);
+  var $1 = HEAPU32[$arrayidx >> 2];
+  var $head = CHECK_OVERFLOW($1 + 4, 32, 0);
+  var $and21 = HEAP32[$head >> 2] & -8;
+  var $sub22 = CHECK_OVERFLOW($and21 - $nb, 32, 0);
+  var $v_0_ph = $1;
+  var $rsize_0_ph = $sub22;
   $while_cond_outer$2 : while (1) {
     var $rsize_0_ph;
     var $v_0_ph;
     var $t_0 = $v_0_ph;
     while (1) {
       var $t_0;
-      var $3 = HEAP32[$t_0 + 16 >> 2];
+      var $arrayidx23 = CHECK_OVERFLOW($t_0 + 16, 32, 0);
+      var $3 = HEAP32[$arrayidx23 >> 2];
       if (($3 | 0) == 0) {
-        var $4 = HEAP32[$t_0 + 20 >> 2];
+        var $arrayidx27 = CHECK_OVERFLOW($t_0 + 20, 32, 0);
+        var $4 = HEAP32[$arrayidx27 >> 2];
         if (($4 | 0) == 0) {
           break $while_cond_outer$2;
         }
@@ -10053,9 +12118,11 @@ function _tmalloc_small($nb) {
         var $cond5 = $3;
       }
       var $cond5;
-      var $sub31 = (HEAP32[$cond5 + 4 >> 2] & -8) - $nb | 0;
+      var $head29 = CHECK_OVERFLOW($cond5 + 4, 32, 0);
+      var $and30 = HEAP32[$head29 >> 2] & -8;
+      var $sub31 = CHECK_OVERFLOW($and30 - $nb, 32, 0);
       if ($sub31 >>> 0 < $rsize_0_ph >>> 0) {
-        var $v_0_ph = $cond5, $v_0_ph$s2 = $v_0_ph >> 2;
+        var $v_0_ph = $cond5;
         var $rsize_0_ph = $sub31;
         continue $while_cond_outer$2;
       }
@@ -10063,27 +12130,29 @@ function _tmalloc_small($nb) {
     }
   }
   var $6 = $v_0_ph;
-  var $7 = HEAPU32[__gm_ + 16 >> 2];
+  var $7 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
   var $cmp33 = $6 >>> 0 < $7 >>> 0;
   do {
     if (!$cmp33) {
-      var $add_ptr = $6 + $nb | 0;
+      var $add_ptr = CHECK_OVERFLOW($6 + $nb, 32, 0);
       var $8 = $add_ptr;
       if ($6 >>> 0 >= $add_ptr >>> 0) {
         break;
       }
-      var $9 = HEAPU32[$v_0_ph$s2 + 6];
-      var $10 = HEAPU32[$v_0_ph$s2 + 3];
+      var $parent = CHECK_OVERFLOW($v_0_ph + 24, 32, 0);
+      var $9 = HEAPU32[$parent >> 2];
+      var $bk = CHECK_OVERFLOW($v_0_ph + 12, 32, 0);
+      var $10 = HEAPU32[$bk >> 2];
       var $cmp40 = ($10 | 0) == ($v_0_ph | 0);
       do {
         if ($cmp40) {
-          var $arrayidx55 = $v_0_ph + 20 | 0;
+          var $arrayidx55 = CHECK_OVERFLOW($v_0_ph + 20, 32, 0);
           var $13 = HEAP32[$arrayidx55 >> 2];
           if (($13 | 0) == 0) {
-            var $arrayidx59 = $v_0_ph + 16 | 0;
+            var $arrayidx59 = CHECK_OVERFLOW($v_0_ph + 16, 32, 0);
             var $14 = HEAP32[$arrayidx59 >> 2];
             if (($14 | 0) == 0) {
-              var $R_1 = 0, $R_1$s2 = $R_1 >> 2;
+              var $R_1 = 0;
               break;
             }
             var $RP_0 = $arrayidx59;
@@ -10096,14 +12165,14 @@ function _tmalloc_small($nb) {
           while (1) {
             var $R_0;
             var $RP_0;
-            var $arrayidx65 = $R_0 + 20 | 0;
+            var $arrayidx65 = CHECK_OVERFLOW($R_0 + 20, 32, 0);
             var $15 = HEAP32[$arrayidx65 >> 2];
             if (($15 | 0) != 0) {
               var $RP_0 = $arrayidx65;
               var $R_0 = $15;
               continue;
             }
-            var $arrayidx69 = $R_0 + 16 | 0;
+            var $arrayidx69 = CHECK_OVERFLOW($R_0 + 16, 32, 0);
             var $16 = HEAPU32[$arrayidx69 >> 2];
             if (($16 | 0) == 0) {
               break;
@@ -10116,17 +12185,20 @@ function _tmalloc_small($nb) {
             throw "Reached an unreachable!";
           } else {
             HEAP32[$RP_0 >> 2] = 0;
-            var $R_1 = $R_0, $R_1$s2 = $R_1 >> 2;
+            var $R_1 = $R_0;
           }
         } else {
-          var $11 = HEAPU32[$v_0_ph$s2 + 2];
+          var $fd = CHECK_OVERFLOW($v_0_ph + 8, 32, 0);
+          var $11 = HEAPU32[$fd >> 2];
           if ($11 >>> 0 < $7 >>> 0) {
             _abort();
             throw "Reached an unreachable!";
           } else {
-            HEAP32[$11 + 12 >> 2] = $10;
-            HEAP32[$10 + 8 >> 2] = $11;
-            var $R_1 = $10, $R_1$s2 = $R_1 >> 2;
+            var $bk50 = CHECK_OVERFLOW($11 + 12, 32, 0);
+            HEAP32[$bk50 >> 2] = $10;
+            var $fd51 = CHECK_OVERFLOW($10 + 8, 32, 0);
+            HEAP32[$fd51 >> 2] = $11;
+            var $R_1 = $10;
           }
         }
       } while (0);
@@ -10134,8 +12206,9 @@ function _tmalloc_small($nb) {
       var $cmp84 = ($9 | 0) == 0;
       $if_end167$$if_then86$29 : do {
         if (!$cmp84) {
-          var $index = $v_0_ph + 28 | 0;
-          var $arrayidx88 = (HEAP32[$index >> 2] << 2) + __gm_ + 304 | 0;
+          var $index = CHECK_OVERFLOW($v_0_ph + 28, 32, 0);
+          var $18 = HEAP32[$index >> 2];
+          var $arrayidx88 = CHECK_OVERFLOW(($18 << 2) + __gm_ + 304, 32, 0);
           var $cmp89 = ($v_0_ph | 0) == (HEAP32[$arrayidx88 >> 2] | 0);
           do {
             if ($cmp89) {
@@ -10143,81 +12216,118 @@ function _tmalloc_small($nb) {
               if (($R_1 | 0) != 0) {
                 break;
               }
-              var $and97 = HEAP32[__gm_ + 4 >> 2] & (1 << HEAP32[$index >> 2] ^ -1);
-              HEAP32[__gm_ + 4 >> 2] = $and97;
+              var $neg = 1 << HEAP32[$index >> 2] ^ -1;
+              var $21 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+              var $and97 = $21 & $neg;
+              HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $and97;
               break $if_end167$$if_then86$29;
             }
-            if ($9 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+            var $22 = $9;
+            var $23 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+            if ($22 >>> 0 < $23 >>> 0) {
               _abort();
               throw "Reached an unreachable!";
             } else {
-              var $arrayidx107 = $9 + 16 | 0;
+              var $arrayidx107 = CHECK_OVERFLOW($9 + 16, 32, 0);
               if ((HEAP32[$arrayidx107 >> 2] | 0) == ($v_0_ph | 0)) {
                 HEAP32[$arrayidx107 >> 2] = $R_1;
               } else {
-                HEAP32[$9 + 20 >> 2] = $R_1;
+                var $arrayidx115 = CHECK_OVERFLOW($9 + 20, 32, 0);
+                HEAP32[$arrayidx115 >> 2] = $R_1;
               }
               if (($R_1 | 0) == 0) {
                 break $if_end167$$if_then86$29;
               }
             }
           } while (0);
-          if ($R_1 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+          var $25 = $R_1;
+          var $26 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+          if ($25 >>> 0 < $26 >>> 0) {
             _abort();
             throw "Reached an unreachable!";
           } else {
-            HEAP32[$R_1$s2 + 6] = $9;
-            var $27 = HEAPU32[$v_0_ph$s2 + 4];
+            var $parent129 = CHECK_OVERFLOW($R_1 + 24, 32, 0);
+            HEAP32[$parent129 >> 2] = $9;
+            var $arrayidx131 = CHECK_OVERFLOW($v_0_ph + 16, 32, 0);
+            var $27 = HEAPU32[$arrayidx131 >> 2];
             if (($27 | 0) != 0) {
-              if ($27 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+              var $28 = $27;
+              var $29 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+              if ($28 >>> 0 < $29 >>> 0) {
                 _abort();
                 throw "Reached an unreachable!";
               } else {
-                HEAP32[$R_1$s2 + 4] = $27;
-                HEAP32[$27 + 24 >> 2] = $R_1;
+                var $arrayidx142 = CHECK_OVERFLOW($R_1 + 16, 32, 0);
+                HEAP32[$arrayidx142 >> 2] = $27;
+                var $parent143 = CHECK_OVERFLOW($27 + 24, 32, 0);
+                HEAP32[$parent143 >> 2] = $R_1;
               }
             }
-            var $30 = HEAPU32[$v_0_ph$s2 + 5];
+            var $arrayidx148 = CHECK_OVERFLOW($v_0_ph + 20, 32, 0);
+            var $30 = HEAPU32[$arrayidx148 >> 2];
             if (($30 | 0) == 0) {
               break;
             }
-            if ($30 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+            var $31 = $30;
+            var $32 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+            if ($31 >>> 0 < $32 >>> 0) {
               _abort();
               throw "Reached an unreachable!";
             } else {
-              HEAP32[$R_1$s2 + 5] = $30;
-              HEAP32[$30 + 24 >> 2] = $R_1;
+              var $arrayidx159 = CHECK_OVERFLOW($R_1 + 20, 32, 0);
+              HEAP32[$arrayidx159 >> 2] = $30;
+              var $parent160 = CHECK_OVERFLOW($30 + 24, 32, 0);
+              HEAP32[$parent160 >> 2] = $R_1;
             }
           }
         }
       } while (0);
       if ($rsize_0_ph >>> 0 < 16) {
-        var $add171 = $rsize_0_ph + $nb | 0;
-        HEAP32[$v_0_ph$s2 + 1] = $add171 | 3;
-        var $33 = $add171 + ($6 + 4) | 0;
+        var $add171 = CHECK_OVERFLOW($rsize_0_ph + $nb, 32, 0);
+        var $or172 = $add171 | 3;
+        var $head173 = CHECK_OVERFLOW($v_0_ph + 4, 32, 0);
+        HEAP32[$head173 >> 2] = $or172;
+        var $add_ptr175_sum = CHECK_OVERFLOW($add171 + 4, 32, 0);
+        var $head176 = CHECK_OVERFLOW($6 + $add_ptr175_sum, 32, 0);
+        var $33 = $head176;
         var $or177 = HEAP32[$33 >> 2] | 1;
         HEAP32[$33 >> 2] = $or177;
       } else {
-        HEAP32[$v_0_ph$s2 + 1] = $nb | 3;
-        HEAP32[$nb + ($6 + 4) >> 2] = $rsize_0_ph | 1;
-        HEAP32[$6 + $rsize_0_ph + $nb >> 2] = $rsize_0_ph;
-        var $36 = HEAPU32[__gm_ + 8 >> 2];
+        var $or180 = $nb | 3;
+        var $head181 = CHECK_OVERFLOW($v_0_ph + 4, 32, 0);
+        HEAP32[$head181 >> 2] = $or180;
+        var $or182 = $rsize_0_ph | 1;
+        var $add_ptr_sum = CHECK_OVERFLOW($nb + 4, 32, 0);
+        var $head183 = CHECK_OVERFLOW($6 + $add_ptr_sum, 32, 0);
+        HEAP32[$head183 >> 2] = $or182;
+        var $add_ptr_sum1 = CHECK_OVERFLOW($rsize_0_ph + $nb, 32, 0);
+        var $add_ptr184 = CHECK_OVERFLOW($6 + $add_ptr_sum1, 32, 0);
+        HEAP32[$add_ptr184 >> 2] = $rsize_0_ph;
+        var $36 = HEAPU32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2];
         if (($36 | 0) != 0) {
-          var $37 = HEAPU32[__gm_ + 20 >> 2];
+          var $37 = HEAPU32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
+          var $shr188 = $36 >>> 3;
           var $shl189 = $36 >>> 2 & 1073741822;
-          var $39 = ($shl189 << 2) + __gm_ + 40 | 0;
-          var $40 = HEAPU32[__gm_ >> 2];
-          var $shl192 = 1 << ($36 >>> 3);
+          var $arrayidx190 = CHECK_OVERFLOW(($shl189 << 2) + __gm_ + 40, 32, 0);
+          var $39 = $arrayidx190;
+          var $40 = HEAPU32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+          var $shl192 = 1 << $shr188;
           var $tobool194 = ($40 & $shl192 | 0) == 0;
           do {
             if ($tobool194) {
-              HEAP32[__gm_ >> 2] = $40 | $shl192;
+              var $or198 = $40 | $shl192;
+              HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $or198;
+              var $arrayidx190_sum_pre = CHECK_OVERFLOW($shl189 + 2, 32, 0);
+              var $_pre = CHECK_OVERFLOW(($arrayidx190_sum_pre << 2) + __gm_ + 40, 32, 0);
               var $F191_0 = $39;
-              var $_pre_phi = ($shl189 + 2 << 2) + __gm_ + 40 | 0;
+              var $_pre_phi = $_pre;
             } else {
-              var $41 = ($shl189 + 2 << 2) + __gm_ + 40 | 0;
+              var $arrayidx190_sum2 = CHECK_OVERFLOW($shl189 + 2, 32, 0);
+              var $41 = CHECK_OVERFLOW(($arrayidx190_sum2 << 2) + __gm_ + 40, 32, 0);
               var $42 = HEAPU32[$41 >> 2];
-              if ($42 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+              var $43 = $42;
+              var $44 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+              if ($43 >>> 0 >= $44 >>> 0) {
                 var $F191_0 = $42;
                 var $_pre_phi = $41;
                 break;
@@ -10229,14 +12339,18 @@ function _tmalloc_small($nb) {
           var $_pre_phi;
           var $F191_0;
           HEAP32[$_pre_phi >> 2] = $37;
-          HEAP32[$F191_0 + 12 >> 2] = $37;
-          HEAP32[$37 + 8 >> 2] = $F191_0;
-          HEAP32[$37 + 12 >> 2] = $39;
+          var $bk212 = CHECK_OVERFLOW($F191_0 + 12, 32, 0);
+          HEAP32[$bk212 >> 2] = $37;
+          var $fd213 = CHECK_OVERFLOW($37 + 8, 32, 0);
+          HEAP32[$fd213 >> 2] = $F191_0;
+          var $bk214 = CHECK_OVERFLOW($37 + 12, 32, 0);
+          HEAP32[$bk214 >> 2] = $39;
         }
-        HEAP32[__gm_ + 8 >> 2] = $rsize_0_ph;
-        HEAP32[__gm_ + 20 >> 2] = $8;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = $rsize_0_ph;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2] = $8;
       }
-      return $v_0_ph + 8 | 0;
+      var $add_ptr219 = CHECK_OVERFLOW($v_0_ph + 8, 32, 0);
+      return $add_ptr219;
     }
   } while (0);
   _abort();
@@ -10247,14 +12361,8 @@ function _tmalloc_small($nb) {
 _tmalloc_small["X"] = 1;
 
 function _tmalloc_large($nb) {
-  var $R_1$s2;
-  var $10$s2;
-  var $t_221$s2;
-  var $v_3_lcssa$s2;
-  var $t_0$s2;
-  var $nb$s2 = $nb >> 2;
   var __label__;
-  var $sub = -$nb | 0;
+  var $sub = CHECK_OVERFLOW(-$nb, 32, 0);
   var $shr = $nb >>> 8;
   var $cmp = ($shr | 0) == 0;
   do {
@@ -10265,17 +12373,26 @@ function _tmalloc_large($nb) {
         var $idx_0 = 31;
         break;
       }
-      var $and = ($shr + 1048320 | 0) >>> 16 & 8;
+      var $sub4 = CHECK_OVERFLOW($shr + 1048320, 32, 0);
+      var $and = $sub4 >>> 16 & 8;
       var $shl = $shr << $and;
-      var $and8 = ($shl + 520192 | 0) >>> 16 & 4;
+      var $sub6 = CHECK_OVERFLOW($shl + 520192, 32, 0);
+      var $and8 = $sub6 >>> 16 & 4;
       var $shl9 = $shl << $and8;
-      var $and12 = ($shl9 + 245760 | 0) >>> 16 & 2;
-      var $add17 = 14 - ($and8 | $and | $and12) + ($shl9 << $and12 >>> 15) | 0;
-      var $idx_0 = $nb >>> (($add17 + 7 | 0) >>> 0) & 1 | $add17 << 1;
+      var $sub10 = CHECK_OVERFLOW($shl9 + 245760, 32, 0);
+      var $and12 = $sub10 >>> 16 & 2;
+      var $add13 = $and8 | $and | $and12;
+      var $sub14 = CHECK_OVERFLOW(14 - $add13, 32, 0);
+      var $shr16 = $shl9 << $and12 >>> 15;
+      var $add17 = CHECK_OVERFLOW($sub14 + $shr16, 32, 0);
+      var $shl18 = $add17 << 1;
+      var $add19 = CHECK_OVERFLOW($add17 + 7, 32, 0);
+      var $idx_0 = $nb >>> ($add19 >>> 0) & 1 | $shl18;
     }
   } while (0);
   var $idx_0;
-  var $0 = HEAPU32[__gm_ + ($idx_0 << 2) + 304 >> 2];
+  var $arrayidx = CHECK_OVERFLOW(($idx_0 << 2) + __gm_ + 304, 32, 0);
+  var $0 = HEAPU32[$arrayidx >> 2];
   var $cmp24 = ($0 | 0) == 0;
   $if_end53$$if_then25$75 : do {
     if ($cmp24) {
@@ -10286,12 +12403,13 @@ function _tmalloc_large($nb) {
       if (($idx_0 | 0) == 31) {
         var $cond = 0;
       } else {
-        var $cond = 25 - ($idx_0 >>> 1) | 0;
+        var $sub30 = CHECK_OVERFLOW(25 - ($idx_0 >>> 1), 32, 0);
+        var $cond = $sub30;
       }
       var $cond;
       var $v_0 = 0;
       var $rsize_0 = $sub;
-      var $t_0 = $0, $t_0$s2 = $t_0 >> 2;
+      var $t_0 = $0;
       var $sizebits_0 = $nb << $cond;
       var $rst_0 = 0;
       while (1) {
@@ -10300,8 +12418,9 @@ function _tmalloc_large($nb) {
         var $t_0;
         var $rsize_0;
         var $v_0;
-        var $and32 = HEAP32[$t_0$s2 + 1] & -8;
-        var $sub33 = $and32 - $nb | 0;
+        var $head = CHECK_OVERFLOW($t_0 + 4, 32, 0);
+        var $and32 = HEAP32[$head >> 2] & -8;
+        var $sub33 = CHECK_OVERFLOW($and32 - $nb, 32, 0);
         if ($sub33 >>> 0 < $rsize_0 >>> 0) {
           if (($and32 | 0) == ($nb | 0)) {
             var $v_2 = $t_0;
@@ -10317,8 +12436,10 @@ function _tmalloc_large($nb) {
         }
         var $rsize_1;
         var $v_1;
-        var $2 = HEAPU32[$t_0$s2 + 5];
-        var $3 = HEAPU32[(($sizebits_0 >>> 31 << 2) + 16 >> 2) + $t_0$s2];
+        var $arrayidx40 = CHECK_OVERFLOW($t_0 + 20, 32, 0);
+        var $2 = HEAPU32[$arrayidx40 >> 2];
+        var $arrayidx44 = CHECK_OVERFLOW(($sizebits_0 >>> 31 << 2) + $t_0 + 16, 32, 0);
+        var $3 = HEAPU32[$arrayidx44 >> 2];
         var $rst_1 = ($2 | 0) == 0 | ($2 | 0) == ($3 | 0) ? $rst_0 : $2;
         if (($3 | 0) == 0) {
           var $v_2 = $v_1;
@@ -10328,7 +12449,7 @@ function _tmalloc_large($nb) {
         }
         var $v_0 = $v_1;
         var $rsize_0 = $rsize_1;
-        var $t_0 = $3, $t_0$s2 = $t_0 >> 2;
+        var $t_0 = $3;
         var $sizebits_0 = $sizebits_0 << 1;
         var $rst_0 = $rst_1;
       }
@@ -10341,12 +12462,17 @@ function _tmalloc_large($nb) {
   do {
     if ($or_cond16) {
       var $shl59 = 2 << $idx_0;
-      var $and63 = HEAP32[__gm_ + 4 >> 2] & ($shl59 | -$shl59);
+      var $sub62 = CHECK_OVERFLOW(-$shl59, 32, 0);
+      var $or = $shl59 | $sub62;
+      var $4 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+      var $and63 = $4 & $or;
       if (($and63 | 0) == 0) {
         var $t_2_ph = $t_1;
         break;
       }
-      var $sub69 = ($and63 & -$and63) - 1 | 0;
+      var $sub66 = CHECK_OVERFLOW(-$and63, 32, 0);
+      var $and67 = $and63 & $sub66;
+      var $sub69 = CHECK_OVERFLOW($and67 - 1, 32, 0);
       var $and72 = $sub69 >>> 12 & 16;
       var $shr74 = $sub69 >>> ($and72 >>> 0);
       var $and76 = $shr74 >>> 5 & 8;
@@ -10356,7 +12482,11 @@ function _tmalloc_large($nb) {
       var $and84 = $shr82 >>> 1 & 2;
       var $shr86 = $shr82 >>> ($and84 >>> 0);
       var $and88 = $shr86 >>> 1 & 1;
-      var $t_2_ph = HEAP32[__gm_ + (($and76 | $and72 | $and80 | $and84 | $and88) + ($shr86 >>> ($and88 >>> 0)) << 2) + 304 >> 2];
+      var $add89 = $and76 | $and72 | $and80 | $and84 | $and88;
+      var $shr90 = $shr86 >>> ($and88 >>> 0);
+      var $add91 = CHECK_OVERFLOW($add89 + $shr90, 32, 0);
+      var $arrayidx93 = CHECK_OVERFLOW(($add91 << 2) + __gm_ + 304, 32, 0);
+      var $t_2_ph = HEAP32[$arrayidx93 >> 2];
     } else {
       var $t_2_ph = $t_1;
     }
@@ -10366,33 +12496,37 @@ function _tmalloc_large($nb) {
   $while_end$$while_body$91 : do {
     if ($cmp9620) {
       var $rsize_3_lcssa = $rsize_2;
-      var $v_3_lcssa = $v_2, $v_3_lcssa$s2 = $v_3_lcssa >> 2;
+      var $v_3_lcssa = $v_2;
     } else {
-      var $t_221 = $t_2_ph, $t_221$s2 = $t_221 >> 2;
+      var $t_221 = $t_2_ph;
       var $rsize_322 = $rsize_2;
       var $v_323 = $v_2;
       while (1) {
         var $v_323;
         var $rsize_322;
         var $t_221;
-        var $sub100 = (HEAP32[$t_221$s2 + 1] & -8) - $nb | 0;
+        var $head98 = CHECK_OVERFLOW($t_221 + 4, 32, 0);
+        var $and99 = HEAP32[$head98 >> 2] & -8;
+        var $sub100 = CHECK_OVERFLOW($and99 - $nb, 32, 0);
         var $cmp101 = $sub100 >>> 0 < $rsize_322 >>> 0;
         var $rsize_4 = $cmp101 ? $sub100 : $rsize_322;
         var $v_4 = $cmp101 ? $t_221 : $v_323;
-        var $7 = HEAPU32[$t_221$s2 + 4];
+        var $arrayidx105 = CHECK_OVERFLOW($t_221 + 16, 32, 0);
+        var $7 = HEAPU32[$arrayidx105 >> 2];
         if (($7 | 0) != 0) {
-          var $t_221 = $7, $t_221$s2 = $t_221 >> 2;
+          var $t_221 = $7;
           var $rsize_322 = $rsize_4;
           var $v_323 = $v_4;
           continue;
         }
-        var $8 = HEAPU32[$t_221$s2 + 5];
+        var $arrayidx112 = CHECK_OVERFLOW($t_221 + 20, 32, 0);
+        var $8 = HEAPU32[$arrayidx112 >> 2];
         if (($8 | 0) == 0) {
           var $rsize_3_lcssa = $rsize_4;
-          var $v_3_lcssa = $v_4, $v_3_lcssa$s2 = $v_3_lcssa >> 2;
+          var $v_3_lcssa = $v_4;
           break $while_end$$while_body$91;
         }
-        var $t_221 = $8, $t_221$s2 = $t_221 >> 2;
+        var $t_221 = $8;
         var $rsize_322 = $rsize_4;
         var $v_323 = $v_4;
       }
@@ -10405,32 +12539,36 @@ function _tmalloc_large($nb) {
     if ($cmp115) {
       var $retval_0 = 0;
     } else {
-      if ($rsize_3_lcssa >>> 0 >= (HEAP32[__gm_ + 8 >> 2] - $nb | 0) >>> 0) {
+      var $9 = HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2];
+      var $sub117 = CHECK_OVERFLOW($9 - $nb, 32, 0);
+      if ($rsize_3_lcssa >>> 0 >= $sub117 >>> 0) {
         var $retval_0 = 0;
         break;
       }
-      var $10 = $v_3_lcssa, $10$s2 = $10 >> 2;
-      var $11 = HEAPU32[__gm_ + 16 >> 2];
+      var $10 = $v_3_lcssa;
+      var $11 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
       var $cmp120 = $10 >>> 0 < $11 >>> 0;
       do {
         if (!$cmp120) {
-          var $add_ptr = $10 + $nb | 0;
+          var $add_ptr = CHECK_OVERFLOW($10 + $nb, 32, 0);
           var $12 = $add_ptr;
           if ($10 >>> 0 >= $add_ptr >>> 0) {
             break;
           }
-          var $13 = HEAPU32[$v_3_lcssa$s2 + 6];
-          var $14 = HEAPU32[$v_3_lcssa$s2 + 3];
+          var $parent = CHECK_OVERFLOW($v_3_lcssa + 24, 32, 0);
+          var $13 = HEAPU32[$parent >> 2];
+          var $bk = CHECK_OVERFLOW($v_3_lcssa + 12, 32, 0);
+          var $14 = HEAPU32[$bk >> 2];
           var $cmp127 = ($14 | 0) == ($v_3_lcssa | 0);
           do {
             if ($cmp127) {
-              var $arrayidx143 = $v_3_lcssa + 20 | 0;
+              var $arrayidx143 = CHECK_OVERFLOW($v_3_lcssa + 20, 32, 0);
               var $17 = HEAP32[$arrayidx143 >> 2];
               if (($17 | 0) == 0) {
-                var $arrayidx147 = $v_3_lcssa + 16 | 0;
+                var $arrayidx147 = CHECK_OVERFLOW($v_3_lcssa + 16, 32, 0);
                 var $18 = HEAP32[$arrayidx147 >> 2];
                 if (($18 | 0) == 0) {
-                  var $R_1 = 0, $R_1$s2 = $R_1 >> 2;
+                  var $R_1 = 0;
                   break;
                 }
                 var $RP_0 = $arrayidx147;
@@ -10443,14 +12581,14 @@ function _tmalloc_large($nb) {
               while (1) {
                 var $R_0;
                 var $RP_0;
-                var $arrayidx153 = $R_0 + 20 | 0;
+                var $arrayidx153 = CHECK_OVERFLOW($R_0 + 20, 32, 0);
                 var $19 = HEAP32[$arrayidx153 >> 2];
                 if (($19 | 0) != 0) {
                   var $RP_0 = $arrayidx153;
                   var $R_0 = $19;
                   continue;
                 }
-                var $arrayidx157 = $R_0 + 16 | 0;
+                var $arrayidx157 = CHECK_OVERFLOW($R_0 + 16, 32, 0);
                 var $20 = HEAPU32[$arrayidx157 >> 2];
                 if (($20 | 0) == 0) {
                   break;
@@ -10463,17 +12601,20 @@ function _tmalloc_large($nb) {
                 throw "Reached an unreachable!";
               } else {
                 HEAP32[$RP_0 >> 2] = 0;
-                var $R_1 = $R_0, $R_1$s2 = $R_1 >> 2;
+                var $R_1 = $R_0;
               }
             } else {
-              var $15 = HEAPU32[$v_3_lcssa$s2 + 2];
+              var $fd = CHECK_OVERFLOW($v_3_lcssa + 8, 32, 0);
+              var $15 = HEAPU32[$fd >> 2];
               if ($15 >>> 0 < $11 >>> 0) {
                 _abort();
                 throw "Reached an unreachable!";
               } else {
-                HEAP32[$15 + 12 >> 2] = $14;
-                HEAP32[$14 + 8 >> 2] = $15;
-                var $R_1 = $14, $R_1$s2 = $R_1 >> 2;
+                var $bk137 = CHECK_OVERFLOW($15 + 12, 32, 0);
+                HEAP32[$bk137 >> 2] = $14;
+                var $fd138 = CHECK_OVERFLOW($14 + 8, 32, 0);
+                HEAP32[$fd138 >> 2] = $15;
+                var $R_1 = $14;
               }
             }
           } while (0);
@@ -10481,8 +12622,9 @@ function _tmalloc_large($nb) {
           var $cmp172 = ($13 | 0) == 0;
           $if_end256$$if_then174$118 : do {
             if (!$cmp172) {
-              var $index = $v_3_lcssa + 28 | 0;
-              var $arrayidx176 = (HEAP32[$index >> 2] << 2) + __gm_ + 304 | 0;
+              var $index = CHECK_OVERFLOW($v_3_lcssa + 28, 32, 0);
+              var $22 = HEAP32[$index >> 2];
+              var $arrayidx176 = CHECK_OVERFLOW(($22 << 2) + __gm_ + 304, 32, 0);
               var $cmp177 = ($v_3_lcssa | 0) == (HEAP32[$arrayidx176 >> 2] | 0);
               do {
                 if ($cmp177) {
@@ -10490,50 +12632,68 @@ function _tmalloc_large($nb) {
                   if (($R_1 | 0) != 0) {
                     break;
                   }
-                  var $and186 = HEAP32[__gm_ + 4 >> 2] & (1 << HEAP32[$index >> 2] ^ -1);
-                  HEAP32[__gm_ + 4 >> 2] = $and186;
+                  var $neg = 1 << HEAP32[$index >> 2] ^ -1;
+                  var $25 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+                  var $and186 = $25 & $neg;
+                  HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $and186;
                   break $if_end256$$if_then174$118;
                 }
-                if ($13 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                var $26 = $13;
+                var $27 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                if ($26 >>> 0 < $27 >>> 0) {
                   _abort();
                   throw "Reached an unreachable!";
                 } else {
-                  var $arrayidx196 = $13 + 16 | 0;
+                  var $arrayidx196 = CHECK_OVERFLOW($13 + 16, 32, 0);
                   if ((HEAP32[$arrayidx196 >> 2] | 0) == ($v_3_lcssa | 0)) {
                     HEAP32[$arrayidx196 >> 2] = $R_1;
                   } else {
-                    HEAP32[$13 + 20 >> 2] = $R_1;
+                    var $arrayidx204 = CHECK_OVERFLOW($13 + 20, 32, 0);
+                    HEAP32[$arrayidx204 >> 2] = $R_1;
                   }
                   if (($R_1 | 0) == 0) {
                     break $if_end256$$if_then174$118;
                   }
                 }
               } while (0);
-              if ($R_1 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+              var $29 = $R_1;
+              var $30 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+              if ($29 >>> 0 < $30 >>> 0) {
                 _abort();
                 throw "Reached an unreachable!";
               } else {
-                HEAP32[$R_1$s2 + 6] = $13;
-                var $31 = HEAPU32[$v_3_lcssa$s2 + 4];
+                var $parent218 = CHECK_OVERFLOW($R_1 + 24, 32, 0);
+                HEAP32[$parent218 >> 2] = $13;
+                var $arrayidx220 = CHECK_OVERFLOW($v_3_lcssa + 16, 32, 0);
+                var $31 = HEAPU32[$arrayidx220 >> 2];
                 if (($31 | 0) != 0) {
-                  if ($31 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $32 = $31;
+                  var $33 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($32 >>> 0 < $33 >>> 0) {
                     _abort();
                     throw "Reached an unreachable!";
                   } else {
-                    HEAP32[$R_1$s2 + 4] = $31;
-                    HEAP32[$31 + 24 >> 2] = $R_1;
+                    var $arrayidx231 = CHECK_OVERFLOW($R_1 + 16, 32, 0);
+                    HEAP32[$arrayidx231 >> 2] = $31;
+                    var $parent232 = CHECK_OVERFLOW($31 + 24, 32, 0);
+                    HEAP32[$parent232 >> 2] = $R_1;
                   }
                 }
-                var $34 = HEAPU32[$v_3_lcssa$s2 + 5];
+                var $arrayidx237 = CHECK_OVERFLOW($v_3_lcssa + 20, 32, 0);
+                var $34 = HEAPU32[$arrayidx237 >> 2];
                 if (($34 | 0) == 0) {
                   break;
                 }
-                if ($34 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                var $35 = $34;
+                var $36 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                if ($35 >>> 0 < $36 >>> 0) {
                   _abort();
                   throw "Reached an unreachable!";
                 } else {
-                  HEAP32[$R_1$s2 + 5] = $34;
-                  HEAP32[$34 + 24 >> 2] = $R_1;
+                  var $arrayidx248 = CHECK_OVERFLOW($R_1 + 20, 32, 0);
+                  HEAP32[$arrayidx248 >> 2] = $34;
+                  var $parent249 = CHECK_OVERFLOW($34 + 24, 32, 0);
+                  HEAP32[$parent249 >> 2] = $R_1;
                 }
               }
             }
@@ -10541,30 +12701,49 @@ function _tmalloc_large($nb) {
           var $cmp257 = $rsize_3_lcssa >>> 0 < 16;
           $if_then259$$if_else268$146 : do {
             if ($cmp257) {
-              var $add260 = $rsize_3_lcssa + $nb | 0;
-              HEAP32[$v_3_lcssa$s2 + 1] = $add260 | 3;
-              var $37 = $add260 + ($10 + 4) | 0;
+              var $add260 = CHECK_OVERFLOW($rsize_3_lcssa + $nb, 32, 0);
+              var $or262 = $add260 | 3;
+              var $head263 = CHECK_OVERFLOW($v_3_lcssa + 4, 32, 0);
+              HEAP32[$head263 >> 2] = $or262;
+              var $add_ptr265_sum = CHECK_OVERFLOW($add260 + 4, 32, 0);
+              var $head266 = CHECK_OVERFLOW($10 + $add_ptr265_sum, 32, 0);
+              var $37 = $head266;
               var $or267 = HEAP32[$37 >> 2] | 1;
               HEAP32[$37 >> 2] = $or267;
             } else {
-              HEAP32[$v_3_lcssa$s2 + 1] = $nb | 3;
-              HEAP32[$nb$s2 + ($10$s2 + 1)] = $rsize_3_lcssa | 1;
-              HEAP32[($rsize_3_lcssa >> 2) + $10$s2 + $nb$s2] = $rsize_3_lcssa;
+              var $or270 = $nb | 3;
+              var $head271 = CHECK_OVERFLOW($v_3_lcssa + 4, 32, 0);
+              HEAP32[$head271 >> 2] = $or270;
+              var $or272 = $rsize_3_lcssa | 1;
+              var $add_ptr_sum = CHECK_OVERFLOW($nb + 4, 32, 0);
+              var $head273 = CHECK_OVERFLOW($10 + $add_ptr_sum, 32, 0);
+              HEAP32[$head273 >> 2] = $or272;
+              var $add_ptr_sum1 = CHECK_OVERFLOW($rsize_3_lcssa + $nb, 32, 0);
+              var $add_ptr274 = CHECK_OVERFLOW($10 + $add_ptr_sum1, 32, 0);
+              HEAP32[$add_ptr274 >> 2] = $rsize_3_lcssa;
               if ($rsize_3_lcssa >>> 0 < 256) {
+                var $shr275 = $rsize_3_lcssa >>> 3;
                 var $shl280 = $rsize_3_lcssa >>> 2 & 1073741822;
-                var $41 = ($shl280 << 2) + __gm_ + 40 | 0;
-                var $42 = HEAPU32[__gm_ >> 2];
-                var $shl283 = 1 << ($rsize_3_lcssa >>> 3);
+                var $arrayidx281 = CHECK_OVERFLOW(($shl280 << 2) + __gm_ + 40, 32, 0);
+                var $41 = $arrayidx281;
+                var $42 = HEAPU32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+                var $shl283 = 1 << $shr275;
                 var $tobool285 = ($42 & $shl283 | 0) == 0;
                 do {
                   if ($tobool285) {
-                    HEAP32[__gm_ >> 2] = $42 | $shl283;
+                    var $or289 = $42 | $shl283;
+                    HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $or289;
+                    var $arrayidx281_sum_pre = CHECK_OVERFLOW($shl280 + 2, 32, 0);
+                    var $_pre = CHECK_OVERFLOW(($arrayidx281_sum_pre << 2) + __gm_ + 40, 32, 0);
                     var $F282_0 = $41;
-                    var $_pre_phi = ($shl280 + 2 << 2) + __gm_ + 40 | 0;
+                    var $_pre_phi = $_pre;
                   } else {
-                    var $43 = ($shl280 + 2 << 2) + __gm_ + 40 | 0;
+                    var $arrayidx281_sum15 = CHECK_OVERFLOW($shl280 + 2, 32, 0);
+                    var $43 = CHECK_OVERFLOW(($arrayidx281_sum15 << 2) + __gm_ + 40, 32, 0);
                     var $44 = HEAPU32[$43 >> 2];
-                    if ($44 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                    var $45 = $44;
+                    var $46 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                    if ($45 >>> 0 >= $46 >>> 0) {
                       var $F282_0 = $44;
                       var $_pre_phi = $43;
                       break;
@@ -10576,9 +12755,14 @@ function _tmalloc_large($nb) {
                 var $_pre_phi;
                 var $F282_0;
                 HEAP32[$_pre_phi >> 2] = $12;
-                HEAP32[$F282_0 + 12 >> 2] = $12;
-                HEAP32[$nb$s2 + ($10$s2 + 2)] = $F282_0;
-                HEAP32[$nb$s2 + ($10$s2 + 3)] = $41;
+                var $bk303 = CHECK_OVERFLOW($F282_0 + 12, 32, 0);
+                HEAP32[$bk303 >> 2] = $12;
+                var $add_ptr_sum13 = CHECK_OVERFLOW($nb + 8, 32, 0);
+                var $fd304 = CHECK_OVERFLOW($10 + $add_ptr_sum13, 32, 0);
+                HEAP32[$fd304 >> 2] = $F282_0;
+                var $add_ptr_sum14 = CHECK_OVERFLOW($nb + 12, 32, 0);
+                var $bk305 = CHECK_OVERFLOW($10 + $add_ptr_sum14, 32, 0);
+                HEAP32[$bk305 >> 2] = $41;
               } else {
                 var $49 = $add_ptr;
                 var $shr310 = $rsize_3_lcssa >>> 8;
@@ -10591,71 +12775,110 @@ function _tmalloc_large($nb) {
                       var $I308_0 = 31;
                       break;
                     }
-                    var $and323 = ($shr310 + 1048320 | 0) >>> 16 & 8;
+                    var $sub321 = CHECK_OVERFLOW($shr310 + 1048320, 32, 0);
+                    var $and323 = $sub321 >>> 16 & 8;
                     var $shl325 = $shr310 << $and323;
-                    var $and328 = ($shl325 + 520192 | 0) >>> 16 & 4;
+                    var $sub326 = CHECK_OVERFLOW($shl325 + 520192, 32, 0);
+                    var $and328 = $sub326 >>> 16 & 4;
                     var $shl330 = $shl325 << $and328;
-                    var $and333 = ($shl330 + 245760 | 0) >>> 16 & 2;
-                    var $add338 = 14 - ($and328 | $and323 | $and333) + ($shl330 << $and333 >>> 15) | 0;
-                    var $I308_0 = $rsize_3_lcssa >>> (($add338 + 7 | 0) >>> 0) & 1 | $add338 << 1;
+                    var $sub331 = CHECK_OVERFLOW($shl330 + 245760, 32, 0);
+                    var $and333 = $sub331 >>> 16 & 2;
+                    var $add334 = $and328 | $and323 | $and333;
+                    var $sub335 = CHECK_OVERFLOW(14 - $add334, 32, 0);
+                    var $shr337 = $shl330 << $and333 >>> 15;
+                    var $add338 = CHECK_OVERFLOW($sub335 + $shr337, 32, 0);
+                    var $shl339 = $add338 << 1;
+                    var $add340 = CHECK_OVERFLOW($add338 + 7, 32, 0);
+                    var $I308_0 = $rsize_3_lcssa >>> ($add340 >>> 0) & 1 | $shl339;
                   }
                 } while (0);
                 var $I308_0;
-                var $arrayidx347 = ($I308_0 << 2) + __gm_ + 304 | 0;
-                HEAP32[$nb$s2 + ($10$s2 + 7)] = $I308_0;
-                var $child349 = $nb + ($10 + 16) | 0;
-                HEAP32[$nb$s2 + ($10$s2 + 5)] = 0;
+                var $arrayidx347 = CHECK_OVERFLOW(($I308_0 << 2) + __gm_ + 304, 32, 0);
+                var $add_ptr_sum2 = CHECK_OVERFLOW($nb + 28, 32, 0);
+                var $index348 = CHECK_OVERFLOW($10 + $add_ptr_sum2, 32, 0);
+                HEAP32[$index348 >> 2] = $I308_0;
+                var $add_ptr_sum3 = CHECK_OVERFLOW($nb + 16, 32, 0);
+                var $child349 = CHECK_OVERFLOW($10 + $add_ptr_sum3, 32, 0);
+                var $child349_sum = CHECK_OVERFLOW($nb + 20, 32, 0);
+                var $arrayidx350 = CHECK_OVERFLOW($10 + $child349_sum, 32, 0);
+                HEAP32[$arrayidx350 >> 2] = 0;
                 HEAP32[$child349 >> 2] = 0;
-                var $52 = HEAP32[__gm_ + 4 >> 2];
+                var $52 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
                 var $shl354 = 1 << $I308_0;
                 if (($52 & $shl354 | 0) == 0) {
                   var $or360 = $52 | $shl354;
-                  HEAP32[__gm_ + 4 >> 2] = $or360;
+                  HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $or360;
                   HEAP32[$arrayidx347 >> 2] = $49;
-                  HEAP32[$nb$s2 + ($10$s2 + 6)] = $arrayidx347;
-                  HEAP32[$nb$s2 + ($10$s2 + 3)] = $49;
-                  HEAP32[$nb$s2 + ($10$s2 + 2)] = $49;
+                  var $53 = $arrayidx347;
+                  var $add_ptr_sum4 = CHECK_OVERFLOW($nb + 24, 32, 0);
+                  var $parent361 = CHECK_OVERFLOW($10 + $add_ptr_sum4, 32, 0);
+                  HEAP32[$parent361 >> 2] = $53;
+                  var $add_ptr_sum5 = CHECK_OVERFLOW($nb + 12, 32, 0);
+                  var $bk362 = CHECK_OVERFLOW($10 + $add_ptr_sum5, 32, 0);
+                  HEAP32[$bk362 >> 2] = $49;
+                  var $add_ptr_sum6 = CHECK_OVERFLOW($nb + 8, 32, 0);
+                  var $fd363 = CHECK_OVERFLOW($10 + $add_ptr_sum6, 32, 0);
+                  HEAP32[$fd363 >> 2] = $49;
                 } else {
+                  var $57 = HEAP32[$arrayidx347 >> 2];
                   if (($I308_0 | 0) == 31) {
                     var $cond375 = 0;
                   } else {
-                    var $cond375 = 25 - ($I308_0 >>> 1) | 0;
+                    var $sub373 = CHECK_OVERFLOW(25 - ($I308_0 >>> 1), 32, 0);
+                    var $cond375 = $sub373;
                   }
                   var $cond375;
                   var $K365_0 = $rsize_3_lcssa << $cond375;
-                  var $T_0 = HEAP32[$arrayidx347 >> 2];
+                  var $T_0 = $57;
                   while (1) {
                     var $T_0;
                     var $K365_0;
-                    if ((HEAP32[$T_0 + 4 >> 2] & -8 | 0) == ($rsize_3_lcssa | 0)) {
-                      var $fd405 = $T_0 + 8 | 0;
+                    var $head378 = CHECK_OVERFLOW($T_0 + 4, 32, 0);
+                    if ((HEAP32[$head378 >> 2] & -8 | 0) == ($rsize_3_lcssa | 0)) {
+                      var $fd405 = CHECK_OVERFLOW($T_0 + 8, 32, 0);
                       var $65 = HEAPU32[$fd405 >> 2];
-                      var $67 = HEAPU32[__gm_ + 16 >> 2];
-                      var $cmp407 = $T_0 >>> 0 < $67 >>> 0;
+                      var $66 = $T_0;
+                      var $67 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                      var $cmp407 = $66 >>> 0 < $67 >>> 0;
                       do {
                         if (!$cmp407) {
                           if ($65 >>> 0 < $67 >>> 0) {
                             break;
                           }
-                          HEAP32[$65 + 12 >> 2] = $49;
+                          var $bk415 = CHECK_OVERFLOW($65 + 12, 32, 0);
+                          HEAP32[$bk415 >> 2] = $49;
                           HEAP32[$fd405 >> 2] = $49;
-                          HEAP32[$nb$s2 + ($10$s2 + 2)] = $65;
-                          HEAP32[$nb$s2 + ($10$s2 + 3)] = $T_0;
-                          HEAP32[$nb$s2 + ($10$s2 + 6)] = 0;
+                          var $add_ptr_sum7 = CHECK_OVERFLOW($nb + 8, 32, 0);
+                          var $fd417 = CHECK_OVERFLOW($10 + $add_ptr_sum7, 32, 0);
+                          HEAP32[$fd417 >> 2] = $65;
+                          var $add_ptr_sum8 = CHECK_OVERFLOW($nb + 12, 32, 0);
+                          var $bk418 = CHECK_OVERFLOW($10 + $add_ptr_sum8, 32, 0);
+                          HEAP32[$bk418 >> 2] = $T_0;
+                          var $add_ptr_sum9 = CHECK_OVERFLOW($nb + 24, 32, 0);
+                          var $parent419 = CHECK_OVERFLOW($10 + $add_ptr_sum9, 32, 0);
+                          HEAP32[$parent419 >> 2] = 0;
                           break $if_then259$$if_else268$146;
                         }
                       } while (0);
                       _abort();
                       throw "Reached an unreachable!";
                     } else {
-                      var $arrayidx386 = ($K365_0 >>> 31 << 2) + $T_0 + 16 | 0;
+                      var $arrayidx386 = CHECK_OVERFLOW(($K365_0 >>> 31 << 2) + $T_0 + 16, 32, 0);
                       var $59 = HEAPU32[$arrayidx386 >> 2];
                       if (($59 | 0) == 0) {
-                        if ($arrayidx386 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                        var $60 = $arrayidx386;
+                        var $61 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                        if ($60 >>> 0 >= $61 >>> 0) {
                           HEAP32[$arrayidx386 >> 2] = $49;
-                          HEAP32[$nb$s2 + ($10$s2 + 6)] = $T_0;
-                          HEAP32[$nb$s2 + ($10$s2 + 3)] = $49;
-                          HEAP32[$nb$s2 + ($10$s2 + 2)] = $49;
+                          var $add_ptr_sum10 = CHECK_OVERFLOW($nb + 24, 32, 0);
+                          var $parent398 = CHECK_OVERFLOW($10 + $add_ptr_sum10, 32, 0);
+                          HEAP32[$parent398 >> 2] = $T_0;
+                          var $add_ptr_sum11 = CHECK_OVERFLOW($nb + 12, 32, 0);
+                          var $bk399 = CHECK_OVERFLOW($10 + $add_ptr_sum11, 32, 0);
+                          HEAP32[$bk399 >> 2] = $49;
+                          var $add_ptr_sum12 = CHECK_OVERFLOW($nb + 8, 32, 0);
+                          var $fd400 = CHECK_OVERFLOW($10 + $add_ptr_sum12, 32, 0);
+                          HEAP32[$fd400 >> 2] = $49;
                           break $if_then259$$if_else268$146;
                         }
                         _abort();
@@ -10670,7 +12893,8 @@ function _tmalloc_large($nb) {
               }
             }
           } while (0);
-          var $retval_0 = $v_3_lcssa + 8 | 0;
+          var $add_ptr426 = CHECK_OVERFLOW($v_3_lcssa + 8, 32, 0);
+          var $retval_0 = $add_ptr426;
           break $return$$land_lhs_true116$96;
         }
       } while (0);
@@ -10686,15 +12910,16 @@ function _tmalloc_large($nb) {
 _tmalloc_large["X"] = 1;
 
 function _sys_alloc($nb) {
-  var $sp_0$s2;
   var __label__;
-  if ((HEAP32[_mparams >> 2] | 0) == 0) {
+  var $0 = HEAP32[CHECK_OVERFLOW(_mparams, 32, 0) >> 2];
+  if (($0 | 0) == 0) {
     _init_mparams();
   }
-  var $tobool11 = (HEAP32[__gm_ + 440 >> 2] & 4 | 0) == 0;
+  var $1 = HEAP32[CHECK_OVERFLOW(__gm_ + 440, 32, 0) >> 2];
+  var $tobool11 = ($1 & 4 | 0) == 0;
   do {
     if ($tobool11) {
-      var $2 = HEAP32[__gm_ + 24 >> 2];
+      var $2 = HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
       var $cmp13 = ($2 | 0) == 0;
       do {
         if ($cmp13) {
@@ -10706,14 +12931,24 @@ function _sys_alloc($nb) {
             __label__ = 5;
             break;
           }
-          var $8 = HEAP32[_mparams + 8 >> 2];
-          var $and50 = $nb + 47 - HEAP32[__gm_ + 12 >> 2] + $8 & -$8;
+          var $7 = HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
+          var $8 = HEAP32[CHECK_OVERFLOW(_mparams + 8, 32, 0) >> 2];
+          var $sub44 = CHECK_OVERFLOW($nb + 47, 32, 0);
+          var $sub46 = CHECK_OVERFLOW($sub44 - $7, 32, 0);
+          var $add47 = CHECK_OVERFLOW($sub46 + $8, 32, 0);
+          var $neg49 = CHECK_OVERFLOW(-$8, 32, 0);
+          var $and50 = $add47 & $neg49;
           if ($and50 >>> 0 >= 2147483647) {
             __label__ = 13;
             break;
           }
           var $call53 = _sbrk($and50);
-          if (($call53 | 0) == (HEAP32[$call15 >> 2] + HEAP32[$call15 + 4 >> 2] | 0)) {
+          var $base54 = CHECK_OVERFLOW($call15, 32, 0);
+          var $9 = HEAP32[$base54 >> 2];
+          var $size = CHECK_OVERFLOW($call15 + 4, 32, 0);
+          var $10 = HEAP32[$size >> 2];
+          var $add_ptr = CHECK_OVERFLOW($9 + $10, 32, 0);
+          if (($call53 | 0) == ($add_ptr | 0)) {
             var $tbase_0 = $call53;
             var $asize_1 = $and50;
             var $br_0 = $call53;
@@ -10733,15 +12968,23 @@ function _sys_alloc($nb) {
             __label__ = 13;
             break;
           }
-          var $4 = HEAP32[_mparams + 8 >> 2];
-          var $and23 = $4 + ($nb + 47) & -$4;
+          var $4 = HEAP32[CHECK_OVERFLOW(_mparams + 8, 32, 0) >> 2];
+          var $sub = CHECK_OVERFLOW($nb + 47, 32, 0);
+          var $add21 = CHECK_OVERFLOW($sub + $4, 32, 0);
+          var $neg = CHECK_OVERFLOW(-$4, 32, 0);
+          var $and23 = $add21 & $neg;
           var $5 = $call18;
-          var $6 = HEAP32[_mparams + 4 >> 2];
-          var $sub24 = $6 - 1 | 0;
+          var $6 = HEAP32[CHECK_OVERFLOW(_mparams + 4, 32, 0) >> 2];
+          var $sub24 = CHECK_OVERFLOW($6 - 1, 32, 0);
           if (($sub24 & $5 | 0) == 0) {
             var $asize_0 = $and23;
           } else {
-            var $asize_0 = $and23 - $5 + ($sub24 + $5 & -$6) | 0;
+            var $add29 = CHECK_OVERFLOW($sub24 + $5, 32, 0);
+            var $neg31 = CHECK_OVERFLOW(-$6, 32, 0);
+            var $and32 = $add29 & $neg31;
+            var $sub33 = CHECK_OVERFLOW($and23 - $5, 32, 0);
+            var $add34 = CHECK_OVERFLOW($sub33 + $and32, 32, 0);
+            var $asize_0 = $add34;
           }
           var $asize_0;
           if ($asize_0 >>> 0 >= 2147483647) {
@@ -10763,8 +13006,9 @@ function _sys_alloc($nb) {
         }
       } while (0);
       if (__label__ == 13) {
-        var $or31 = HEAP32[__gm_ + 440 >> 2] | 4;
-        HEAP32[__gm_ + 440 >> 2] = $or31;
+        var $11 = HEAP32[CHECK_OVERFLOW(__gm_ + 440, 32, 0) >> 2];
+        var $or31 = $11 | 4;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 440, 32, 0) >> 2] = $or31;
         __label__ = 22;
         break;
       } else if (__label__ == 12) {
@@ -10782,17 +13026,22 @@ function _sys_alloc($nb) {
       }
       var $asize_18;
       var $br_07;
-      var $sub82 = -$asize_18 | 0;
+      var $sub82 = CHECK_OVERFLOW(-$asize_18, 32, 0);
       var $or_cond = ($br_07 | 0) != -1 & $asize_18 >>> 0 < 2147483647;
       do {
         if ($or_cond) {
-          if ($asize_18 >>> 0 >= ($nb + 48 | 0) >>> 0) {
+          var $add65 = CHECK_OVERFLOW($nb + 48, 32, 0);
+          if ($asize_18 >>> 0 >= $add65 >>> 0) {
             var $asize_2 = $asize_18;
             __label__ = 20;
             break;
           }
-          var $12 = HEAP32[_mparams + 8 >> 2];
-          var $and74 = $nb + 47 - $asize_18 + $12 & -$12;
+          var $12 = HEAP32[CHECK_OVERFLOW(_mparams + 8, 32, 0) >> 2];
+          var $sub69 = CHECK_OVERFLOW($nb + 47, 32, 0);
+          var $sub70 = CHECK_OVERFLOW($sub69 - $asize_18, 32, 0);
+          var $add71 = CHECK_OVERFLOW($sub70 + $12, 32, 0);
+          var $neg73 = CHECK_OVERFLOW(-$12, 32, 0);
+          var $and74 = $add71 & $neg73;
           if ($and74 >>> 0 >= 2147483647) {
             var $asize_2 = $asize_18;
             __label__ = 20;
@@ -10804,7 +13053,8 @@ function _sys_alloc($nb) {
             __label__ = 21;
             break;
           }
-          var $asize_2 = $and74 + $asize_18 | 0;
+          var $add80 = CHECK_OVERFLOW($and74 + $asize_18, 32, 0);
+          var $asize_2 = $add80;
           __label__ = 20;
           break;
         } else {
@@ -10821,8 +13071,9 @@ function _sys_alloc($nb) {
           break;
         }
       }
-      var $or = HEAP32[__gm_ + 440 >> 2] | 4;
-      HEAP32[__gm_ + 440 >> 2] = $or;
+      var $13 = HEAP32[CHECK_OVERFLOW(__gm_ + 440, 32, 0) >> 2];
+      var $or = $13 | 4;
+      HEAP32[CHECK_OVERFLOW(__gm_ + 440, 32, 0) >> 2] = $or;
       __label__ = 22;
       break;
     }
@@ -10830,8 +13081,11 @@ function _sys_alloc($nb) {
   } while (0);
   do {
     if (__label__ == 22) {
-      var $14 = HEAP32[_mparams + 8 >> 2];
-      var $and103 = $14 + ($nb + 47) & -$14;
+      var $14 = HEAP32[CHECK_OVERFLOW(_mparams + 8, 32, 0) >> 2];
+      var $sub99 = CHECK_OVERFLOW($nb + 47, 32, 0);
+      var $add100 = CHECK_OVERFLOW($sub99 + $14, 32, 0);
+      var $neg102 = CHECK_OVERFLOW(-$14, 32, 0);
+      var $and103 = $add100 & $neg102;
       if ($and103 >>> 0 >= 2147483647) {
         __label__ = 48;
         break;
@@ -10842,8 +13096,11 @@ function _sys_alloc($nb) {
         __label__ = 48;
         break;
       }
-      var $sub_ptr_sub = $call109 - $call108 | 0;
-      if ($sub_ptr_sub >>> 0 <= ($nb + 40 | 0) >>> 0 | ($call108 | 0) == -1) {
+      var $sub_ptr_lhs_cast = $call109;
+      var $sub_ptr_rhs_cast = $call108;
+      var $sub_ptr_sub = CHECK_OVERFLOW($sub_ptr_lhs_cast - $sub_ptr_rhs_cast, 32, 0);
+      var $add116 = CHECK_OVERFLOW($nb + 40, 32, 0);
+      if ($sub_ptr_sub >>> 0 <= $add116 >>> 0 | ($call108 | 0) == -1) {
         __label__ = 48;
         break;
       }
@@ -10857,97 +13114,118 @@ function _sys_alloc($nb) {
     if (__label__ == 25) {
       var $tbase_221;
       var $tsize_220;
-      var $add125 = HEAP32[__gm_ + 432 >> 2] + $tsize_220 | 0;
-      HEAP32[__gm_ + 432 >> 2] = $add125;
-      if ($add125 >>> 0 > HEAPU32[__gm_ + 436 >> 2] >>> 0) {
-        HEAP32[__gm_ + 436 >> 2] = $add125;
+      var $15 = HEAP32[CHECK_OVERFLOW(__gm_ + 432, 32, 0) >> 2];
+      var $add125 = CHECK_OVERFLOW($15 + $tsize_220, 32, 0);
+      HEAP32[CHECK_OVERFLOW(__gm_ + 432, 32, 0) >> 2] = $add125;
+      var $16 = HEAPU32[CHECK_OVERFLOW(__gm_ + 436, 32, 0) >> 2];
+      if ($add125 >>> 0 > $16 >>> 0) {
+        HEAP32[CHECK_OVERFLOW(__gm_ + 436, 32, 0) >> 2] = $add125;
       }
-      var $17 = HEAPU32[__gm_ + 24 >> 2];
+      var $17 = HEAPU32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
       var $cmp132 = ($17 | 0) == 0;
       $if_then133$$while_cond$41 : do {
         if ($cmp132) {
-          var $18 = HEAPU32[__gm_ + 16 >> 2];
+          var $18 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
           if (($18 | 0) == 0 | $tbase_221 >>> 0 < $18 >>> 0) {
-            HEAP32[__gm_ + 16 >> 2] = $tbase_221;
+            HEAP32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2] = $tbase_221;
           }
-          HEAP32[__gm_ + 444 >> 2] = $tbase_221;
-          HEAP32[__gm_ + 448 >> 2] = $tsize_220;
-          HEAP32[__gm_ + 456 >> 2] = 0;
-          var $19 = HEAP32[_mparams >> 2];
-          HEAP32[__gm_ + 36 >> 2] = $19;
-          HEAP32[__gm_ + 32 >> 2] = -1;
+          HEAP32[CHECK_OVERFLOW(__gm_ + 444, 32, 0) >> 2] = $tbase_221;
+          HEAP32[CHECK_OVERFLOW(__gm_ + 448, 32, 0) >> 2] = $tsize_220;
+          HEAP32[CHECK_OVERFLOW(__gm_ + 456, 32, 0) >> 2] = 0;
+          var $19 = HEAP32[CHECK_OVERFLOW(_mparams, 32, 0) >> 2];
+          HEAP32[CHECK_OVERFLOW(__gm_ + 36, 32, 0) >> 2] = $19;
+          HEAP32[CHECK_OVERFLOW(__gm_ + 32, 32, 0) >> 2] = -1;
           _init_bins();
-          _init_top($tbase_221, $tsize_220 - 40 | 0);
+          var $20 = $tbase_221;
+          var $sub146 = CHECK_OVERFLOW($tsize_220 - 40, 32, 0);
+          _init_top($20, $sub146);
         } else {
-          var $sp_0 = __gm_ + 444 | 0, $sp_0$s2 = $sp_0 >> 2;
+          var $sp_0 = CHECK_OVERFLOW(__gm_ + 444, 32, 0);
           while (1) {
             var $sp_0;
             if (($sp_0 | 0) == 0) {
               break;
             }
-            var $21 = HEAPU32[$sp_0$s2];
-            var $size162 = $sp_0 + 4 | 0;
+            var $base161 = CHECK_OVERFLOW($sp_0, 32, 0);
+            var $21 = HEAPU32[$base161 >> 2];
+            var $size162 = CHECK_OVERFLOW($sp_0 + 4, 32, 0);
             var $22 = HEAPU32[$size162 >> 2];
-            var $add_ptr163 = $21 + $22 | 0;
+            var $add_ptr163 = CHECK_OVERFLOW($21 + $22, 32, 0);
             if (($tbase_221 | 0) == ($add_ptr163 | 0)) {
-              if ((HEAP32[$sp_0$s2 + 3] & 8 | 0) != 0) {
+              var $sflags167 = CHECK_OVERFLOW($sp_0 + 12, 32, 0);
+              if ((HEAP32[$sflags167 >> 2] & 8 | 0) != 0) {
                 break;
               }
               var $25 = $17;
               if (!($25 >>> 0 >= $21 >>> 0 & $25 >>> 0 < $add_ptr163 >>> 0)) {
                 break;
               }
-              HEAP32[$size162 >> 2] = $22 + $tsize_220 | 0;
-              var $26 = HEAP32[__gm_ + 24 >> 2];
-              var $add189 = HEAP32[__gm_ + 12 >> 2] + $tsize_220 | 0;
+              var $add186 = CHECK_OVERFLOW($22 + $tsize_220, 32, 0);
+              HEAP32[$size162 >> 2] = $add186;
+              var $26 = HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
+              var $27 = HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
+              var $add189 = CHECK_OVERFLOW($27 + $tsize_220, 32, 0);
               _init_top($26, $add189);
               break $if_then133$$while_cond$41;
             }
-            var $sp_0 = HEAP32[$sp_0$s2 + 2], $sp_0$s2 = $sp_0 >> 2;
+            var $next = CHECK_OVERFLOW($sp_0 + 8, 32, 0);
+            var $sp_0 = HEAP32[$next >> 2];
           }
-          if ($tbase_221 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
-            HEAP32[__gm_ + 16 >> 2] = $tbase_221;
+          var $28 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+          if ($tbase_221 >>> 0 < $28 >>> 0) {
+            HEAP32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2] = $tbase_221;
           }
-          var $add_ptr201 = $tbase_221 + $tsize_220 | 0;
-          var $sp_1 = __gm_ + 444 | 0;
+          var $add_ptr201 = CHECK_OVERFLOW($tbase_221 + $tsize_220, 32, 0);
+          var $sp_1 = CHECK_OVERFLOW(__gm_ + 444, 32, 0);
           while (1) {
             var $sp_1;
             if (($sp_1 | 0) == 0) {
               break;
             }
-            var $base200 = $sp_1 | 0;
+            var $base200 = CHECK_OVERFLOW($sp_1, 32, 0);
             var $29 = HEAPU32[$base200 >> 2];
             if (($29 | 0) == ($add_ptr201 | 0)) {
-              if ((HEAP32[$sp_1 + 12 >> 2] & 8 | 0) != 0) {
+              var $sflags209 = CHECK_OVERFLOW($sp_1 + 12, 32, 0);
+              if ((HEAP32[$sflags209 >> 2] & 8 | 0) != 0) {
                 break;
               }
               HEAP32[$base200 >> 2] = $tbase_221;
-              var $size219 = $sp_1 + 4 | 0;
-              var $add220 = HEAP32[$size219 >> 2] + $tsize_220 | 0;
+              var $size219 = CHECK_OVERFLOW($sp_1 + 4, 32, 0);
+              var $32 = HEAP32[$size219 >> 2];
+              var $add220 = CHECK_OVERFLOW($32 + $tsize_220, 32, 0);
               HEAP32[$size219 >> 2] = $add220;
               var $call221 = _prepend_alloc($tbase_221, $29, $nb);
               var $retval_0 = $call221;
               __label__ = 49;
               break $if_end241$$if_then124$36;
             }
-            var $sp_1 = HEAP32[$sp_1 + 8 >> 2];
+            var $next205 = CHECK_OVERFLOW($sp_1 + 8, 32, 0);
+            var $sp_1 = HEAP32[$next205 >> 2];
           }
           _add_segment($tbase_221, $tsize_220);
         }
       } while (0);
-      var $33 = HEAPU32[__gm_ + 12 >> 2];
+      var $33 = HEAPU32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
       if ($33 >>> 0 <= $nb >>> 0) {
         __label__ = 48;
         break;
       }
-      var $sub230 = $33 - $nb | 0;
-      HEAP32[__gm_ + 12 >> 2] = $sub230;
-      var $34 = HEAPU32[__gm_ + 24 >> 2];
+      var $sub230 = CHECK_OVERFLOW($33 - $nb, 32, 0);
+      HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2] = $sub230;
+      var $34 = HEAPU32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
       var $35 = $34;
-      HEAP32[__gm_ + 24 >> 2] = $35 + $nb | 0;
-      HEAP32[$nb + ($35 + 4) >> 2] = $sub230 | 1;
-      HEAP32[$34 + 4 >> 2] = $nb | 3;
-      var $retval_0 = $34 + 8 | 0;
+      var $add_ptr232 = CHECK_OVERFLOW($35 + $nb, 32, 0);
+      var $36 = $add_ptr232;
+      HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2] = $36;
+      var $or234 = $sub230 | 1;
+      var $add_ptr232_sum = CHECK_OVERFLOW($nb + 4, 32, 0);
+      var $head235 = CHECK_OVERFLOW($35 + $add_ptr232_sum, 32, 0);
+      HEAP32[$head235 >> 2] = $or234;
+      var $or237 = $nb | 3;
+      var $head238 = CHECK_OVERFLOW($34 + 4, 32, 0);
+      HEAP32[$head238 >> 2] = $or237;
+      var $add_ptr239 = CHECK_OVERFLOW($34 + 8, 32, 0);
+      var $retval_0 = $add_ptr239;
       __label__ = 49;
       break;
     }
@@ -10965,14 +13243,15 @@ function _sys_alloc($nb) {
 _sys_alloc["X"] = 1;
 
 function _release_unused_segments() {
-  var $sp_01 = HEAP32[__gm_ + 452 >> 2];
+  var $sp_01 = HEAP32[CHECK_OVERFLOW(__gm_ + 452, 32, 0) >> 2];
   var $cmp2 = ($sp_01 | 0) == 0;
   $while_end256$$if_end255$195 : do {
     if (!$cmp2) {
       var $sp_03 = $sp_01;
       while (1) {
         var $sp_03;
-        var $sp_0 = HEAP32[$sp_03 + 8 >> 2];
+        var $next4 = CHECK_OVERFLOW($sp_03 + 8, 32, 0);
+        var $sp_0 = HEAP32[$next4 >> 2];
         if (($sp_0 | 0) == 0) {
           break $while_end256$$if_end255$195;
         }
@@ -10980,63 +13259,80 @@ function _release_unused_segments() {
       }
     }
   } while (0);
-  HEAP32[__gm_ + 32 >> 2] = -1;
+  HEAP32[CHECK_OVERFLOW(__gm_ + 32, 32, 0) >> 2] = -1;
   return;
   return;
 }
 
 function _sys_trim() {
   var $size$s2;
-  if ((HEAP32[_mparams >> 2] | 0) == 0) {
+  var $0 = HEAP32[CHECK_OVERFLOW(_mparams, 32, 0) >> 2];
+  if (($0 | 0) == 0) {
     _init_mparams();
   }
-  var $1 = HEAPU32[__gm_ + 24 >> 2];
+  var $1 = HEAPU32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
   var $cmp2 = ($1 | 0) == 0;
   $if_end51$$if_then$183 : do {
     if (!$cmp2) {
-      var $2 = HEAPU32[__gm_ + 12 >> 2];
+      var $2 = HEAPU32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
       var $cmp3 = $2 >>> 0 > 40;
       do {
         if ($cmp3) {
-          var $3 = HEAPU32[_mparams + 8 >> 2];
-          var $add7 = $2 - 41 + $3 | 0;
+          var $3 = HEAPU32[CHECK_OVERFLOW(_mparams + 8, 32, 0) >> 2];
+          var $sub6 = CHECK_OVERFLOW($2 - 41, 32, 0);
+          var $add7 = CHECK_OVERFLOW($sub6 + $3, 32, 0);
           var $div = Math.floor(($add7 >>> 0) / ($3 >>> 0));
-          var $mul = ($div - 1) * $3 | 0;
+          var $sub8 = CHECK_OVERFLOW($div - 1, 32, 0);
+          var $mul = CHECK_OVERFLOW($sub8 * $3, 32, 0);
           var $4 = $1;
           var $call10 = _segment_holding($4);
-          if ((HEAP32[$call10 + 12 >> 2] & 8 | 0) != 0) {
+          var $sflags = CHECK_OVERFLOW($call10 + 12, 32, 0);
+          if ((HEAP32[$sflags >> 2] & 8 | 0) != 0) {
             break;
           }
           var $call20 = _sbrk(0);
-          var $size$s2 = ($call10 + 4 | 0) >> 2;
-          if (($call20 | 0) != (HEAP32[$call10 >> 2] + HEAP32[$size$s2] | 0)) {
+          var $base = CHECK_OVERFLOW($call10, 32, 0);
+          var $6 = HEAP32[$base >> 2];
+          var $size = CHECK_OVERFLOW($call10 + 4, 32, 0), $size$s2 = $size >> 2;
+          var $7 = HEAP32[$size$s2];
+          var $add_ptr = CHECK_OVERFLOW($6 + $7, 32, 0);
+          if (($call20 | 0) != ($add_ptr | 0)) {
             break;
           }
-          var $sub19_mul = $mul >>> 0 > 2147483646 ? -2147483648 - $3 | 0 : $mul;
-          var $sub23 = -$sub19_mul | 0;
+          var $cmp17 = $mul >>> 0 > 2147483646;
+          var $sub19 = CHECK_OVERFLOW(-2147483648 - $3, 32, 0);
+          var $sub19_mul = $cmp17 ? $sub19 : $mul;
+          var $sub23 = CHECK_OVERFLOW(-$sub19_mul, 32, 0);
           var $call24 = _sbrk($sub23);
           var $call25 = _sbrk(0);
           if (!(($call24 | 0) != -1 & $call25 >>> 0 < $call20 >>> 0)) {
             break;
           }
-          var $sub_ptr_sub = $call20 - $call25 | 0;
+          var $sub_ptr_lhs_cast = $call20;
+          var $sub_ptr_rhs_cast = $call25;
+          var $sub_ptr_sub = CHECK_OVERFLOW($sub_ptr_lhs_cast - $sub_ptr_rhs_cast, 32, 0);
           if (($call20 | 0) == ($call25 | 0)) {
             break;
           }
-          var $sub37 = HEAP32[$size$s2] - $sub_ptr_sub | 0;
+          var $8 = HEAP32[$size$s2];
+          var $sub37 = CHECK_OVERFLOW($8 - $sub_ptr_sub, 32, 0);
           HEAP32[$size$s2] = $sub37;
-          var $sub38 = HEAP32[__gm_ + 432 >> 2] - $sub_ptr_sub | 0;
-          HEAP32[__gm_ + 432 >> 2] = $sub38;
-          var $10 = HEAP32[__gm_ + 24 >> 2];
-          var $sub41 = HEAP32[__gm_ + 12 >> 2] - $sub_ptr_sub | 0;
+          var $9 = HEAP32[CHECK_OVERFLOW(__gm_ + 432, 32, 0) >> 2];
+          var $sub38 = CHECK_OVERFLOW($9 - $sub_ptr_sub, 32, 0);
+          HEAP32[CHECK_OVERFLOW(__gm_ + 432, 32, 0) >> 2] = $sub38;
+          var $10 = HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
+          var $11 = HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
+          var $sub41 = CHECK_OVERFLOW($11 - $sub_ptr_sub, 32, 0);
           _init_top($10, $sub41);
           break $if_end51$$if_then$183;
         }
       } while (0);
-      if (HEAPU32[__gm_ + 12 >> 2] >>> 0 <= HEAPU32[__gm_ + 28 >> 2] >>> 0) {
+      var $12 = HEAPU32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
+      var $13 = HEAPU32[CHECK_OVERFLOW(__gm_ + 28, 32, 0) >> 2];
+      if ($12 >>> 0 <= $13 >>> 0) {
         break;
       }
-      HEAP32[__gm_ + 28 >> 2] = -1;
+      HEAP32[CHECK_OVERFLOW(__gm_ + 28, 32, 0) >> 2] = -1;
     }
   } while (0);
   return;
@@ -11046,30 +13342,26 @@ function _sys_trim() {
 _sys_trim["X"] = 1;
 
 function _free($mem) {
-  var $R288_1$s2;
-  var $R_1$s2;
-  var $p_0$s2;
   var $48$s2;
-  var $add_ptr_sum1$s2;
-  var $and5$s2;
-  var $mem$s2 = $mem >> 2;
   var __label__;
   var $cmp = ($mem | 0) == 0;
   $if_end586$$if_then$2 : do {
     if (!$cmp) {
-      var $add_ptr = $mem - 8 | 0;
+      var $add_ptr = CHECK_OVERFLOW($mem - 8, 32, 0);
       var $0 = $add_ptr;
-      var $1 = HEAPU32[__gm_ + 16 >> 2];
+      var $1 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
       var $cmp1 = $add_ptr >>> 0 < $1 >>> 0;
       $erroraction$$land_rhs$4 : do {
         if (!$cmp1) {
-          var $3 = HEAPU32[$mem - 4 >> 2];
+          var $head = CHECK_OVERFLOW($mem - 4, 32, 0);
+          var $3 = HEAPU32[$head >> 2];
           var $and = $3 & 3;
           if (($and | 0) == 1) {
             break;
           }
-          var $and5 = $3 & -8, $and5$s2 = $and5 >> 2;
-          var $add_ptr6 = $mem + ($and5 - 8) | 0;
+          var $and5 = $3 & -8;
+          var $add_ptr_sum = CHECK_OVERFLOW($and5 - 8, 32, 0);
+          var $add_ptr6 = CHECK_OVERFLOW($mem + $add_ptr_sum, 32, 0);
           var $4 = $add_ptr6;
           var $tobool9 = ($3 & 1 | 0) == 0;
           $if_then10$$if_end198$7 : do {
@@ -11078,46 +13370,63 @@ function _free($mem) {
               if (($and | 0) == 0) {
                 break $if_end586$$if_then$2;
               }
-              var $add_ptr_sum1 = -8 - $5 | 0, $add_ptr_sum1$s2 = $add_ptr_sum1 >> 2;
-              var $add_ptr16 = $mem + $add_ptr_sum1 | 0;
+              var $add_ptr_sum1 = CHECK_OVERFLOW(-8 - $5, 32, 0);
+              var $add_ptr16 = CHECK_OVERFLOW($mem + $add_ptr_sum1, 32, 0);
               var $6 = $add_ptr16;
-              var $add17 = $5 + $and5 | 0;
+              var $add17 = CHECK_OVERFLOW($5 + $and5, 32, 0);
               if ($add_ptr16 >>> 0 < $1 >>> 0) {
                 break $erroraction$$land_rhs$4;
               }
-              if (($6 | 0) == (HEAP32[__gm_ + 20 >> 2] | 0)) {
-                var $48$s2 = ($mem + ($and5 - 4) | 0) >> 2;
+              var $7 = HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
+              if (($6 | 0) == ($7 | 0)) {
+                var $add_ptr6_sum = CHECK_OVERFLOW($and5 - 4, 32, 0);
+                var $head183 = CHECK_OVERFLOW($mem + $add_ptr6_sum, 32, 0);
+                var $48$s2 = $head183 >> 2;
                 if ((HEAP32[$48$s2] & 3 | 0) != 3) {
-                  var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                  var $p_0 = $6;
                   var $psize_0 = $add17;
                   break;
                 }
-                HEAP32[__gm_ + 8 >> 2] = $add17;
+                HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = $add17;
                 var $and189 = HEAP32[$48$s2] & -2;
                 HEAP32[$48$s2] = $and189;
-                HEAP32[$add_ptr_sum1$s2 + ($mem$s2 + 1)] = $add17 | 1;
+                var $or = $add17 | 1;
+                var $add_ptr16_sum = CHECK_OVERFLOW($add_ptr_sum1 + 4, 32, 0);
+                var $head190 = CHECK_OVERFLOW($mem + $add_ptr16_sum, 32, 0);
+                HEAP32[$head190 >> 2] = $or;
                 HEAP32[$add_ptr6 >> 2] = $add17;
                 break $if_end586$$if_then$2;
               }
+              var $shr = $5 >>> 3;
               if ($5 >>> 0 < 256) {
-                var $9 = HEAPU32[$add_ptr_sum1$s2 + ($mem$s2 + 2)];
-                var $11 = HEAPU32[$add_ptr_sum1$s2 + ($mem$s2 + 3)];
+                var $add_ptr16_sum28 = CHECK_OVERFLOW($add_ptr_sum1 + 8, 32, 0);
+                var $fd = CHECK_OVERFLOW($mem + $add_ptr16_sum28, 32, 0);
+                var $9 = HEAPU32[$fd >> 2];
+                var $add_ptr16_sum29 = CHECK_OVERFLOW($add_ptr_sum1 + 12, 32, 0);
+                var $bk = CHECK_OVERFLOW($mem + $add_ptr16_sum29, 32, 0);
+                var $11 = HEAPU32[$bk >> 2];
                 if (($9 | 0) == ($11 | 0)) {
-                  var $and32 = HEAP32[__gm_ >> 2] & (1 << ($5 >>> 3) ^ -1);
-                  HEAP32[__gm_ >> 2] = $and32;
-                  var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                  var $neg = 1 << $shr ^ -1;
+                  var $12 = HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+                  var $and32 = $12 & $neg;
+                  HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $and32;
+                  var $p_0 = $6;
                   var $psize_0 = $add17;
                 } else {
-                  var $14 = (($5 >>> 2 & 1073741822) << 2) + __gm_ + 40 | 0;
+                  var $shl34 = $5 >>> 2 & 1073741822;
+                  var $arrayidx = CHECK_OVERFLOW(($shl34 << 2) + __gm_ + 40, 32, 0);
+                  var $14 = $arrayidx;
                   var $or_cond = ($9 | 0) != ($14 | 0) & $9 >>> 0 < $1 >>> 0;
                   do {
                     if (!$or_cond) {
                       if (!(($11 | 0) == ($14 | 0) | $11 >>> 0 >= $1 >>> 0)) {
                         break;
                       }
-                      HEAP32[$9 + 12 >> 2] = $11;
-                      HEAP32[$11 + 8 >> 2] = $9;
-                      var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                      var $bk51 = CHECK_OVERFLOW($9 + 12, 32, 0);
+                      HEAP32[$bk51 >> 2] = $11;
+                      var $fd52 = CHECK_OVERFLOW($11 + 8, 32, 0);
+                      HEAP32[$fd52 >> 2] = $9;
+                      var $p_0 = $6;
                       var $psize_0 = $add17;
                       break $if_then10$$if_end198$7;
                     }
@@ -11127,18 +13436,26 @@ function _free($mem) {
                 }
               } else {
                 var $17 = $add_ptr16;
-                var $19 = HEAPU32[$add_ptr_sum1$s2 + ($mem$s2 + 6)];
-                var $21 = HEAPU32[$add_ptr_sum1$s2 + ($mem$s2 + 3)];
+                var $add_ptr16_sum22 = CHECK_OVERFLOW($add_ptr_sum1 + 24, 32, 0);
+                var $parent = CHECK_OVERFLOW($mem + $add_ptr16_sum22, 32, 0);
+                var $19 = HEAPU32[$parent >> 2];
+                var $add_ptr16_sum23 = CHECK_OVERFLOW($add_ptr_sum1 + 12, 32, 0);
+                var $bk56 = CHECK_OVERFLOW($mem + $add_ptr16_sum23, 32, 0);
+                var $21 = HEAPU32[$bk56 >> 2];
                 var $cmp57 = ($21 | 0) == ($17 | 0);
                 do {
                   if ($cmp57) {
-                    var $25 = $add_ptr_sum1 + ($mem + 20) | 0;
+                    var $child_sum = CHECK_OVERFLOW($add_ptr_sum1 + 20, 32, 0);
+                    var $arrayidx73 = CHECK_OVERFLOW($mem + $child_sum, 32, 0);
+                    var $25 = $arrayidx73;
                     var $26 = HEAP32[$25 >> 2];
                     if (($26 | 0) == 0) {
-                      var $arrayidx78 = $add_ptr_sum1 + ($mem + 16) | 0;
+                      var $add_ptr16_sum24 = CHECK_OVERFLOW($add_ptr_sum1 + 16, 32, 0);
+                      var $child = CHECK_OVERFLOW($mem + $add_ptr16_sum24, 32, 0);
+                      var $arrayidx78 = $child;
                       var $27 = HEAP32[$arrayidx78 >> 2];
                       if (($27 | 0) == 0) {
-                        var $R_1 = 0, $R_1$s2 = $R_1 >> 2;
+                        var $R_1 = 0;
                         break;
                       }
                       var $RP_0 = $arrayidx78;
@@ -11151,14 +13468,14 @@ function _free($mem) {
                     while (1) {
                       var $R_0;
                       var $RP_0;
-                      var $arrayidx83 = $R_0 + 20 | 0;
+                      var $arrayidx83 = CHECK_OVERFLOW($R_0 + 20, 32, 0);
                       var $28 = HEAP32[$arrayidx83 >> 2];
                       if (($28 | 0) != 0) {
                         var $RP_0 = $arrayidx83;
                         var $R_0 = $28;
                         continue;
                       }
-                      var $arrayidx88 = $R_0 + 16 | 0;
+                      var $arrayidx88 = CHECK_OVERFLOW($R_0 + 16, 32, 0);
                       var $29 = HEAPU32[$arrayidx88 >> 2];
                       if (($29 | 0) == 0) {
                         break;
@@ -11171,28 +13488,35 @@ function _free($mem) {
                       throw "Reached an unreachable!";
                     } else {
                       HEAP32[$RP_0 >> 2] = 0;
-                      var $R_1 = $R_0, $R_1$s2 = $R_1 >> 2;
+                      var $R_1 = $R_0;
                     }
                   } else {
-                    var $23 = HEAPU32[$add_ptr_sum1$s2 + ($mem$s2 + 2)];
+                    var $add_ptr16_sum27 = CHECK_OVERFLOW($add_ptr_sum1 + 8, 32, 0);
+                    var $fd61 = CHECK_OVERFLOW($mem + $add_ptr16_sum27, 32, 0);
+                    var $23 = HEAPU32[$fd61 >> 2];
                     if ($23 >>> 0 < $1 >>> 0) {
                       _abort();
                       throw "Reached an unreachable!";
                     } else {
-                      HEAP32[$23 + 12 >> 2] = $21;
-                      HEAP32[$21 + 8 >> 2] = $23;
-                      var $R_1 = $21, $R_1$s2 = $R_1 >> 2;
+                      var $bk68 = CHECK_OVERFLOW($23 + 12, 32, 0);
+                      HEAP32[$bk68 >> 2] = $21;
+                      var $fd69 = CHECK_OVERFLOW($21 + 8, 32, 0);
+                      HEAP32[$fd69 >> 2] = $23;
+                      var $R_1 = $21;
                     }
                   }
                 } while (0);
                 var $R_1;
                 if (($19 | 0) == 0) {
-                  var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                  var $p_0 = $6;
                   var $psize_0 = $add17;
                   break;
                 }
-                var $31 = $add_ptr_sum1 + ($mem + 28) | 0;
-                var $arrayidx104 = (HEAP32[$31 >> 2] << 2) + __gm_ + 304 | 0;
+                var $add_ptr16_sum25 = CHECK_OVERFLOW($add_ptr_sum1 + 28, 32, 0);
+                var $index = CHECK_OVERFLOW($mem + $add_ptr16_sum25, 32, 0);
+                var $31 = $index;
+                var $32 = HEAP32[$31 >> 2];
+                var $arrayidx104 = CHECK_OVERFLOW(($32 << 2) + __gm_ + 304, 32, 0);
                 var $cmp105 = ($17 | 0) == (HEAP32[$arrayidx104 >> 2] | 0);
                 do {
                   if ($cmp105) {
@@ -11200,63 +13524,83 @@ function _free($mem) {
                     if (($R_1 | 0) != 0) {
                       break;
                     }
-                    var $and114 = HEAP32[__gm_ + 4 >> 2] & (1 << HEAP32[$31 >> 2] ^ -1);
-                    HEAP32[__gm_ + 4 >> 2] = $and114;
-                    var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                    var $neg113 = 1 << HEAP32[$31 >> 2] ^ -1;
+                    var $35 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+                    var $and114 = $35 & $neg113;
+                    HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $and114;
+                    var $p_0 = $6;
                     var $psize_0 = $add17;
                     break $if_then10$$if_end198$7;
                   }
-                  if ($19 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $36 = $19;
+                  var $37 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($36 >>> 0 < $37 >>> 0) {
                     _abort();
                     throw "Reached an unreachable!";
                   } else {
-                    var $arrayidx123 = $19 + 16 | 0;
+                    var $arrayidx123 = CHECK_OVERFLOW($19 + 16, 32, 0);
                     if ((HEAP32[$arrayidx123 >> 2] | 0) == ($17 | 0)) {
                       HEAP32[$arrayidx123 >> 2] = $R_1;
                     } else {
-                      HEAP32[$19 + 20 >> 2] = $R_1;
+                      var $arrayidx131 = CHECK_OVERFLOW($19 + 20, 32, 0);
+                      HEAP32[$arrayidx131 >> 2] = $R_1;
                     }
                     if (($R_1 | 0) == 0) {
-                      var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                      var $p_0 = $6;
                       var $psize_0 = $add17;
                       break $if_then10$$if_end198$7;
                     }
                   }
                 } while (0);
-                if ($R_1 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                var $39 = $R_1;
+                var $40 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                if ($39 >>> 0 < $40 >>> 0) {
                   _abort();
                   throw "Reached an unreachable!";
                 } else {
-                  HEAP32[$R_1$s2 + 6] = $19;
-                  var $41 = HEAPU32[$add_ptr_sum1$s2 + ($mem$s2 + 4)];
+                  var $parent144 = CHECK_OVERFLOW($R_1 + 24, 32, 0);
+                  HEAP32[$parent144 >> 2] = $19;
+                  var $add_ptr16_sum26 = CHECK_OVERFLOW($add_ptr_sum1 + 16, 32, 0);
+                  var $child145 = CHECK_OVERFLOW($mem + $add_ptr16_sum26, 32, 0);
+                  var $41 = HEAPU32[$child145 >> 2];
                   if (($41 | 0) != 0) {
-                    if ($41 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                    var $42 = $41;
+                    var $43 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                    if ($42 >>> 0 < $43 >>> 0) {
                       _abort();
                       throw "Reached an unreachable!";
                     } else {
-                      HEAP32[$R_1$s2 + 4] = $41;
-                      HEAP32[$41 + 24 >> 2] = $R_1;
+                      var $arrayidx156 = CHECK_OVERFLOW($R_1 + 16, 32, 0);
+                      HEAP32[$arrayidx156 >> 2] = $41;
+                      var $parent157 = CHECK_OVERFLOW($41 + 24, 32, 0);
+                      HEAP32[$parent157 >> 2] = $R_1;
                     }
                   }
-                  var $45 = HEAPU32[$add_ptr_sum1$s2 + ($mem$s2 + 5)];
+                  var $child145_sum = CHECK_OVERFLOW($add_ptr_sum1 + 20, 32, 0);
+                  var $arrayidx162 = CHECK_OVERFLOW($mem + $child145_sum, 32, 0);
+                  var $45 = HEAPU32[$arrayidx162 >> 2];
                   if (($45 | 0) == 0) {
-                    var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                    var $p_0 = $6;
                     var $psize_0 = $add17;
                     break;
                   }
-                  if ($45 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $46 = $45;
+                  var $47 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($46 >>> 0 < $47 >>> 0) {
                     _abort();
                     throw "Reached an unreachable!";
                   } else {
-                    HEAP32[$R_1$s2 + 5] = $45;
-                    HEAP32[$45 + 24 >> 2] = $R_1;
-                    var $p_0 = $6, $p_0$s2 = $p_0 >> 2;
+                    var $arrayidx172 = CHECK_OVERFLOW($R_1 + 20, 32, 0);
+                    HEAP32[$arrayidx172 >> 2] = $45;
+                    var $parent173 = CHECK_OVERFLOW($45 + 24, 32, 0);
+                    HEAP32[$parent173 >> 2] = $R_1;
+                    var $p_0 = $6;
                     var $psize_0 = $add17;
                   }
                 }
               }
             } else {
-              var $p_0 = $0, $p_0$s2 = $p_0 >> 2;
+              var $p_0 = $0;
               var $psize_0 = $and5;
             }
           } while (0);
@@ -11266,7 +13610,9 @@ function _free($mem) {
           if ($52 >>> 0 >= $add_ptr6 >>> 0) {
             break;
           }
-          var $53 = $mem + ($and5 - 4) | 0;
+          var $add_ptr6_sum20 = CHECK_OVERFLOW($and5 - 4, 32, 0);
+          var $head202 = CHECK_OVERFLOW($mem + $add_ptr6_sum20, 32, 0);
+          var $53 = $head202;
           var $54 = HEAPU32[$53 >> 2];
           if (($54 & 1 | 0) == 0) {
             break;
@@ -11274,50 +13620,69 @@ function _free($mem) {
           var $tobool212 = ($54 & 2 | 0) == 0;
           do {
             if ($tobool212) {
-              if (($4 | 0) == (HEAP32[__gm_ + 24 >> 2] | 0)) {
-                var $add217 = HEAP32[__gm_ + 12 >> 2] + $psize_0 | 0;
-                HEAP32[__gm_ + 12 >> 2] = $add217;
-                HEAP32[__gm_ + 24 >> 2] = $p_0;
+              var $55 = HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
+              if (($4 | 0) == ($55 | 0)) {
+                var $56 = HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
+                var $add217 = CHECK_OVERFLOW($56 + $psize_0, 32, 0);
+                HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2] = $add217;
+                HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2] = $p_0;
                 var $or218 = $add217 | 1;
-                HEAP32[$p_0$s2 + 1] = $or218;
-                if (($p_0 | 0) == (HEAP32[__gm_ + 20 >> 2] | 0)) {
-                  HEAP32[__gm_ + 20 >> 2] = 0;
-                  HEAP32[__gm_ + 8 >> 2] = 0;
+                var $head219 = CHECK_OVERFLOW($p_0 + 4, 32, 0);
+                HEAP32[$head219 >> 2] = $or218;
+                var $57 = HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
+                if (($p_0 | 0) == ($57 | 0)) {
+                  HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2] = 0;
+                  HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = 0;
                 }
-                if ($add217 >>> 0 <= HEAPU32[__gm_ + 28 >> 2] >>> 0) {
+                var $58 = HEAPU32[CHECK_OVERFLOW(__gm_ + 28, 32, 0) >> 2];
+                if ($add217 >>> 0 <= $58 >>> 0) {
                   break $if_end586$$if_then$2;
                 }
                 _sys_trim();
                 break $if_end586$$if_then$2;
               }
-              if (($4 | 0) == (HEAP32[__gm_ + 20 >> 2] | 0)) {
-                var $add232 = HEAP32[__gm_ + 8 >> 2] + $psize_0 | 0;
-                HEAP32[__gm_ + 8 >> 2] = $add232;
-                HEAP32[__gm_ + 20 >> 2] = $p_0;
+              var $59 = HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
+              if (($4 | 0) == ($59 | 0)) {
+                var $60 = HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2];
+                var $add232 = CHECK_OVERFLOW($60 + $psize_0, 32, 0);
+                HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = $add232;
+                HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2] = $p_0;
                 var $or233 = $add232 | 1;
-                HEAP32[$p_0$s2 + 1] = $or233;
-                var $prev_foot236 = $52 + $add232 | 0;
+                var $head234 = CHECK_OVERFLOW($p_0 + 4, 32, 0);
+                HEAP32[$head234 >> 2] = $or233;
+                var $add_ptr235 = CHECK_OVERFLOW($52 + $add232, 32, 0);
+                var $prev_foot236 = $add_ptr235;
                 HEAP32[$prev_foot236 >> 2] = $add232;
                 break $if_end586$$if_then$2;
               }
-              var $add240 = ($54 & -8) + $psize_0 | 0;
+              var $and239 = $54 & -8;
+              var $add240 = CHECK_OVERFLOW($and239 + $psize_0, 32, 0);
               var $shr241 = $54 >>> 3;
               var $cmp242 = $54 >>> 0 < 256;
               $if_then244$$if_else284$82 : do {
                 if ($cmp242) {
-                  var $62 = HEAPU32[$mem$s2 + $and5$s2];
-                  var $64 = HEAPU32[(($and5 | 4) >> 2) + $mem$s2];
+                  var $fd246 = CHECK_OVERFLOW($mem + $and5, 32, 0);
+                  var $62 = HEAPU32[$fd246 >> 2];
+                  var $add_ptr6_sum1819 = $and5 | 4;
+                  var $bk248 = CHECK_OVERFLOW($mem + $add_ptr6_sum1819, 32, 0);
+                  var $64 = HEAPU32[$bk248 >> 2];
                   if (($62 | 0) == ($64 | 0)) {
-                    var $and256 = HEAP32[__gm_ >> 2] & (1 << $shr241 ^ -1);
-                    HEAP32[__gm_ >> 2] = $and256;
+                    var $neg255 = 1 << $shr241 ^ -1;
+                    var $65 = HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+                    var $and256 = $65 & $neg255;
+                    HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $and256;
                   } else {
-                    var $67 = (($54 >>> 2 & 1073741822) << 2) + __gm_ + 40 | 0;
+                    var $shl258 = $54 >>> 2 & 1073741822;
+                    var $arrayidx259 = CHECK_OVERFLOW(($shl258 << 2) + __gm_ + 40, 32, 0);
+                    var $67 = $arrayidx259;
                     var $cmp260 = ($62 | 0) == ($67 | 0);
                     do {
                       if ($cmp260) {
                         __label__ = 62;
                       } else {
-                        if ($62 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                        var $68 = $62;
+                        var $69 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                        if ($68 >>> 0 < $69 >>> 0) {
                           __label__ = 65;
                           break;
                         }
@@ -11328,12 +13693,16 @@ function _free($mem) {
                     do {
                       if (__label__ == 62) {
                         if (($64 | 0) != ($67 | 0)) {
-                          if ($64 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                          var $70 = $64;
+                          var $71 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                          if ($70 >>> 0 < $71 >>> 0) {
                             break;
                           }
                         }
-                        HEAP32[$62 + 12 >> 2] = $64;
-                        HEAP32[$64 + 8 >> 2] = $62;
+                        var $bk279 = CHECK_OVERFLOW($62 + 12, 32, 0);
+                        HEAP32[$bk279 >> 2] = $64;
+                        var $fd280 = CHECK_OVERFLOW($64 + 8, 32, 0);
+                        HEAP32[$fd280 >> 2] = $62;
                         break $if_then244$$if_else284$82;
                       }
                     } while (0);
@@ -11342,18 +13711,26 @@ function _free($mem) {
                   }
                 } else {
                   var $72 = $add_ptr6;
-                  var $74 = HEAPU32[$and5$s2 + ($mem$s2 + 4)];
-                  var $76 = HEAPU32[(($and5 | 4) >> 2) + $mem$s2];
+                  var $add_ptr6_sum3 = CHECK_OVERFLOW($and5 + 16, 32, 0);
+                  var $parent287 = CHECK_OVERFLOW($mem + $add_ptr6_sum3, 32, 0);
+                  var $74 = HEAPU32[$parent287 >> 2];
+                  var $add_ptr6_sum45 = $and5 | 4;
+                  var $bk289 = CHECK_OVERFLOW($mem + $add_ptr6_sum45, 32, 0);
+                  var $76 = HEAPU32[$bk289 >> 2];
                   var $cmp290 = ($76 | 0) == ($72 | 0);
                   do {
                     if ($cmp290) {
-                      var $81 = $and5 + ($mem + 12) | 0;
+                      var $child307_sum = CHECK_OVERFLOW($and5 + 12, 32, 0);
+                      var $arrayidx308 = CHECK_OVERFLOW($mem + $child307_sum, 32, 0);
+                      var $81 = $arrayidx308;
                       var $82 = HEAP32[$81 >> 2];
                       if (($82 | 0) == 0) {
-                        var $arrayidx313 = $and5 + ($mem + 8) | 0;
+                        var $add_ptr6_sum6 = CHECK_OVERFLOW($and5 + 8, 32, 0);
+                        var $child307 = CHECK_OVERFLOW($mem + $add_ptr6_sum6, 32, 0);
+                        var $arrayidx313 = $child307;
                         var $83 = HEAP32[$arrayidx313 >> 2];
                         if (($83 | 0) == 0) {
-                          var $R288_1 = 0, $R288_1$s2 = $R288_1 >> 2;
+                          var $R288_1 = 0;
                           break;
                         }
                         var $RP306_0 = $arrayidx313;
@@ -11366,14 +13743,14 @@ function _free($mem) {
                       while (1) {
                         var $R288_0;
                         var $RP306_0;
-                        var $arrayidx320 = $R288_0 + 20 | 0;
+                        var $arrayidx320 = CHECK_OVERFLOW($R288_0 + 20, 32, 0);
                         var $84 = HEAP32[$arrayidx320 >> 2];
                         if (($84 | 0) != 0) {
                           var $RP306_0 = $arrayidx320;
                           var $R288_0 = $84;
                           continue;
                         }
-                        var $arrayidx325 = $R288_0 + 16 | 0;
+                        var $arrayidx325 = CHECK_OVERFLOW($R288_0 + 16, 32, 0);
                         var $85 = HEAPU32[$arrayidx325 >> 2];
                         if (($85 | 0) == 0) {
                           break;
@@ -11381,22 +13758,29 @@ function _free($mem) {
                         var $RP306_0 = $arrayidx325;
                         var $R288_0 = $85;
                       }
-                      if ($RP306_0 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                      var $86 = $RP306_0;
+                      var $87 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                      if ($86 >>> 0 < $87 >>> 0) {
                         _abort();
                         throw "Reached an unreachable!";
                       } else {
                         HEAP32[$RP306_0 >> 2] = 0;
-                        var $R288_1 = $R288_0, $R288_1$s2 = $R288_1 >> 2;
+                        var $R288_1 = $R288_0;
                       }
                     } else {
-                      var $78 = HEAPU32[$mem$s2 + $and5$s2];
-                      if ($78 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                      var $fd294 = CHECK_OVERFLOW($mem + $and5, 32, 0);
+                      var $78 = HEAPU32[$fd294 >> 2];
+                      var $79 = $78;
+                      var $80 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                      if ($79 >>> 0 < $80 >>> 0) {
                         _abort();
                         throw "Reached an unreachable!";
                       } else {
-                        HEAP32[$78 + 12 >> 2] = $76;
-                        HEAP32[$76 + 8 >> 2] = $78;
-                        var $R288_1 = $76, $R288_1$s2 = $R288_1 >> 2;
+                        var $bk301 = CHECK_OVERFLOW($78 + 12, 32, 0);
+                        HEAP32[$bk301 >> 2] = $76;
+                        var $fd302 = CHECK_OVERFLOW($76 + 8, 32, 0);
+                        HEAP32[$fd302 >> 2] = $78;
+                        var $R288_1 = $76;
                       }
                     }
                   } while (0);
@@ -11404,8 +13788,11 @@ function _free($mem) {
                   if (($74 | 0) == 0) {
                     break;
                   }
-                  var $88 = $and5 + ($mem + 20) | 0;
-                  var $arrayidx345 = (HEAP32[$88 >> 2] << 2) + __gm_ + 304 | 0;
+                  var $add_ptr6_sum14 = CHECK_OVERFLOW($and5 + 20, 32, 0);
+                  var $index344 = CHECK_OVERFLOW($mem + $add_ptr6_sum14, 32, 0);
+                  var $88 = $index344;
+                  var $89 = HEAP32[$88 >> 2];
+                  var $arrayidx345 = CHECK_OVERFLOW(($89 << 2) + __gm_ + 304, 32, 0);
                   var $cmp346 = ($72 | 0) == (HEAP32[$arrayidx345 >> 2] | 0);
                   do {
                     if ($cmp346) {
@@ -11413,85 +13800,120 @@ function _free($mem) {
                       if (($R288_1 | 0) != 0) {
                         break;
                       }
-                      var $and355 = HEAP32[__gm_ + 4 >> 2] & (1 << HEAP32[$88 >> 2] ^ -1);
-                      HEAP32[__gm_ + 4 >> 2] = $and355;
+                      var $neg354 = 1 << HEAP32[$88 >> 2] ^ -1;
+                      var $92 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+                      var $and355 = $92 & $neg354;
+                      HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $and355;
                       break $if_then244$$if_else284$82;
                     }
-                    if ($74 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                    var $93 = $74;
+                    var $94 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                    if ($93 >>> 0 < $94 >>> 0) {
                       _abort();
                       throw "Reached an unreachable!";
                     } else {
-                      var $arrayidx364 = $74 + 16 | 0;
+                      var $arrayidx364 = CHECK_OVERFLOW($74 + 16, 32, 0);
                       if ((HEAP32[$arrayidx364 >> 2] | 0) == ($72 | 0)) {
                         HEAP32[$arrayidx364 >> 2] = $R288_1;
                       } else {
-                        HEAP32[$74 + 20 >> 2] = $R288_1;
+                        var $arrayidx372 = CHECK_OVERFLOW($74 + 20, 32, 0);
+                        HEAP32[$arrayidx372 >> 2] = $R288_1;
                       }
                       if (($R288_1 | 0) == 0) {
                         break $if_then244$$if_else284$82;
                       }
                     }
                   } while (0);
-                  if ($R288_1 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $96 = $R288_1;
+                  var $97 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($96 >>> 0 < $97 >>> 0) {
                     _abort();
                     throw "Reached an unreachable!";
                   } else {
-                    HEAP32[$R288_1$s2 + 6] = $74;
-                    var $98 = HEAPU32[$and5$s2 + ($mem$s2 + 2)];
+                    var $parent387 = CHECK_OVERFLOW($R288_1 + 24, 32, 0);
+                    HEAP32[$parent387 >> 2] = $74;
+                    var $add_ptr6_sum15 = CHECK_OVERFLOW($and5 + 8, 32, 0);
+                    var $child388 = CHECK_OVERFLOW($mem + $add_ptr6_sum15, 32, 0);
+                    var $98 = HEAPU32[$child388 >> 2];
                     if (($98 | 0) != 0) {
-                      if ($98 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                      var $99 = $98;
+                      var $100 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                      if ($99 >>> 0 < $100 >>> 0) {
                         _abort();
                         throw "Reached an unreachable!";
                       } else {
-                        HEAP32[$R288_1$s2 + 4] = $98;
-                        HEAP32[$98 + 24 >> 2] = $R288_1;
+                        var $arrayidx399 = CHECK_OVERFLOW($R288_1 + 16, 32, 0);
+                        HEAP32[$arrayidx399 >> 2] = $98;
+                        var $parent400 = CHECK_OVERFLOW($98 + 24, 32, 0);
+                        HEAP32[$parent400 >> 2] = $R288_1;
                       }
                     }
-                    var $102 = HEAPU32[$and5$s2 + ($mem$s2 + 3)];
+                    var $child388_sum = CHECK_OVERFLOW($and5 + 12, 32, 0);
+                    var $arrayidx405 = CHECK_OVERFLOW($mem + $child388_sum, 32, 0);
+                    var $102 = HEAPU32[$arrayidx405 >> 2];
                     if (($102 | 0) == 0) {
                       break;
                     }
-                    if ($102 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                    var $103 = $102;
+                    var $104 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                    if ($103 >>> 0 < $104 >>> 0) {
                       _abort();
                       throw "Reached an unreachable!";
                     } else {
-                      HEAP32[$R288_1$s2 + 5] = $102;
-                      HEAP32[$102 + 24 >> 2] = $R288_1;
+                      var $arrayidx415 = CHECK_OVERFLOW($R288_1 + 20, 32, 0);
+                      HEAP32[$arrayidx415 >> 2] = $102;
+                      var $parent416 = CHECK_OVERFLOW($102 + 24, 32, 0);
+                      HEAP32[$parent416 >> 2] = $R288_1;
                     }
                   }
                 }
               } while (0);
-              HEAP32[$p_0$s2 + 1] = $add240 | 1;
-              HEAP32[$52 + $add240 >> 2] = $add240;
-              if (($p_0 | 0) != (HEAP32[__gm_ + 20 >> 2] | 0)) {
+              var $or425 = $add240 | 1;
+              var $head426 = CHECK_OVERFLOW($p_0 + 4, 32, 0);
+              HEAP32[$head426 >> 2] = $or425;
+              var $add_ptr427 = CHECK_OVERFLOW($52 + $add240, 32, 0);
+              HEAP32[$add_ptr427 >> 2] = $add240;
+              var $105 = HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
+              if (($p_0 | 0) != ($105 | 0)) {
                 var $psize_1 = $add240;
                 break;
               }
-              HEAP32[__gm_ + 8 >> 2] = $add240;
+              HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = $add240;
               break $if_end586$$if_then$2;
             } else {
               HEAP32[$53 >> 2] = $54 & -2;
-              HEAP32[$p_0$s2 + 1] = $psize_0 | 1;
-              HEAP32[$52 + $psize_0 >> 2] = $psize_0;
+              var $or438 = $psize_0 | 1;
+              var $head439 = CHECK_OVERFLOW($p_0 + 4, 32, 0);
+              HEAP32[$head439 >> 2] = $or438;
+              var $add_ptr440 = CHECK_OVERFLOW($52 + $psize_0, 32, 0);
+              HEAP32[$add_ptr440 >> 2] = $psize_0;
               var $psize_1 = $psize_0;
             }
           } while (0);
           var $psize_1;
           if ($psize_1 >>> 0 < 256) {
+            var $shr443 = $psize_1 >>> 3;
             var $shl450 = $psize_1 >>> 2 & 1073741822;
-            var $107 = ($shl450 << 2) + __gm_ + 40 | 0;
-            var $108 = HEAPU32[__gm_ >> 2];
-            var $shl453 = 1 << ($psize_1 >>> 3);
+            var $arrayidx451 = CHECK_OVERFLOW(($shl450 << 2) + __gm_ + 40, 32, 0);
+            var $107 = $arrayidx451;
+            var $108 = HEAPU32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+            var $shl453 = 1 << $shr443;
             var $tobool455 = ($108 & $shl453 | 0) == 0;
             do {
               if ($tobool455) {
-                HEAP32[__gm_ >> 2] = $108 | $shl453;
+                var $or458 = $108 | $shl453;
+                HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $or458;
+                var $arrayidx451_sum_pre = CHECK_OVERFLOW($shl450 + 2, 32, 0);
+                var $_pre = CHECK_OVERFLOW(($arrayidx451_sum_pre << 2) + __gm_ + 40, 32, 0);
                 var $F452_0 = $107;
-                var $_pre_phi = ($shl450 + 2 << 2) + __gm_ + 40 | 0;
+                var $_pre_phi = $_pre;
               } else {
-                var $109 = ($shl450 + 2 << 2) + __gm_ + 40 | 0;
+                var $arrayidx451_sum13 = CHECK_OVERFLOW($shl450 + 2, 32, 0);
+                var $109 = CHECK_OVERFLOW(($arrayidx451_sum13 << 2) + __gm_ + 40, 32, 0);
                 var $110 = HEAPU32[$109 >> 2];
-                if ($110 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                var $111 = $110;
+                var $112 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                if ($111 >>> 0 >= $112 >>> 0) {
                   var $F452_0 = $110;
                   var $_pre_phi = $109;
                   break;
@@ -11503,9 +13925,12 @@ function _free($mem) {
             var $_pre_phi;
             var $F452_0;
             HEAP32[$_pre_phi >> 2] = $p_0;
-            HEAP32[$F452_0 + 12 >> 2] = $p_0;
-            HEAP32[$p_0$s2 + 2] = $F452_0;
-            HEAP32[$p_0$s2 + 3] = $107;
+            var $bk471 = CHECK_OVERFLOW($F452_0 + 12, 32, 0);
+            HEAP32[$bk471 >> 2] = $p_0;
+            var $fd472 = CHECK_OVERFLOW($p_0 + 8, 32, 0);
+            HEAP32[$fd472 >> 2] = $F452_0;
+            var $bk473 = CHECK_OVERFLOW($p_0 + 12, 32, 0);
+            HEAP32[$bk473 >> 2] = $107;
             break $if_end586$$if_then$2;
           }
           var $113 = $p_0;
@@ -11519,72 +13944,99 @@ function _free($mem) {
                 var $I476_0 = 31;
                 break;
               }
-              var $and487 = ($shr477 + 1048320 | 0) >>> 16 & 8;
+              var $sub = CHECK_OVERFLOW($shr477 + 1048320, 32, 0);
+              var $and487 = $sub >>> 16 & 8;
               var $shl488 = $shr477 << $and487;
-              var $and491 = ($shl488 + 520192 | 0) >>> 16 & 4;
+              var $sub489 = CHECK_OVERFLOW($shl488 + 520192, 32, 0);
+              var $and491 = $sub489 >>> 16 & 4;
               var $shl493 = $shl488 << $and491;
-              var $and496 = ($shl493 + 245760 | 0) >>> 16 & 2;
-              var $add501 = 14 - ($and491 | $and487 | $and496) + ($shl493 << $and496 >>> 15) | 0;
-              var $I476_0 = $psize_1 >>> (($add501 + 7 | 0) >>> 0) & 1 | $add501 << 1;
+              var $sub494 = CHECK_OVERFLOW($shl493 + 245760, 32, 0);
+              var $and496 = $sub494 >>> 16 & 2;
+              var $add497 = $and491 | $and487 | $and496;
+              var $sub498 = CHECK_OVERFLOW(14 - $add497, 32, 0);
+              var $shr500 = $shl493 << $and496 >>> 15;
+              var $add501 = CHECK_OVERFLOW($sub498 + $shr500, 32, 0);
+              var $shl502 = $add501 << 1;
+              var $add503 = CHECK_OVERFLOW($add501 + 7, 32, 0);
+              var $I476_0 = $psize_1 >>> ($add503 >>> 0) & 1 | $shl502;
             }
           } while (0);
           var $I476_0;
-          var $arrayidx509 = ($I476_0 << 2) + __gm_ + 304 | 0;
-          HEAP32[$p_0$s2 + 7] = $I476_0;
-          HEAP32[$p_0$s2 + 5] = 0;
-          HEAP32[$p_0$s2 + 4] = 0;
-          var $115 = HEAP32[__gm_ + 4 >> 2];
+          var $arrayidx509 = CHECK_OVERFLOW(($I476_0 << 2) + __gm_ + 304, 32, 0);
+          var $index510 = CHECK_OVERFLOW($p_0 + 28, 32, 0);
+          HEAP32[$index510 >> 2] = $I476_0;
+          var $arrayidx512 = CHECK_OVERFLOW($p_0 + 20, 32, 0);
+          HEAP32[$arrayidx512 >> 2] = 0;
+          var $114 = CHECK_OVERFLOW($p_0 + 16, 32, 0);
+          HEAP32[$114 >> 2] = 0;
+          var $115 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
           var $shl515 = 1 << $I476_0;
           var $tobool517 = ($115 & $shl515 | 0) == 0;
           $if_then518$$if_else524$154 : do {
             if ($tobool517) {
               var $or520 = $115 | $shl515;
-              HEAP32[__gm_ + 4 >> 2] = $or520;
+              HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $or520;
               HEAP32[$arrayidx509 >> 2] = $113;
-              HEAP32[$p_0$s2 + 6] = $arrayidx509;
-              HEAP32[$p_0$s2 + 3] = $p_0;
-              HEAP32[$p_0$s2 + 2] = $p_0;
+              var $parent521 = CHECK_OVERFLOW($p_0 + 24, 32, 0);
+              HEAP32[$parent521 >> 2] = $arrayidx509;
+              var $bk522 = CHECK_OVERFLOW($p_0 + 12, 32, 0);
+              HEAP32[$bk522 >> 2] = $p_0;
+              var $fd523 = CHECK_OVERFLOW($p_0 + 8, 32, 0);
+              HEAP32[$fd523 >> 2] = $p_0;
             } else {
+              var $116 = HEAP32[$arrayidx509 >> 2];
               if (($I476_0 | 0) == 31) {
                 var $cond = 0;
               } else {
-                var $cond = 25 - ($I476_0 >>> 1) | 0;
+                var $sub531 = CHECK_OVERFLOW(25 - ($I476_0 >>> 1), 32, 0);
+                var $cond = $sub531;
               }
               var $cond;
               var $K525_0 = $psize_1 << $cond;
-              var $T_0 = HEAP32[$arrayidx509 >> 2];
+              var $T_0 = $116;
               while (1) {
                 var $T_0;
                 var $K525_0;
-                if ((HEAP32[$T_0 + 4 >> 2] & -8 | 0) == ($psize_1 | 0)) {
-                  var $fd559 = $T_0 + 8 | 0;
+                var $head533 = CHECK_OVERFLOW($T_0 + 4, 32, 0);
+                if ((HEAP32[$head533 >> 2] & -8 | 0) == ($psize_1 | 0)) {
+                  var $fd559 = CHECK_OVERFLOW($T_0 + 8, 32, 0);
                   var $121 = HEAPU32[$fd559 >> 2];
-                  var $123 = HEAPU32[__gm_ + 16 >> 2];
-                  var $cmp560 = $T_0 >>> 0 < $123 >>> 0;
+                  var $122 = $T_0;
+                  var $123 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  var $cmp560 = $122 >>> 0 < $123 >>> 0;
                   do {
                     if (!$cmp560) {
                       if ($121 >>> 0 < $123 >>> 0) {
                         break;
                       }
-                      HEAP32[$121 + 12 >> 2] = $113;
+                      var $bk570 = CHECK_OVERFLOW($121 + 12, 32, 0);
+                      HEAP32[$bk570 >> 2] = $113;
                       HEAP32[$fd559 >> 2] = $113;
-                      HEAP32[$p_0$s2 + 2] = $121;
-                      HEAP32[$p_0$s2 + 3] = $T_0;
-                      HEAP32[$p_0$s2 + 6] = 0;
+                      var $fd572 = CHECK_OVERFLOW($p_0 + 8, 32, 0);
+                      HEAP32[$fd572 >> 2] = $121;
+                      var $bk573 = CHECK_OVERFLOW($p_0 + 12, 32, 0);
+                      HEAP32[$bk573 >> 2] = $T_0;
+                      var $parent574 = CHECK_OVERFLOW($p_0 + 24, 32, 0);
+                      HEAP32[$parent574 >> 2] = 0;
                       break $if_then518$$if_else524$154;
                     }
                   } while (0);
                   _abort();
                   throw "Reached an unreachable!";
                 } else {
-                  var $arrayidx541 = ($K525_0 >>> 31 << 2) + $T_0 + 16 | 0;
+                  var $arrayidx541 = CHECK_OVERFLOW(($K525_0 >>> 31 << 2) + $T_0 + 16, 32, 0);
                   var $118 = HEAPU32[$arrayidx541 >> 2];
                   if (($118 | 0) == 0) {
-                    if ($arrayidx541 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                    var $119 = $arrayidx541;
+                    var $120 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                    if ($119 >>> 0 >= $120 >>> 0) {
                       HEAP32[$arrayidx541 >> 2] = $113;
-                      HEAP32[$p_0$s2 + 6] = $T_0;
-                      HEAP32[$p_0$s2 + 3] = $p_0;
-                      HEAP32[$p_0$s2 + 2] = $p_0;
+                      var $parent552 = CHECK_OVERFLOW($p_0 + 24, 32, 0);
+                      HEAP32[$parent552 >> 2] = $T_0;
+                      var $bk553 = CHECK_OVERFLOW($p_0 + 12, 32, 0);
+                      HEAP32[$bk553 >> 2] = $p_0;
+                      var $fd554 = CHECK_OVERFLOW($p_0 + 8, 32, 0);
+                      HEAP32[$fd554 >> 2] = $p_0;
                       break $if_then518$$if_else524$154;
                     }
                     _abort();
@@ -11597,8 +14049,9 @@ function _free($mem) {
               }
             }
           } while (0);
-          var $dec = HEAP32[__gm_ + 32 >> 2] - 1 | 0;
-          HEAP32[__gm_ + 32 >> 2] = $dec;
+          var $125 = HEAP32[CHECK_OVERFLOW(__gm_ + 32, 32, 0) >> 2];
+          var $dec = CHECK_OVERFLOW($125 - 1, 32, 0);
+          HEAP32[CHECK_OVERFLOW(__gm_ + 32, 32, 0) >> 2] = $dec;
           if (($dec | 0) != 0) {
             break $if_end586$$if_then$2;
           }
@@ -11617,23 +14070,27 @@ function _free($mem) {
 _free["X"] = 1;
 
 function _segment_holding($addr) {
-  var $sp_0$s2;
-  var $sp_0 = __gm_ + 444 | 0, $sp_0$s2 = $sp_0 >> 2;
+  var $sp_0 = CHECK_OVERFLOW(__gm_ + 444, 32, 0);
   while (1) {
     var $sp_0;
-    var $0 = HEAPU32[$sp_0$s2];
+    var $base = CHECK_OVERFLOW($sp_0, 32, 0);
+    var $0 = HEAPU32[$base >> 2];
     if ($0 >>> 0 <= $addr >>> 0) {
-      if (($0 + HEAP32[$sp_0$s2 + 1] | 0) >>> 0 > $addr >>> 0) {
+      var $size = CHECK_OVERFLOW($sp_0 + 4, 32, 0);
+      var $1 = HEAP32[$size >> 2];
+      var $add_ptr = CHECK_OVERFLOW($0 + $1, 32, 0);
+      if ($add_ptr >>> 0 > $addr >>> 0) {
         var $retval_0 = $sp_0;
         break;
       }
     }
-    var $2 = HEAPU32[$sp_0$s2 + 2];
+    var $next = CHECK_OVERFLOW($sp_0 + 8, 32, 0);
+    var $2 = HEAPU32[$next >> 2];
     if (($2 | 0) == 0) {
       var $retval_0 = 0;
       break;
     }
-    var $sp_0 = $2, $sp_0$s2 = $sp_0 >> 2;
+    var $sp_0 = $2;
   }
   var $retval_0;
   return $retval_0;
@@ -11642,20 +14099,29 @@ function _segment_holding($addr) {
 
 function _init_top($p, $psize) {
   var $0 = $p;
-  var $1 = $p + 8 | 0;
+  var $add_ptr = CHECK_OVERFLOW($p + 8, 32, 0);
+  var $1 = $add_ptr;
   if (($1 & 7 | 0) == 0) {
     var $cond = 0;
   } else {
-    var $cond = -$1 & 7;
+    var $2 = CHECK_OVERFLOW(-$1, 32, 0);
+    var $cond = $2 & 7;
   }
   var $cond;
-  var $sub5 = $psize - $cond | 0;
-  HEAP32[__gm_ + 24 >> 2] = $0 + $cond | 0;
-  HEAP32[__gm_ + 12 >> 2] = $sub5;
-  HEAP32[$cond + ($0 + 4) >> 2] = $sub5 | 1;
-  HEAP32[$psize + ($0 + 4) >> 2] = 40;
-  var $6 = HEAP32[_mparams + 16 >> 2];
-  HEAP32[__gm_ + 28 >> 2] = $6;
+  var $add_ptr4 = CHECK_OVERFLOW($0 + $cond, 32, 0);
+  var $3 = $add_ptr4;
+  var $sub5 = CHECK_OVERFLOW($psize - $cond, 32, 0);
+  HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2] = $3;
+  HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2] = $sub5;
+  var $or = $sub5 | 1;
+  var $add_ptr4_sum = CHECK_OVERFLOW($cond + 4, 32, 0);
+  var $head = CHECK_OVERFLOW($0 + $add_ptr4_sum, 32, 0);
+  HEAP32[$head >> 2] = $or;
+  var $add_ptr6_sum = CHECK_OVERFLOW($psize + 4, 32, 0);
+  var $head7 = CHECK_OVERFLOW($0 + $add_ptr6_sum, 32, 0);
+  HEAP32[$head7 >> 2] = 40;
+  var $6 = HEAP32[CHECK_OVERFLOW(_mparams + 16, 32, 0) >> 2];
+  HEAP32[CHECK_OVERFLOW(__gm_ + 28, 32, 0) >> 2] = $6;
   return;
   return;
 }
@@ -11665,10 +14131,15 @@ function _init_bins() {
   while (1) {
     var $i_02;
     var $shl = $i_02 << 1;
-    var $0 = ($shl << 2) + __gm_ + 40 | 0;
-    HEAP32[__gm_ + ($shl + 3 << 2) + 40 >> 2] = $0;
-    HEAP32[__gm_ + ($shl + 2 << 2) + 40 >> 2] = $0;
-    var $inc = $i_02 + 1 | 0;
+    var $arrayidx = CHECK_OVERFLOW(($shl << 2) + __gm_ + 40, 32, 0);
+    var $0 = $arrayidx;
+    var $arrayidx_sum = CHECK_OVERFLOW($shl + 3, 32, 0);
+    var $1 = CHECK_OVERFLOW(($arrayidx_sum << 2) + __gm_ + 40, 32, 0);
+    HEAP32[$1 >> 2] = $0;
+    var $arrayidx_sum1 = CHECK_OVERFLOW($shl + 2, 32, 0);
+    var $2 = CHECK_OVERFLOW(($arrayidx_sum1 << 2) + __gm_ + 40, 32, 0);
+    HEAP32[$2 >> 2] = $0;
+    var $inc = CHECK_OVERFLOW($i_02 + 1, 32, 0);
     if (($inc | 0) == 32) {
       break;
     }
@@ -11679,17 +14150,20 @@ function _init_bins() {
 }
 
 function _init_mparams() {
-  if ((HEAP32[_mparams >> 2] | 0) == 0) {
+  var $0 = HEAP32[CHECK_OVERFLOW(_mparams, 32, 0) >> 2];
+  if (($0 | 0) == 0) {
     var $call = _sysconf(8);
-    if (($call - 1 & $call | 0) == 0) {
-      HEAP32[_mparams + 8 >> 2] = $call;
-      HEAP32[_mparams + 4 >> 2] = $call;
-      HEAP32[_mparams + 12 >> 2] = -1;
-      HEAP32[_mparams + 16 >> 2] = 2097152;
-      HEAP32[_mparams + 20 >> 2] = 0;
-      HEAP32[__gm_ + 440 >> 2] = 0;
+    var $sub = CHECK_OVERFLOW($call - 1, 32, 0);
+    if (($sub & $call | 0) == 0) {
+      HEAP32[CHECK_OVERFLOW(_mparams + 8, 32, 0) >> 2] = $call;
+      HEAP32[CHECK_OVERFLOW(_mparams + 4, 32, 0) >> 2] = $call;
+      HEAP32[CHECK_OVERFLOW(_mparams + 12, 32, 0) >> 2] = -1;
+      HEAP32[CHECK_OVERFLOW(_mparams + 16, 32, 0) >> 2] = 2097152;
+      HEAP32[CHECK_OVERFLOW(_mparams + 20, 32, 0) >> 2] = 0;
+      HEAP32[CHECK_OVERFLOW(__gm_ + 440, 32, 0) >> 2] = 0;
       var $call6 = _time(0);
-      HEAP32[_mparams >> 2] = $call6 & -16 ^ 1431655768;
+      var $and7 = $call6 & -16 ^ 1431655768;
+      HEAP32[CHECK_OVERFLOW(_mparams, 32, 0) >> 2] = $and7;
     } else {
       _abort();
       throw "Reached an unreachable!";
@@ -11700,71 +14174,98 @@ function _init_mparams() {
 }
 
 function _prepend_alloc($newbase, $oldbase, $nb) {
-  var $R_1$s2;
-  var $add_ptr4_sum$s2;
-  var $cond15$s2;
-  var $oldbase$s2 = $oldbase >> 2;
-  var $newbase$s2 = $newbase >> 2;
   var __label__;
-  var $0 = $newbase + 8 | 0;
+  var $add_ptr = CHECK_OVERFLOW($newbase + 8, 32, 0);
+  var $0 = $add_ptr;
   if (($0 & 7 | 0) == 0) {
     var $cond = 0;
   } else {
-    var $cond = -$0 & 7;
+    var $1 = CHECK_OVERFLOW(-$0, 32, 0);
+    var $cond = $1 & 7;
   }
   var $cond;
-  var $2 = $oldbase + 8 | 0;
+  var $add_ptr4 = CHECK_OVERFLOW($newbase + $cond, 32, 0);
+  var $add_ptr5 = CHECK_OVERFLOW($oldbase + 8, 32, 0);
+  var $2 = $add_ptr5;
   if (($2 & 7 | 0) == 0) {
-    var $cond15 = 0, $cond15$s2 = $cond15 >> 2;
+    var $cond15 = 0;
   } else {
-    var $cond15 = -$2 & 7, $cond15$s2 = $cond15 >> 2;
+    var $3 = CHECK_OVERFLOW(-$2, 32, 0);
+    var $cond15 = $3 & 7;
   }
   var $cond15;
-  var $add_ptr16 = $oldbase + $cond15 | 0;
+  var $add_ptr16 = CHECK_OVERFLOW($oldbase + $cond15, 32, 0);
   var $4 = $add_ptr16;
-  var $add_ptr4_sum = $cond + $nb | 0, $add_ptr4_sum$s2 = $add_ptr4_sum >> 2;
-  var $add_ptr17 = $newbase + $add_ptr4_sum | 0;
+  var $sub_ptr_lhs_cast = $add_ptr16;
+  var $sub_ptr_rhs_cast = $add_ptr4;
+  var $sub_ptr_sub = CHECK_OVERFLOW($sub_ptr_lhs_cast - $sub_ptr_rhs_cast, 32, 0);
+  var $add_ptr4_sum = CHECK_OVERFLOW($cond + $nb, 32, 0);
+  var $add_ptr17 = CHECK_OVERFLOW($newbase + $add_ptr4_sum, 32, 0);
   var $5 = $add_ptr17;
-  var $sub18 = $add_ptr16 - ($newbase + $cond) - $nb | 0;
-  HEAP32[($cond + 4 >> 2) + $newbase$s2] = $nb | 3;
-  var $cmp20 = ($4 | 0) == (HEAP32[__gm_ + 24 >> 2] | 0);
+  var $sub18 = CHECK_OVERFLOW($sub_ptr_sub - $nb, 32, 0);
+  var $or19 = $nb | 3;
+  var $add_ptr4_sum1 = CHECK_OVERFLOW($cond + 4, 32, 0);
+  var $head = CHECK_OVERFLOW($newbase + $add_ptr4_sum1, 32, 0);
+  HEAP32[$head >> 2] = $or19;
+  var $7 = HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
+  var $cmp20 = ($4 | 0) == ($7 | 0);
   $if_then$$if_else$30 : do {
     if ($cmp20) {
-      var $add = HEAP32[__gm_ + 12 >> 2] + $sub18 | 0;
-      HEAP32[__gm_ + 12 >> 2] = $add;
-      HEAP32[__gm_ + 24 >> 2] = $5;
+      var $8 = HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2];
+      var $add = CHECK_OVERFLOW($8 + $sub18, 32, 0);
+      HEAP32[CHECK_OVERFLOW(__gm_ + 12, 32, 0) >> 2] = $add;
+      HEAP32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2] = $5;
       var $or22 = $add | 1;
-      HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 1)] = $or22;
+      var $add_ptr17_sum35 = CHECK_OVERFLOW($add_ptr4_sum + 4, 32, 0);
+      var $head23 = CHECK_OVERFLOW($newbase + $add_ptr17_sum35, 32, 0);
+      HEAP32[$head23 >> 2] = $or22;
     } else {
-      if (($4 | 0) == (HEAP32[__gm_ + 20 >> 2] | 0)) {
-        var $add26 = HEAP32[__gm_ + 8 >> 2] + $sub18 | 0;
-        HEAP32[__gm_ + 8 >> 2] = $add26;
-        HEAP32[__gm_ + 20 >> 2] = $5;
+      var $10 = HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2];
+      if (($4 | 0) == ($10 | 0)) {
+        var $11 = HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2];
+        var $add26 = CHECK_OVERFLOW($11 + $sub18, 32, 0);
+        HEAP32[CHECK_OVERFLOW(__gm_ + 8, 32, 0) >> 2] = $add26;
+        HEAP32[CHECK_OVERFLOW(__gm_ + 20, 32, 0) >> 2] = $5;
         var $or28 = $add26 | 1;
-        HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 1)] = $or28;
-        var $prev_foot = $newbase + $add26 + $add_ptr4_sum | 0;
+        var $add_ptr17_sum33 = CHECK_OVERFLOW($add_ptr4_sum + 4, 32, 0);
+        var $head29 = CHECK_OVERFLOW($newbase + $add_ptr17_sum33, 32, 0);
+        HEAP32[$head29 >> 2] = $or28;
+        var $add_ptr17_sum34 = CHECK_OVERFLOW($add26 + $add_ptr4_sum, 32, 0);
+        var $add_ptr30 = CHECK_OVERFLOW($newbase + $add_ptr17_sum34, 32, 0);
+        var $prev_foot = $add_ptr30;
         HEAP32[$prev_foot >> 2] = $add26;
       } else {
-        var $14 = HEAPU32[$cond15$s2 + ($oldbase$s2 + 1)];
+        var $add_ptr16_sum = CHECK_OVERFLOW($cond15 + 4, 32, 0);
+        var $head32 = CHECK_OVERFLOW($oldbase + $add_ptr16_sum, 32, 0);
+        var $14 = HEAPU32[$head32 >> 2];
         if (($14 & 3 | 0) == 1) {
           var $and37 = $14 & -8;
           var $shr = $14 >>> 3;
           var $cmp38 = $14 >>> 0 < 256;
           $if_then39$$if_else59$38 : do {
             if ($cmp38) {
-              var $16 = HEAPU32[(($cond15 | 8) >> 2) + $oldbase$s2];
-              var $18 = HEAPU32[$cond15$s2 + ($oldbase$s2 + 3)];
+              var $fd = CHECK_OVERFLOW($oldbase + ($cond15 | 8), 32, 0);
+              var $16 = HEAPU32[$fd >> 2];
+              var $add_ptr16_sum32 = CHECK_OVERFLOW($cond15 + 12, 32, 0);
+              var $bk = CHECK_OVERFLOW($oldbase + $add_ptr16_sum32, 32, 0);
+              var $18 = HEAPU32[$bk >> 2];
               if (($16 | 0) == ($18 | 0)) {
-                var $and43 = HEAP32[__gm_ >> 2] & (1 << $shr ^ -1);
-                HEAP32[__gm_ >> 2] = $and43;
+                var $neg = 1 << $shr ^ -1;
+                var $19 = HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+                var $and43 = $19 & $neg;
+                HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $and43;
               } else {
-                var $21 = (($14 >>> 2 & 1073741822) << 2) + __gm_ + 40 | 0;
+                var $shl45 = $14 >>> 2 & 1073741822;
+                var $arrayidx = CHECK_OVERFLOW(($shl45 << 2) + __gm_ + 40, 32, 0);
+                var $21 = $arrayidx;
                 var $cmp46 = ($16 | 0) == ($21 | 0);
                 do {
                   if ($cmp46) {
                     __label__ = 14;
                   } else {
-                    if ($16 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                    var $22 = $16;
+                    var $23 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                    if ($22 >>> 0 < $23 >>> 0) {
                       __label__ = 17;
                       break;
                     }
@@ -11775,12 +14276,16 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
                 do {
                   if (__label__ == 14) {
                     if (($18 | 0) != ($21 | 0)) {
-                      if ($18 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                      var $24 = $18;
+                      var $25 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                      if ($24 >>> 0 < $25 >>> 0) {
                         break;
                       }
                     }
-                    HEAP32[$16 + 12 >> 2] = $18;
-                    HEAP32[$18 + 8 >> 2] = $16;
+                    var $bk55 = CHECK_OVERFLOW($16 + 12, 32, 0);
+                    HEAP32[$bk55 >> 2] = $18;
+                    var $fd56 = CHECK_OVERFLOW($18 + 8, 32, 0);
+                    HEAP32[$fd56 >> 2] = $16;
                     break $if_then39$$if_else59$38;
                   }
                 } while (0);
@@ -11789,19 +14294,25 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
               }
             } else {
               var $26 = $add_ptr16;
-              var $28 = HEAPU32[(($cond15 | 24) >> 2) + $oldbase$s2];
-              var $30 = HEAPU32[$cond15$s2 + ($oldbase$s2 + 3)];
+              var $parent = CHECK_OVERFLOW($oldbase + ($cond15 | 24), 32, 0);
+              var $28 = HEAPU32[$parent >> 2];
+              var $add_ptr16_sum4 = CHECK_OVERFLOW($cond15 + 12, 32, 0);
+              var $bk60 = CHECK_OVERFLOW($oldbase + $add_ptr16_sum4, 32, 0);
+              var $30 = HEAPU32[$bk60 >> 2];
               var $cmp61 = ($30 | 0) == ($26 | 0);
               do {
                 if ($cmp61) {
                   var $add_ptr16_sum56 = $cond15 | 16;
-                  var $35 = $add_ptr16_sum56 + ($oldbase + 4) | 0;
+                  var $child_sum = CHECK_OVERFLOW($add_ptr16_sum56 + 4, 32, 0);
+                  var $arrayidx76 = CHECK_OVERFLOW($oldbase + $child_sum, 32, 0);
+                  var $35 = $arrayidx76;
                   var $36 = HEAP32[$35 >> 2];
                   if (($36 | 0) == 0) {
-                    var $arrayidx81 = $oldbase + $add_ptr16_sum56 | 0;
+                    var $child = CHECK_OVERFLOW($oldbase + $add_ptr16_sum56, 32, 0);
+                    var $arrayidx81 = $child;
                     var $37 = HEAP32[$arrayidx81 >> 2];
                     if (($37 | 0) == 0) {
-                      var $R_1 = 0, $R_1$s2 = $R_1 >> 2;
+                      var $R_1 = 0;
                       break;
                     }
                     var $RP_0 = $arrayidx81;
@@ -11814,14 +14325,14 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
                   while (1) {
                     var $R_0;
                     var $RP_0;
-                    var $arrayidx86 = $R_0 + 20 | 0;
+                    var $arrayidx86 = CHECK_OVERFLOW($R_0 + 20, 32, 0);
                     var $38 = HEAP32[$arrayidx86 >> 2];
                     if (($38 | 0) != 0) {
                       var $RP_0 = $arrayidx86;
                       var $R_0 = $38;
                       continue;
                     }
-                    var $arrayidx91 = $R_0 + 16 | 0;
+                    var $arrayidx91 = CHECK_OVERFLOW($R_0 + 16, 32, 0);
                     var $39 = HEAPU32[$arrayidx91 >> 2];
                     if (($39 | 0) == 0) {
                       break;
@@ -11829,22 +14340,29 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
                     var $RP_0 = $arrayidx91;
                     var $R_0 = $39;
                   }
-                  if ($RP_0 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $40 = $RP_0;
+                  var $41 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($40 >>> 0 < $41 >>> 0) {
                     _abort();
                     throw "Reached an unreachable!";
                   } else {
                     HEAP32[$RP_0 >> 2] = 0;
-                    var $R_1 = $R_0, $R_1$s2 = $R_1 >> 2;
+                    var $R_1 = $R_0;
                   }
                 } else {
-                  var $32 = HEAPU32[(($cond15 | 8) >> 2) + $oldbase$s2];
-                  if ($32 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $fd64 = CHECK_OVERFLOW($oldbase + ($cond15 | 8), 32, 0);
+                  var $32 = HEAPU32[$fd64 >> 2];
+                  var $33 = $32;
+                  var $34 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($33 >>> 0 < $34 >>> 0) {
                     _abort();
                     throw "Reached an unreachable!";
                   } else {
-                    HEAP32[$32 + 12 >> 2] = $30;
-                    HEAP32[$30 + 8 >> 2] = $32;
-                    var $R_1 = $30, $R_1$s2 = $R_1 >> 2;
+                    var $bk71 = CHECK_OVERFLOW($32 + 12, 32, 0);
+                    HEAP32[$bk71 >> 2] = $30;
+                    var $fd72 = CHECK_OVERFLOW($30 + 8, 32, 0);
+                    HEAP32[$fd72 >> 2] = $32;
+                    var $R_1 = $30;
                   }
                 }
               } while (0);
@@ -11852,8 +14370,11 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
               if (($28 | 0) == 0) {
                 break;
               }
-              var $42 = $cond15 + ($oldbase + 28) | 0;
-              var $arrayidx108 = (HEAP32[$42 >> 2] << 2) + __gm_ + 304 | 0;
+              var $add_ptr16_sum25 = CHECK_OVERFLOW($cond15 + 28, 32, 0);
+              var $index = CHECK_OVERFLOW($oldbase + $add_ptr16_sum25, 32, 0);
+              var $42 = $index;
+              var $43 = HEAP32[$42 >> 2];
+              var $arrayidx108 = CHECK_OVERFLOW(($43 << 2) + __gm_ + 304, 32, 0);
               var $cmp109 = ($26 | 0) == (HEAP32[$arrayidx108 >> 2] | 0);
               do {
                 if ($cmp109) {
@@ -11861,83 +14382,119 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
                   if (($R_1 | 0) != 0) {
                     break;
                   }
-                  var $and118 = HEAP32[__gm_ + 4 >> 2] & (1 << HEAP32[$42 >> 2] ^ -1);
-                  HEAP32[__gm_ + 4 >> 2] = $and118;
+                  var $neg117 = 1 << HEAP32[$42 >> 2] ^ -1;
+                  var $46 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
+                  var $and118 = $46 & $neg117;
+                  HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $and118;
                   break $if_then39$$if_else59$38;
                 }
-                if ($28 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                var $47 = $28;
+                var $48 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                if ($47 >>> 0 < $48 >>> 0) {
                   _abort();
                   throw "Reached an unreachable!";
                 } else {
-                  var $arrayidx128 = $28 + 16 | 0;
+                  var $arrayidx128 = CHECK_OVERFLOW($28 + 16, 32, 0);
                   if ((HEAP32[$arrayidx128 >> 2] | 0) == ($26 | 0)) {
                     HEAP32[$arrayidx128 >> 2] = $R_1;
                   } else {
-                    HEAP32[$28 + 20 >> 2] = $R_1;
+                    var $arrayidx136 = CHECK_OVERFLOW($28 + 20, 32, 0);
+                    HEAP32[$arrayidx136 >> 2] = $R_1;
                   }
                   if (($R_1 | 0) == 0) {
                     break $if_then39$$if_else59$38;
                   }
                 }
               } while (0);
-              if ($R_1 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+              var $50 = $R_1;
+              var $51 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+              if ($50 >>> 0 < $51 >>> 0) {
                 _abort();
                 throw "Reached an unreachable!";
               } else {
-                HEAP32[$R_1$s2 + 6] = $28;
+                var $parent150 = CHECK_OVERFLOW($R_1 + 24, 32, 0);
+                HEAP32[$parent150 >> 2] = $28;
                 var $add_ptr16_sum2627 = $cond15 | 16;
-                var $52 = HEAPU32[($add_ptr16_sum2627 >> 2) + $oldbase$s2];
+                var $child151 = CHECK_OVERFLOW($oldbase + $add_ptr16_sum2627, 32, 0);
+                var $52 = HEAPU32[$child151 >> 2];
                 if (($52 | 0) != 0) {
-                  if ($52 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $53 = $52;
+                  var $54 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($53 >>> 0 < $54 >>> 0) {
                     _abort();
                     throw "Reached an unreachable!";
                   } else {
-                    HEAP32[$R_1$s2 + 4] = $52;
-                    HEAP32[$52 + 24 >> 2] = $R_1;
+                    var $arrayidx163 = CHECK_OVERFLOW($R_1 + 16, 32, 0);
+                    HEAP32[$arrayidx163 >> 2] = $52;
+                    var $parent164 = CHECK_OVERFLOW($52 + 24, 32, 0);
+                    HEAP32[$parent164 >> 2] = $R_1;
                   }
                 }
-                var $56 = HEAPU32[($add_ptr16_sum2627 + 4 >> 2) + $oldbase$s2];
+                var $child151_sum = CHECK_OVERFLOW($add_ptr16_sum2627 + 4, 32, 0);
+                var $arrayidx169 = CHECK_OVERFLOW($oldbase + $child151_sum, 32, 0);
+                var $56 = HEAPU32[$arrayidx169 >> 2];
                 if (($56 | 0) == 0) {
                   break;
                 }
-                if ($56 >>> 0 < HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                var $57 = $56;
+                var $58 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                if ($57 >>> 0 < $58 >>> 0) {
                   _abort();
                   throw "Reached an unreachable!";
                 } else {
-                  HEAP32[$R_1$s2 + 5] = $56;
-                  HEAP32[$56 + 24 >> 2] = $R_1;
+                  var $arrayidx180 = CHECK_OVERFLOW($R_1 + 20, 32, 0);
+                  HEAP32[$arrayidx180 >> 2] = $56;
+                  var $parent181 = CHECK_OVERFLOW($56 + 24, 32, 0);
+                  HEAP32[$parent181 >> 2] = $R_1;
                 }
               }
             }
           } while (0);
-          var $oldfirst_0 = $oldbase + ($and37 | $cond15) | 0;
-          var $qsize_0 = $and37 + $sub18 | 0;
+          var $add_ptr16_sum7 = $and37 | $cond15;
+          var $add_ptr190 = CHECK_OVERFLOW($oldbase + $add_ptr16_sum7, 32, 0);
+          var $59 = $add_ptr190;
+          var $add191 = CHECK_OVERFLOW($and37 + $sub18, 32, 0);
+          var $oldfirst_0 = $59;
+          var $qsize_0 = $add191;
         } else {
           var $oldfirst_0 = $4;
           var $qsize_0 = $sub18;
         }
         var $qsize_0;
         var $oldfirst_0;
-        var $head193 = $oldfirst_0 + 4 | 0;
+        var $head193 = CHECK_OVERFLOW($oldfirst_0 + 4, 32, 0);
         var $and194 = HEAP32[$head193 >> 2] & -2;
         HEAP32[$head193 >> 2] = $and194;
-        HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 1)] = $qsize_0 | 1;
-        HEAP32[($qsize_0 >> 2) + $newbase$s2 + $add_ptr4_sum$s2] = $qsize_0;
+        var $or195 = $qsize_0 | 1;
+        var $add_ptr17_sum = CHECK_OVERFLOW($add_ptr4_sum + 4, 32, 0);
+        var $head196 = CHECK_OVERFLOW($newbase + $add_ptr17_sum, 32, 0);
+        HEAP32[$head196 >> 2] = $or195;
+        var $add_ptr17_sum8 = CHECK_OVERFLOW($qsize_0 + $add_ptr4_sum, 32, 0);
+        var $add_ptr197 = CHECK_OVERFLOW($newbase + $add_ptr17_sum8, 32, 0);
+        HEAP32[$add_ptr197 >> 2] = $qsize_0;
         if ($qsize_0 >>> 0 < 256) {
+          var $shr199 = $qsize_0 >>> 3;
           var $shl206 = $qsize_0 >>> 2 & 1073741822;
-          var $63 = ($shl206 << 2) + __gm_ + 40 | 0;
-          var $64 = HEAPU32[__gm_ >> 2];
-          var $shl211 = 1 << ($qsize_0 >>> 3);
+          var $arrayidx208 = CHECK_OVERFLOW(($shl206 << 2) + __gm_ + 40, 32, 0);
+          var $63 = $arrayidx208;
+          var $64 = HEAPU32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+          var $shl211 = 1 << $shr199;
           var $tobool213 = ($64 & $shl211 | 0) == 0;
           do {
             if ($tobool213) {
-              HEAP32[__gm_ >> 2] = $64 | $shl211;
+              var $or217 = $64 | $shl211;
+              HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $or217;
+              var $arrayidx208_sum_pre = CHECK_OVERFLOW($shl206 + 2, 32, 0);
+              var $_pre = CHECK_OVERFLOW(($arrayidx208_sum_pre << 2) + __gm_ + 40, 32, 0);
               var $F209_0 = $63;
-              var $_pre_phi = ($shl206 + 2 << 2) + __gm_ + 40 | 0;
+              var $_pre_phi = $_pre;
             } else {
-              var $65 = ($shl206 + 2 << 2) + __gm_ + 40 | 0;
+              var $arrayidx208_sum24 = CHECK_OVERFLOW($shl206 + 2, 32, 0);
+              var $65 = CHECK_OVERFLOW(($arrayidx208_sum24 << 2) + __gm_ + 40, 32, 0);
               var $66 = HEAPU32[$65 >> 2];
-              if ($66 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+              var $67 = $66;
+              var $68 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+              if ($67 >>> 0 >= $68 >>> 0) {
                 var $F209_0 = $66;
                 var $_pre_phi = $65;
                 break;
@@ -11949,9 +14506,14 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
           var $_pre_phi;
           var $F209_0;
           HEAP32[$_pre_phi >> 2] = $5;
-          HEAP32[$F209_0 + 12 >> 2] = $5;
-          HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 2)] = $F209_0;
-          HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 3)] = $63;
+          var $bk231 = CHECK_OVERFLOW($F209_0 + 12, 32, 0);
+          HEAP32[$bk231 >> 2] = $5;
+          var $add_ptr17_sum22 = CHECK_OVERFLOW($add_ptr4_sum + 8, 32, 0);
+          var $fd232 = CHECK_OVERFLOW($newbase + $add_ptr17_sum22, 32, 0);
+          HEAP32[$fd232 >> 2] = $F209_0;
+          var $add_ptr17_sum23 = CHECK_OVERFLOW($add_ptr4_sum + 12, 32, 0);
+          var $bk233 = CHECK_OVERFLOW($newbase + $add_ptr17_sum23, 32, 0);
+          HEAP32[$bk233 >> 2] = $63;
         } else {
           var $71 = $add_ptr17;
           var $shr238 = $qsize_0 >>> 8;
@@ -11964,71 +14526,110 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
                 var $I237_0 = 31;
                 break;
               }
-              var $and249 = ($shr238 + 1048320 | 0) >>> 16 & 8;
+              var $sub247 = CHECK_OVERFLOW($shr238 + 1048320, 32, 0);
+              var $and249 = $sub247 >>> 16 & 8;
               var $shl250 = $shr238 << $and249;
-              var $and253 = ($shl250 + 520192 | 0) >>> 16 & 4;
+              var $sub251 = CHECK_OVERFLOW($shl250 + 520192, 32, 0);
+              var $and253 = $sub251 >>> 16 & 4;
               var $shl255 = $shl250 << $and253;
-              var $and258 = ($shl255 + 245760 | 0) >>> 16 & 2;
-              var $add263 = 14 - ($and253 | $and249 | $and258) + ($shl255 << $and258 >>> 15) | 0;
-              var $I237_0 = $qsize_0 >>> (($add263 + 7 | 0) >>> 0) & 1 | $add263 << 1;
+              var $sub256 = CHECK_OVERFLOW($shl255 + 245760, 32, 0);
+              var $and258 = $sub256 >>> 16 & 2;
+              var $add259 = $and253 | $and249 | $and258;
+              var $sub260 = CHECK_OVERFLOW(14 - $add259, 32, 0);
+              var $shr262 = $shl255 << $and258 >>> 15;
+              var $add263 = CHECK_OVERFLOW($sub260 + $shr262, 32, 0);
+              var $shl264 = $add263 << 1;
+              var $add265 = CHECK_OVERFLOW($add263 + 7, 32, 0);
+              var $I237_0 = $qsize_0 >>> ($add265 >>> 0) & 1 | $shl264;
             }
           } while (0);
           var $I237_0;
-          var $arrayidx272 = ($I237_0 << 2) + __gm_ + 304 | 0;
-          HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 7)] = $I237_0;
-          var $child274 = $add_ptr4_sum + ($newbase + 16) | 0;
-          HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 5)] = 0;
+          var $arrayidx272 = CHECK_OVERFLOW(($I237_0 << 2) + __gm_ + 304, 32, 0);
+          var $add_ptr17_sum9 = CHECK_OVERFLOW($add_ptr4_sum + 28, 32, 0);
+          var $index273 = CHECK_OVERFLOW($newbase + $add_ptr17_sum9, 32, 0);
+          HEAP32[$index273 >> 2] = $I237_0;
+          var $add_ptr17_sum10 = CHECK_OVERFLOW($add_ptr4_sum + 16, 32, 0);
+          var $child274 = CHECK_OVERFLOW($newbase + $add_ptr17_sum10, 32, 0);
+          var $child274_sum = CHECK_OVERFLOW($add_ptr4_sum + 20, 32, 0);
+          var $arrayidx275 = CHECK_OVERFLOW($newbase + $child274_sum, 32, 0);
+          HEAP32[$arrayidx275 >> 2] = 0;
           HEAP32[$child274 >> 2] = 0;
-          var $74 = HEAP32[__gm_ + 4 >> 2];
+          var $74 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
           var $shl279 = 1 << $I237_0;
           if (($74 & $shl279 | 0) == 0) {
             var $or285 = $74 | $shl279;
-            HEAP32[__gm_ + 4 >> 2] = $or285;
+            HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $or285;
             HEAP32[$arrayidx272 >> 2] = $71;
-            HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 6)] = $arrayidx272;
-            HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 3)] = $71;
-            HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 2)] = $71;
+            var $75 = $arrayidx272;
+            var $add_ptr17_sum11 = CHECK_OVERFLOW($add_ptr4_sum + 24, 32, 0);
+            var $parent286 = CHECK_OVERFLOW($newbase + $add_ptr17_sum11, 32, 0);
+            HEAP32[$parent286 >> 2] = $75;
+            var $add_ptr17_sum12 = CHECK_OVERFLOW($add_ptr4_sum + 12, 32, 0);
+            var $bk287 = CHECK_OVERFLOW($newbase + $add_ptr17_sum12, 32, 0);
+            HEAP32[$bk287 >> 2] = $71;
+            var $add_ptr17_sum13 = CHECK_OVERFLOW($add_ptr4_sum + 8, 32, 0);
+            var $fd288 = CHECK_OVERFLOW($newbase + $add_ptr17_sum13, 32, 0);
+            HEAP32[$fd288 >> 2] = $71;
           } else {
+            var $79 = HEAP32[$arrayidx272 >> 2];
             if (($I237_0 | 0) == 31) {
               var $cond300 = 0;
             } else {
-              var $cond300 = 25 - ($I237_0 >>> 1) | 0;
+              var $sub298 = CHECK_OVERFLOW(25 - ($I237_0 >>> 1), 32, 0);
+              var $cond300 = $sub298;
             }
             var $cond300;
             var $K290_0 = $qsize_0 << $cond300;
-            var $T_0 = HEAP32[$arrayidx272 >> 2];
+            var $T_0 = $79;
             while (1) {
               var $T_0;
               var $K290_0;
-              if ((HEAP32[$T_0 + 4 >> 2] & -8 | 0) == ($qsize_0 | 0)) {
-                var $fd329 = $T_0 + 8 | 0;
+              var $head302 = CHECK_OVERFLOW($T_0 + 4, 32, 0);
+              if ((HEAP32[$head302 >> 2] & -8 | 0) == ($qsize_0 | 0)) {
+                var $fd329 = CHECK_OVERFLOW($T_0 + 8, 32, 0);
                 var $87 = HEAPU32[$fd329 >> 2];
-                var $89 = HEAPU32[__gm_ + 16 >> 2];
-                var $cmp331 = $T_0 >>> 0 < $89 >>> 0;
+                var $88 = $T_0;
+                var $89 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                var $cmp331 = $88 >>> 0 < $89 >>> 0;
                 do {
                   if (!$cmp331) {
                     if ($87 >>> 0 < $89 >>> 0) {
                       break;
                     }
-                    HEAP32[$87 + 12 >> 2] = $71;
+                    var $bk342 = CHECK_OVERFLOW($87 + 12, 32, 0);
+                    HEAP32[$bk342 >> 2] = $71;
                     HEAP32[$fd329 >> 2] = $71;
-                    HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 2)] = $87;
-                    HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 3)] = $T_0;
-                    HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 6)] = 0;
+                    var $add_ptr17_sum16 = CHECK_OVERFLOW($add_ptr4_sum + 8, 32, 0);
+                    var $fd344 = CHECK_OVERFLOW($newbase + $add_ptr17_sum16, 32, 0);
+                    HEAP32[$fd344 >> 2] = $87;
+                    var $add_ptr17_sum17 = CHECK_OVERFLOW($add_ptr4_sum + 12, 32, 0);
+                    var $bk345 = CHECK_OVERFLOW($newbase + $add_ptr17_sum17, 32, 0);
+                    HEAP32[$bk345 >> 2] = $T_0;
+                    var $add_ptr17_sum18 = CHECK_OVERFLOW($add_ptr4_sum + 24, 32, 0);
+                    var $parent346 = CHECK_OVERFLOW($newbase + $add_ptr17_sum18, 32, 0);
+                    HEAP32[$parent346 >> 2] = 0;
                     break $if_then$$if_else$30;
                   }
                 } while (0);
                 _abort();
                 throw "Reached an unreachable!";
               } else {
-                var $arrayidx310 = ($K290_0 >>> 31 << 2) + $T_0 + 16 | 0;
+                var $arrayidx310 = CHECK_OVERFLOW(($K290_0 >>> 31 << 2) + $T_0 + 16, 32, 0);
                 var $81 = HEAPU32[$arrayidx310 >> 2];
                 if (($81 | 0) == 0) {
-                  if ($arrayidx310 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                  var $82 = $arrayidx310;
+                  var $83 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                  if ($82 >>> 0 >= $83 >>> 0) {
                     HEAP32[$arrayidx310 >> 2] = $71;
-                    HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 6)] = $T_0;
-                    HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 3)] = $71;
-                    HEAP32[$add_ptr4_sum$s2 + ($newbase$s2 + 2)] = $71;
+                    var $add_ptr17_sum19 = CHECK_OVERFLOW($add_ptr4_sum + 24, 32, 0);
+                    var $parent322 = CHECK_OVERFLOW($newbase + $add_ptr17_sum19, 32, 0);
+                    HEAP32[$parent322 >> 2] = $T_0;
+                    var $add_ptr17_sum20 = CHECK_OVERFLOW($add_ptr4_sum + 12, 32, 0);
+                    var $bk323 = CHECK_OVERFLOW($newbase + $add_ptr17_sum20, 32, 0);
+                    HEAP32[$bk323 >> 2] = $71;
+                    var $add_ptr17_sum21 = CHECK_OVERFLOW($add_ptr4_sum + 8, 32, 0);
+                    var $fd324 = CHECK_OVERFLOW($newbase + $add_ptr17_sum21, 32, 0);
+                    HEAP32[$fd324 >> 2] = $71;
                     break $if_then$$if_else$30;
                   }
                   _abort();
@@ -12044,7 +14645,8 @@ function _prepend_alloc($newbase, $oldbase, $nb) {
       }
     }
   } while (0);
-  return $newbase + ($cond | 8) | 0;
+  var $add_ptr353 = CHECK_OVERFLOW($newbase + ($cond | 8), 32, 0);
+  return $add_ptr353;
   return null;
 }
 
@@ -12052,48 +14654,59 @@ _prepend_alloc["X"] = 1;
 
 function _add_segment($tbase, $tsize) {
   var $add_ptr14$s2;
-  var $0$s2;
-  var $0 = HEAPU32[__gm_ + 24 >> 2], $0$s2 = $0 >> 2;
+  var $0 = HEAPU32[CHECK_OVERFLOW(__gm_ + 24, 32, 0) >> 2];
   var $1 = $0;
   var $call = _segment_holding($1);
-  var $2 = HEAP32[$call >> 2];
-  var $3 = HEAP32[$call + 4 >> 2];
-  var $add_ptr = $2 + $3 | 0;
-  var $4 = $2 + ($3 - 39) | 0;
+  var $base = CHECK_OVERFLOW($call, 32, 0);
+  var $2 = HEAP32[$base >> 2];
+  var $size = CHECK_OVERFLOW($call + 4, 32, 0);
+  var $3 = HEAP32[$size >> 2];
+  var $add_ptr = CHECK_OVERFLOW($2 + $3, 32, 0);
+  var $add_ptr2_sum = CHECK_OVERFLOW($3 - 39, 32, 0);
+  var $add_ptr3 = CHECK_OVERFLOW($2 + $add_ptr2_sum, 32, 0);
+  var $4 = $add_ptr3;
   if (($4 & 7 | 0) == 0) {
     var $cond = 0;
   } else {
-    var $cond = -$4 & 7;
+    var $5 = CHECK_OVERFLOW(-$4, 32, 0);
+    var $cond = $5 & 7;
   }
   var $cond;
-  var $add_ptr7 = $2 + ($3 - 47) + $cond | 0;
-  var $cond13 = $add_ptr7 >>> 0 < ($0 + 16 | 0) >>> 0 ? $1 : $add_ptr7;
-  var $add_ptr14 = $cond13 + 8 | 0, $add_ptr14$s2 = $add_ptr14 >> 2;
+  var $add_ptr_sum = CHECK_OVERFLOW($3 - 47, 32, 0);
+  var $add_ptr2_sum1 = CHECK_OVERFLOW($add_ptr_sum + $cond, 32, 0);
+  var $add_ptr7 = CHECK_OVERFLOW($2 + $add_ptr2_sum1, 32, 0);
+  var $add_ptr8 = CHECK_OVERFLOW($0 + 16, 32, 0);
+  var $cond13 = $add_ptr7 >>> 0 < $add_ptr8 >>> 0 ? $1 : $add_ptr7;
+  var $add_ptr14 = CHECK_OVERFLOW($cond13 + 8, 32, 0), $add_ptr14$s2 = $add_ptr14 >> 2;
   var $7 = $add_ptr14;
   var $8 = $tbase;
-  var $sub16 = $tsize - 40 | 0;
+  var $sub16 = CHECK_OVERFLOW($tsize - 40, 32, 0);
   _init_top($8, $sub16);
-  var $9 = $cond13 + 4 | 0;
+  var $head = CHECK_OVERFLOW($cond13 + 4, 32, 0);
+  var $9 = $head;
   HEAP32[$9 >> 2] = 27;
-  HEAP32[$add_ptr14$s2] = HEAP32[__gm_ + 444 >> 2];
-  HEAP32[$add_ptr14$s2 + 1] = HEAP32[__gm_ + 448 >> 2];
-  HEAP32[$add_ptr14$s2 + 2] = HEAP32[__gm_ + 452 >> 2];
-  HEAP32[$add_ptr14$s2 + 3] = HEAP32[__gm_ + 456 >> 2];
-  HEAP32[__gm_ + 444 >> 2] = $tbase;
-  HEAP32[__gm_ + 448 >> 2] = $tsize;
-  HEAP32[__gm_ + 456 >> 2] = 0;
-  HEAP32[__gm_ + 452 >> 2] = $7;
-  var $10 = $cond13 + 28 | 0;
+  HEAP32[$add_ptr14$s2] = HEAP32[CHECK_OVERFLOW(__gm_ + 444, 32, 0) >> 2];
+  HEAP32[$add_ptr14$s2 + 1] = HEAP32[CHECK_OVERFLOW(__gm_ + 444, 32, 0) + 4 >> 2];
+  HEAP32[$add_ptr14$s2 + 2] = HEAP32[CHECK_OVERFLOW(__gm_ + 444, 32, 0) + 8 >> 2];
+  HEAP32[$add_ptr14$s2 + 3] = HEAP32[CHECK_OVERFLOW(__gm_ + 444, 32, 0) + 12 >> 2];
+  HEAP32[CHECK_OVERFLOW(__gm_ + 444, 32, 0) >> 2] = $tbase;
+  HEAP32[CHECK_OVERFLOW(__gm_ + 448, 32, 0) >> 2] = $tsize;
+  HEAP32[CHECK_OVERFLOW(__gm_ + 456, 32, 0) >> 2] = 0;
+  HEAP32[CHECK_OVERFLOW(__gm_ + 452, 32, 0) >> 2] = $7;
+  var $add_ptr2410 = CHECK_OVERFLOW($cond13 + 28, 32, 0);
+  var $10 = $add_ptr2410;
   HEAP32[$10 >> 2] = 7;
-  var $cmp2711 = ($cond13 + 32 | 0) >>> 0 < $add_ptr >>> 0;
+  var $11 = CHECK_OVERFLOW($cond13 + 32, 32, 0);
+  var $cmp2711 = $11 >>> 0 < $add_ptr >>> 0;
   $if_then$$for_end$134 : do {
     if ($cmp2711) {
       var $add_ptr2412 = $10;
       while (1) {
         var $add_ptr2412;
-        var $12 = $add_ptr2412 + 4 | 0;
+        var $12 = CHECK_OVERFLOW($add_ptr2412 + 4, 32, 0);
         HEAP32[$12 >> 2] = 7;
-        if (($add_ptr2412 + 8 | 0) >>> 0 >= $add_ptr >>> 0) {
+        var $13 = CHECK_OVERFLOW($add_ptr2412 + 8, 32, 0);
+        if ($13 >>> 0 >= $add_ptr >>> 0) {
           break $if_then$$for_end$134;
         }
         var $add_ptr2412 = $12;
@@ -12103,31 +14716,43 @@ function _add_segment($tbase, $tsize) {
   var $cmp28 = ($cond13 | 0) == ($1 | 0);
   $if_end165$$if_then29$138 : do {
     if (!$cmp28) {
-      var $sub_ptr_sub = $cond13 - $0 | 0;
-      var $add_ptr30 = $1 + $sub_ptr_sub | 0;
-      var $15 = $sub_ptr_sub + ($1 + 4) | 0;
+      var $sub_ptr_lhs_cast = $cond13;
+      var $sub_ptr_rhs_cast = $0;
+      var $sub_ptr_sub = CHECK_OVERFLOW($sub_ptr_lhs_cast - $sub_ptr_rhs_cast, 32, 0);
+      var $add_ptr30 = CHECK_OVERFLOW($1 + $sub_ptr_sub, 32, 0);
+      var $add_ptr30_sum = CHECK_OVERFLOW($sub_ptr_sub + 4, 32, 0);
+      var $head31 = CHECK_OVERFLOW($1 + $add_ptr30_sum, 32, 0);
+      var $15 = $head31;
       var $and32 = HEAP32[$15 >> 2] & -2;
       HEAP32[$15 >> 2] = $and32;
       var $or33 = $sub_ptr_sub | 1;
-      HEAP32[$0$s2 + 1] = $or33;
+      var $head34 = CHECK_OVERFLOW($0 + 4, 32, 0);
+      HEAP32[$head34 >> 2] = $or33;
       var $prev_foot = $add_ptr30;
       HEAP32[$prev_foot >> 2] = $sub_ptr_sub;
       if ($sub_ptr_sub >>> 0 < 256) {
+        var $shr = $sub_ptr_sub >>> 3;
         var $shl = $sub_ptr_sub >>> 2 & 1073741822;
-        var $18 = ($shl << 2) + __gm_ + 40 | 0;
-        var $19 = HEAPU32[__gm_ >> 2];
-        var $shl39 = 1 << ($sub_ptr_sub >>> 3);
+        var $arrayidx = CHECK_OVERFLOW(($shl << 2) + __gm_ + 40, 32, 0);
+        var $18 = $arrayidx;
+        var $19 = HEAPU32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2];
+        var $shl39 = 1 << $shr;
         var $tobool = ($19 & $shl39 | 0) == 0;
         do {
           if ($tobool) {
             var $or44 = $19 | $shl39;
-            HEAP32[__gm_ >> 2] = $or44;
+            HEAP32[CHECK_OVERFLOW(__gm_, 32, 0) >> 2] = $or44;
+            var $arrayidx_sum_pre = CHECK_OVERFLOW($shl + 2, 32, 0);
+            var $_pre = CHECK_OVERFLOW(($arrayidx_sum_pre << 2) + __gm_ + 40, 32, 0);
             var $F_0 = $18;
-            var $_pre_phi = ($shl + 2 << 2) + __gm_ + 40 | 0;
+            var $_pre_phi = $_pre;
           } else {
-            var $20 = ($shl + 2 << 2) + __gm_ + 40 | 0;
+            var $arrayidx_sum8 = CHECK_OVERFLOW($shl + 2, 32, 0);
+            var $20 = CHECK_OVERFLOW(($arrayidx_sum8 << 2) + __gm_ + 40, 32, 0);
             var $21 = HEAPU32[$20 >> 2];
-            if ($21 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+            var $22 = $21;
+            var $23 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+            if ($22 >>> 0 >= $23 >>> 0) {
               var $F_0 = $21;
               var $_pre_phi = $20;
               break;
@@ -12139,9 +14764,12 @@ function _add_segment($tbase, $tsize) {
         var $_pre_phi;
         var $F_0;
         HEAP32[$_pre_phi >> 2] = $0;
-        HEAP32[$F_0 + 12 >> 2] = $0;
-        HEAP32[$0$s2 + 2] = $F_0;
-        HEAP32[$0$s2 + 3] = $18;
+        var $bk = CHECK_OVERFLOW($F_0 + 12, 32, 0);
+        HEAP32[$bk >> 2] = $0;
+        var $fd54 = CHECK_OVERFLOW($0 + 8, 32, 0);
+        HEAP32[$fd54 >> 2] = $F_0;
+        var $bk55 = CHECK_OVERFLOW($0 + 12, 32, 0);
+        HEAP32[$bk55 >> 2] = $18;
       } else {
         var $24 = $0;
         var $shr58 = $sub_ptr_sub >>> 8;
@@ -12154,70 +14782,97 @@ function _add_segment($tbase, $tsize) {
               var $I57_0 = 31;
               break;
             }
-            var $and69 = ($shr58 + 1048320 | 0) >>> 16 & 8;
+            var $sub67 = CHECK_OVERFLOW($shr58 + 1048320, 32, 0);
+            var $and69 = $sub67 >>> 16 & 8;
             var $shl70 = $shr58 << $and69;
-            var $and73 = ($shl70 + 520192 | 0) >>> 16 & 4;
+            var $sub71 = CHECK_OVERFLOW($shl70 + 520192, 32, 0);
+            var $and73 = $sub71 >>> 16 & 4;
             var $shl75 = $shl70 << $and73;
-            var $and78 = ($shl75 + 245760 | 0) >>> 16 & 2;
-            var $add83 = 14 - ($and73 | $and69 | $and78) + ($shl75 << $and78 >>> 15) | 0;
-            var $I57_0 = $sub_ptr_sub >>> (($add83 + 7 | 0) >>> 0) & 1 | $add83 << 1;
+            var $sub76 = CHECK_OVERFLOW($shl75 + 245760, 32, 0);
+            var $and78 = $sub76 >>> 16 & 2;
+            var $add79 = $and73 | $and69 | $and78;
+            var $sub80 = CHECK_OVERFLOW(14 - $add79, 32, 0);
+            var $shr82 = $shl75 << $and78 >>> 15;
+            var $add83 = CHECK_OVERFLOW($sub80 + $shr82, 32, 0);
+            var $shl84 = $add83 << 1;
+            var $add85 = CHECK_OVERFLOW($add83 + 7, 32, 0);
+            var $I57_0 = $sub_ptr_sub >>> ($add85 >>> 0) & 1 | $shl84;
           }
         } while (0);
         var $I57_0;
-        var $arrayidx91 = ($I57_0 << 2) + __gm_ + 304 | 0;
-        HEAP32[$0$s2 + 7] = $I57_0;
-        HEAP32[$0$s2 + 5] = 0;
-        HEAP32[$0$s2 + 4] = 0;
-        var $26 = HEAP32[__gm_ + 4 >> 2];
+        var $arrayidx91 = CHECK_OVERFLOW(($I57_0 << 2) + __gm_ + 304, 32, 0);
+        var $index = CHECK_OVERFLOW($0 + 28, 32, 0);
+        HEAP32[$index >> 2] = $I57_0;
+        var $arrayidx92 = CHECK_OVERFLOW($0 + 20, 32, 0);
+        HEAP32[$arrayidx92 >> 2] = 0;
+        var $25 = CHECK_OVERFLOW($0 + 16, 32, 0);
+        HEAP32[$25 >> 2] = 0;
+        var $26 = HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2];
         var $shl95 = 1 << $I57_0;
         if (($26 & $shl95 | 0) == 0) {
           var $or101 = $26 | $shl95;
-          HEAP32[__gm_ + 4 >> 2] = $or101;
+          HEAP32[CHECK_OVERFLOW(__gm_ + 4, 32, 0) >> 2] = $or101;
           HEAP32[$arrayidx91 >> 2] = $24;
-          HEAP32[$0$s2 + 6] = $arrayidx91;
-          HEAP32[$0$s2 + 3] = $0;
-          HEAP32[$0$s2 + 2] = $0;
+          var $parent = CHECK_OVERFLOW($0 + 24, 32, 0);
+          HEAP32[$parent >> 2] = $arrayidx91;
+          var $bk102 = CHECK_OVERFLOW($0 + 12, 32, 0);
+          HEAP32[$bk102 >> 2] = $0;
+          var $fd103 = CHECK_OVERFLOW($0 + 8, 32, 0);
+          HEAP32[$fd103 >> 2] = $0;
         } else {
+          var $27 = HEAP32[$arrayidx91 >> 2];
           if (($I57_0 | 0) == 31) {
             var $cond115 = 0;
           } else {
-            var $cond115 = 25 - ($I57_0 >>> 1) | 0;
+            var $sub113 = CHECK_OVERFLOW(25 - ($I57_0 >>> 1), 32, 0);
+            var $cond115 = $sub113;
           }
           var $cond115;
           var $K105_0 = $sub_ptr_sub << $cond115;
-          var $T_0 = HEAP32[$arrayidx91 >> 2];
+          var $T_0 = $27;
           while (1) {
             var $T_0;
             var $K105_0;
-            if ((HEAP32[$T_0 + 4 >> 2] & -8 | 0) == ($sub_ptr_sub | 0)) {
-              var $fd145 = $T_0 + 8 | 0;
+            var $head118 = CHECK_OVERFLOW($T_0 + 4, 32, 0);
+            if ((HEAP32[$head118 >> 2] & -8 | 0) == ($sub_ptr_sub | 0)) {
+              var $fd145 = CHECK_OVERFLOW($T_0 + 8, 32, 0);
               var $32 = HEAPU32[$fd145 >> 2];
-              var $34 = HEAPU32[__gm_ + 16 >> 2];
-              var $cmp147 = $T_0 >>> 0 < $34 >>> 0;
+              var $33 = $T_0;
+              var $34 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+              var $cmp147 = $33 >>> 0 < $34 >>> 0;
               do {
                 if (!$cmp147) {
                   if ($32 >>> 0 < $34 >>> 0) {
                     break;
                   }
-                  HEAP32[$32 + 12 >> 2] = $24;
+                  var $bk155 = CHECK_OVERFLOW($32 + 12, 32, 0);
+                  HEAP32[$bk155 >> 2] = $24;
                   HEAP32[$fd145 >> 2] = $24;
-                  HEAP32[$0$s2 + 2] = $32;
-                  HEAP32[$0$s2 + 3] = $T_0;
-                  HEAP32[$0$s2 + 6] = 0;
+                  var $fd157 = CHECK_OVERFLOW($0 + 8, 32, 0);
+                  HEAP32[$fd157 >> 2] = $32;
+                  var $bk158 = CHECK_OVERFLOW($0 + 12, 32, 0);
+                  HEAP32[$bk158 >> 2] = $T_0;
+                  var $parent159 = CHECK_OVERFLOW($0 + 24, 32, 0);
+                  HEAP32[$parent159 >> 2] = 0;
                   break $if_end165$$if_then29$138;
                 }
               } while (0);
               _abort();
               throw "Reached an unreachable!";
             } else {
-              var $arrayidx126 = ($K105_0 >>> 31 << 2) + $T_0 + 16 | 0;
+              var $arrayidx126 = CHECK_OVERFLOW(($K105_0 >>> 31 << 2) + $T_0 + 16, 32, 0);
               var $29 = HEAPU32[$arrayidx126 >> 2];
               if (($29 | 0) == 0) {
-                if ($arrayidx126 >>> 0 >= HEAPU32[__gm_ + 16 >> 2] >>> 0) {
+                var $30 = $arrayidx126;
+                var $31 = HEAPU32[CHECK_OVERFLOW(__gm_ + 16, 32, 0) >> 2];
+                if ($30 >>> 0 >= $31 >>> 0) {
                   HEAP32[$arrayidx126 >> 2] = $24;
-                  HEAP32[$0$s2 + 6] = $T_0;
-                  HEAP32[$0$s2 + 3] = $0;
-                  HEAP32[$0$s2 + 2] = $0;
+                  var $parent138 = CHECK_OVERFLOW($0 + 24, 32, 0);
+                  HEAP32[$parent138 >> 2] = $T_0;
+                  var $bk139 = CHECK_OVERFLOW($0 + 12, 32, 0);
+                  HEAP32[$bk139 >> 2] = $0;
+                  var $fd140 = CHECK_OVERFLOW($0 + 8, 32, 0);
+                  HEAP32[$fd140 >> 2] = $0;
                   break $if_end165$$if_then29$138;
                 }
                 _abort();
@@ -12830,6 +15485,129 @@ function _fwrite(ptr, size, nitems, stream) {
   }
 }
 
+var ___dirent_struct_layout = null;
+
+function _open(path, oflag, varargs) {
+  var mode = HEAP32[varargs >> 2];
+  var accessMode = oflag & 3;
+  var isWrite = accessMode != 0;
+  var isRead = accessMode != 1;
+  var isCreate = Boolean(oflag & 512);
+  var isExistCheck = Boolean(oflag & 2048);
+  var isTruncate = Boolean(oflag & 1024);
+  var isAppend = Boolean(oflag & 8);
+  var origPath = path;
+  path = FS.analyzePath(Pointer_stringify(path));
+  if (!path.parentExists) {
+    ___setErrNo(path.error);
+    return -1;
+  }
+  var target = path.object || null;
+  var finalPath;
+  if (target) {
+    if (isCreate && isExistCheck) {
+      ___setErrNo(ERRNO_CODES.EEXIST);
+      return -1;
+    }
+    if ((isWrite || isCreate || isTruncate) && target.isFolder) {
+      ___setErrNo(ERRNO_CODES.EISDIR);
+      return -1;
+    }
+    if (isRead && !target.read || isWrite && !target.write) {
+      ___setErrNo(ERRNO_CODES.EACCES);
+      return -1;
+    }
+    if (isTruncate && !target.isDevice) {
+      target.contents = [];
+    } else {
+      if (!FS.forceLoadFile(target)) {
+        ___setErrNo(ERRNO_CODES.EIO);
+        return -1;
+      }
+    }
+    finalPath = path.path;
+  } else {
+    if (!isCreate) {
+      ___setErrNo(ERRNO_CODES.ENOENT);
+      return -1;
+    }
+    if (!path.parentObject.write) {
+      ___setErrNo(ERRNO_CODES.EACCES);
+      return -1;
+    }
+    target = FS.createDataFile(path.parentObject, path.name, [], mode & 256, mode & 128);
+    finalPath = path.parentPath + "/" + path.name;
+  }
+  var id = FS.streams.length;
+  if (target.isFolder) {
+    var entryBuffer = 0;
+    if (___dirent_struct_layout) {
+      entryBuffer = _malloc(___dirent_struct_layout.__size__);
+    }
+    var contents = [];
+    for (var key in target.contents) contents.push(key);
+    FS.streams[id] = {
+      path: finalPath,
+      object: target,
+      position: -2,
+      isRead: true,
+      isWrite: false,
+      isAppend: false,
+      error: false,
+      eof: false,
+      ungotten: [],
+      contents: contents,
+      currentEntry: entryBuffer
+    };
+  } else {
+    FS.streams[id] = {
+      path: finalPath,
+      object: target,
+      position: 0,
+      isRead: isRead,
+      isWrite: isWrite,
+      isAppend: isAppend,
+      error: false,
+      eof: false,
+      ungotten: []
+    };
+  }
+  return id;
+}
+
+function _fopen(filename, mode) {
+  var flags;
+  mode = Pointer_stringify(mode);
+  if (mode[0] == "r") {
+    if (mode.indexOf("+") != -1) {
+      flags = 2;
+    } else {
+      flags = 0;
+    }
+  } else if (mode[0] == "w") {
+    if (mode.indexOf("+") != -1) {
+      flags = 2;
+    } else {
+      flags = 1;
+    }
+    flags |= 512;
+    flags |= 1024;
+  } else if (mode[0] == "a") {
+    if (mode.indexOf("+") != -1) {
+      flags = 2;
+    } else {
+      flags = 1;
+    }
+    flags |= 512;
+    flags |= 8;
+  } else {
+    ___setErrNo(ERRNO_CODES.EINVAL);
+    return 0;
+  }
+  var ret = _open(filename, flags, allocate([ 511, 0, 0, 0 ], "i32", ALLOC_STACK));
+  return ret == -1 ? 0 : ret;
+}
+
 function _strncmp(px, py, n) {
   var i = 0;
   while (i < n) {
@@ -13217,39 +15995,43 @@ STRING_TABLE.__str10 = allocate([ 111, 117, 116, 32, 111, 102, 32, 109, 101, 109
 
 STRING_TABLE.__str11 = allocate([ 122, 108, 105, 98, 32, 118, 101, 114, 115, 105, 111, 110, 32, 109, 105, 115, 109, 97, 116, 99, 104, 33, 10, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str12 = allocate([ 45, 100, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str12 = allocate([ 114, 98, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str13 = allocate([ 122, 112, 105, 112, 101, 32, 117, 115, 97, 103, 101, 58, 32, 122, 112, 105, 112, 101, 32, 91, 45, 100, 93, 32, 60, 32, 115, 111, 117, 114, 99, 101, 32, 62, 32, 100, 101, 115, 116, 10, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str13 = allocate([ 119, 98, 0 ], "i8", ALLOC_STATIC);
+
+STRING_TABLE.__str14 = allocate([ 45, 100, 0 ], "i8", ALLOC_STATIC);
+
+STRING_TABLE.__str15 = allocate([ 122, 112, 105, 112, 101, 32, 117, 115, 97, 103, 101, 58, 32, 122, 112, 105, 112, 101, 32, 91, 45, 100, 93, 32, 60, 32, 115, 111, 117, 114, 99, 101, 32, 62, 32, 100, 101, 115, 116, 10, 0 ], "i8", ALLOC_STATIC);
 
 _configuration_table = allocate([ 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 4, 0, 4, 0, 8, 0, 4, 0, 8, 0, 0, 0, 4, 0, 5, 0, 16, 0, 8, 0, 8, 0, 0, 0, 4, 0, 6, 0, 32, 0, 32, 0, 8, 0, 0, 0, 4, 0, 4, 0, 16, 0, 16, 0, 10, 0, 0, 0, 8, 0, 16, 0, 32, 0, 32, 0, 10, 0, 0, 0, 8, 0, 16, 0, 128, 0, 128, 0, 10, 0, 0, 0, 8, 0, 32, 0, 128, 0, 256, 0, 10, 0, 0, 0, 32, 0, 128, 0, 258, 0, 1024, 0, 10, 0, 0, 0, 32, 0, 258, 0, 258, 0, 4096, 0, 10, 0, 0, 0 ], [ "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "*", 0, 0, 0 ], ALLOC_STATIC);
 
 _inflate_order = allocate([ 16, 0, 17, 0, 18, 0, 0, 0, 8, 0, 7, 0, 9, 0, 6, 0, 10, 0, 5, 0, 11, 0, 4, 0, 12, 0, 3, 0, 13, 0, 2, 0, 14, 0, 1, 0, 15, 0 ], [ "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0 ], ALLOC_STATIC);
 
-STRING_TABLE.__str115 = allocate([ 105, 110, 99, 111, 114, 114, 101, 99, 116, 32, 104, 101, 97, 100, 101, 114, 32, 99, 104, 101, 99, 107, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str117 = allocate([ 105, 110, 99, 111, 114, 114, 101, 99, 116, 32, 104, 101, 97, 100, 101, 114, 32, 99, 104, 101, 99, 107, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str216 = allocate([ 117, 110, 107, 110, 111, 119, 110, 32, 99, 111, 109, 112, 114, 101, 115, 115, 105, 111, 110, 32, 109, 101, 116, 104, 111, 100, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str218 = allocate([ 117, 110, 107, 110, 111, 119, 110, 32, 99, 111, 109, 112, 114, 101, 115, 115, 105, 111, 110, 32, 109, 101, 116, 104, 111, 100, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str317 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 119, 105, 110, 100, 111, 119, 32, 115, 105, 122, 101, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str319 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 119, 105, 110, 100, 111, 119, 32, 115, 105, 122, 101, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str418 = allocate([ 117, 110, 107, 110, 111, 119, 110, 32, 104, 101, 97, 100, 101, 114, 32, 102, 108, 97, 103, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str420 = allocate([ 117, 110, 107, 110, 111, 119, 110, 32, 104, 101, 97, 100, 101, 114, 32, 102, 108, 97, 103, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str519 = allocate([ 104, 101, 97, 100, 101, 114, 32, 99, 114, 99, 32, 109, 105, 115, 109, 97, 116, 99, 104, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str521 = allocate([ 104, 101, 97, 100, 101, 114, 32, 99, 114, 99, 32, 109, 105, 115, 109, 97, 116, 99, 104, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str620 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 98, 108, 111, 99, 107, 32, 116, 121, 112, 101, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str622 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 98, 108, 111, 99, 107, 32, 116, 121, 112, 101, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str721 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 115, 116, 111, 114, 101, 100, 32, 98, 108, 111, 99, 107, 32, 108, 101, 110, 103, 116, 104, 115, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str723 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 115, 116, 111, 114, 101, 100, 32, 98, 108, 111, 99, 107, 32, 108, 101, 110, 103, 116, 104, 115, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str822 = allocate([ 116, 111, 111, 32, 109, 97, 110, 121, 32, 108, 101, 110, 103, 116, 104, 32, 111, 114, 32, 100, 105, 115, 116, 97, 110, 99, 101, 32, 115, 121, 109, 98, 111, 108, 115, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str824 = allocate([ 116, 111, 111, 32, 109, 97, 110, 121, 32, 108, 101, 110, 103, 116, 104, 32, 111, 114, 32, 100, 105, 115, 116, 97, 110, 99, 101, 32, 115, 121, 109, 98, 111, 108, 115, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str923 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 99, 111, 100, 101, 32, 108, 101, 110, 103, 116, 104, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str925 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 99, 111, 100, 101, 32, 108, 101, 110, 103, 116, 104, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str1024 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 98, 105, 116, 32, 108, 101, 110, 103, 116, 104, 32, 114, 101, 112, 101, 97, 116, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str1026 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 98, 105, 116, 32, 108, 101, 110, 103, 116, 104, 32, 114, 101, 112, 101, 97, 116, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str1125 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 99, 111, 100, 101, 32, 45, 45, 32, 109, 105, 115, 115, 105, 110, 103, 32, 101, 110, 100, 45, 111, 102, 45, 98, 108, 111, 99, 107, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str1127 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 99, 111, 100, 101, 32, 45, 45, 32, 109, 105, 115, 115, 105, 110, 103, 32, 101, 110, 100, 45, 111, 102, 45, 98, 108, 111, 99, 107, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str1226 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 108, 105, 116, 101, 114, 97, 108, 47, 108, 101, 110, 103, 116, 104, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str1228 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 108, 105, 116, 101, 114, 97, 108, 47, 108, 101, 110, 103, 116, 104, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str1327 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 100, 105, 115, 116, 97, 110, 99, 101, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str1329 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 100, 105, 115, 116, 97, 110, 99, 101, 115, 32, 115, 101, 116, 0 ], "i8", ALLOC_STATIC);
 
 STRING_TABLE.__str17 = allocate([ 105, 110, 99, 111, 114, 114, 101, 99, 116, 32, 100, 97, 116, 97, 32, 99, 104, 101, 99, 107, 0 ], "i8", ALLOC_STATIC);
 
@@ -13295,31 +16077,31 @@ _inflate_table_dbase = allocate([ 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 7, 0, 9, 0, 13, 
 
 _inflate_table_dext = allocate([ 16, 0, 16, 0, 16, 0, 16, 0, 17, 0, 17, 0, 18, 0, 18, 0, 19, 0, 19, 0, 20, 0, 20, 0, 21, 0, 21, 0, 22, 0, 22, 0, 23, 0, 23, 0, 24, 0, 24, 0, 25, 0, 25, 0, 26, 0, 26, 0, 27, 0, 27, 0, 28, 0, 28, 0, 29, 0, 29, 0, 64, 0, 64, 0 ], [ "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0, "i16", 0 ], ALLOC_STATIC);
 
-STRING_TABLE.__str53 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 100, 105, 115, 116, 97, 110, 99, 101, 32, 116, 111, 111, 32, 102, 97, 114, 32, 98, 97, 99, 107, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str57 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 100, 105, 115, 116, 97, 110, 99, 101, 32, 116, 111, 111, 32, 102, 97, 114, 32, 98, 97, 99, 107, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str154 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 100, 105, 115, 116, 97, 110, 99, 101, 32, 99, 111, 100, 101, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str158 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 100, 105, 115, 116, 97, 110, 99, 101, 32, 99, 111, 100, 101, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str255 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 108, 105, 116, 101, 114, 97, 108, 47, 108, 101, 110, 103, 116, 104, 32, 99, 111, 100, 101, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str259 = allocate([ 105, 110, 118, 97, 108, 105, 100, 32, 108, 105, 116, 101, 114, 97, 108, 47, 108, 101, 110, 103, 116, 104, 32, 99, 111, 100, 101, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str462 = allocate([ 115, 116, 114, 101, 97, 109, 32, 101, 114, 114, 111, 114, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str466 = allocate([ 115, 116, 114, 101, 97, 109, 32, 101, 114, 114, 111, 114, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str664 = allocate([ 105, 110, 115, 117, 102, 102, 105, 99, 105, 101, 110, 116, 32, 109, 101, 109, 111, 114, 121, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str668 = allocate([ 105, 110, 115, 117, 102, 102, 105, 99, 105, 101, 110, 116, 32, 109, 101, 109, 111, 114, 121, 0 ], "i8", ALLOC_STATIC);
 
-STRING_TABLE.__str765 = allocate([ 98, 117, 102, 102, 101, 114, 32, 101, 114, 114, 111, 114, 0 ], "i8", ALLOC_STATIC);
+STRING_TABLE.__str769 = allocate([ 98, 117, 102, 102, 101, 114, 32, 101, 114, 114, 111, 114, 0 ], "i8", ALLOC_STATIC);
 
 __gm_ = allocate(468, [ "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0 ], ALLOC_STATIC);
 
 _mparams = allocate(24, "i32", ALLOC_STATIC);
 
-HEAP32[_static_l_desc >> 2] = _static_ltree | 0;
+HEAP32[_static_l_desc >> 2] = CHECK_OVERFLOW(_static_ltree, 32, 0);
 
-HEAP32[_static_l_desc + 4 >> 2] = _extra_lbits | 0;
+HEAP32[_static_l_desc + 4 >> 2] = CHECK_OVERFLOW(_extra_lbits, 32, 0);
 
-HEAP32[_static_d_desc >> 2] = _static_dtree | 0;
+HEAP32[_static_d_desc >> 2] = CHECK_OVERFLOW(_static_dtree, 32, 0);
 
-HEAP32[_static_d_desc + 4 >> 2] = _extra_dbits | 0;
+HEAP32[_static_d_desc + 4 >> 2] = CHECK_OVERFLOW(_extra_dbits, 32, 0);
 
-HEAP32[_static_bl_desc + 4 >> 2] = _extra_blbits | 0;
+HEAP32[_static_bl_desc + 4 >> 2] = CHECK_OVERFLOW(_extra_blbits, 32, 0);
 
 FUNCTION_TABLE = [ 0, 0, _zcalloc, 0, _zcfree, 0, _deflate_stored, 0, _deflate_fast, 0, _deflate_slow, 0 ];
 
