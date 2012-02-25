@@ -48,6 +48,7 @@ z'pipe operates on octet strings only, UTF-16 characters will have their high by
 ## TODO
 
 * Support streaming compression through workers
+* Optimisation
 * Performance benchmarks
 * Use a unit test framework (nodeunit, mocha)
 * Package for Ender
