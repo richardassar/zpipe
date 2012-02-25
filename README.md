@@ -17,7 +17,11 @@ z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.n
 * You might want to compress IDAT chunks of client-side generated PNG images ;)
 * You might like pipes...
 
-**Smoking in the Browser**
+## Browser requirements
+
+The ZLib library cannot currently be cross-compiled without the use of typed arrays. Until I investiage a solution to this use of zpipe is restricted to [browsers which support typed arrays](http://caniuse.com/typedarrays).
+
+**Packing in the Browser**
 
     <script type="text/javascript" src="zpipe.min.js"></script>
 
@@ -27,9 +31,9 @@ z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.n
          var inflated = zpipe.inflate("deflated"); // "the balloon"
     </script>
 
-**Smoking with Ender/Node**
+**Packing with Ender / Node**
 
-Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html) but we want automated testing and browser-side require() support
+**Note**: Node.js already has [zlib bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html) but we want automated testing and browser-side require (**Ender**, **Browserify**) support.
 
     var zpipe = require("zpipe");
     
@@ -37,14 +41,14 @@ Note: Node alread has zlib [bindings](http://nodejs.org/docs/v0.6.0/api/zlib.htm
 
     var inflated = zpipe.inflate("deflated"); // "the balloon"
 
-## TODO
-
-* Web workers
-* Benchmark
-* Better test
-* Ender
-* NPM publish
-
 ## Notes
 
-z'pipe is currently a work in progress, don't use it yet...
+z'pipe works on octet strings only, throw UTF-16 encoded characters at it will ignore the high byte.
+
+## TODO
+
+* Support streaming compression through workers
+* Performance benchmarks
+* Use a test suite
+* Package for Ender
+* NPM publish
