@@ -8,7 +8,7 @@ zpipe is **not** a pipe.
 
 ## About
 
-z'pipe exposes an interface to the DEFLATE algorithm of the [ZLib](http://zlib.net/) compression library, it has been cross-compiled from the ZLib source with [emscripten](https://github.com/kripken/emscripten).
+z'pipe exposes an interface to the [**DEFLATE**](http://www.ietf.org/rfc/rfc1951.txt) algorithm of the [ZLib](http://zlib.net/) compression library, it has been cross-compiled from the ZLib source with [emscripten](https://github.com/kripken/emscripten).
 
 ## Why?
 
@@ -28,7 +28,7 @@ The ZLib library cannot currently be cross-compiled without the use of typed arr
     <script>
          var deflated = zpipe.deflate("the balloon");
 
-         var inflated = zpipe.inflate("deflated"); // "the balloon"
+         var inflated = zpipe.inflate(deflated); // "the balloon"
     </script>
 
 **Packing with Ender / Node**
@@ -39,7 +39,7 @@ The ZLib library cannot currently be cross-compiled without the use of typed arr
     
     var deflated = zpipe.deflate("the balloon");
 
-    var inflated = zpipe.inflate("deflated"); // "the balloon"
+    var inflated = zpipe.inflate(deflated); // "the balloon"
 
 ## Notes
 
