@@ -43,7 +43,7 @@ The ZLib library cannot currently be cross-compiled without the use of typed arr
 
 ## Notes
 
-z'pipe works on octet strings only, throw UTF-16 encoded characters at it will ignore the high byte.
+z'pipe works on octet strings only, throw UTF-16 encoded characters at it and it will ignore the high byte.
 
 ## TODO
 
