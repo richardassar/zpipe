@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<script type="text/javascript" src="../src/zpipe.js"></script>
+		<script type="text/javascript" src="../dist/zpipe.min.js"></script>
 
 		<script>
 			var time;
@@ -33,11 +33,15 @@
 
 			var deflated = zpipe.deflate(data);
 
-			checkpoint("benchmark deflate:");
+			var delta = checkpoint("benchmark deflate:");
+
+			console.log(data.length / (1024 * 1024) / delta, "MB/s");
 
 			var inflated = zpipe.inflate(deflated);
 
-			checkpoint("benchmark inflate:");
+			var delta = checkpoint("benchmark inflate:");
+
+			console.log(data.length / (1024 * 1024) / delta, "MB/s");
 
 			console.log("deflated / inflated", deflated.length / inflated.length);
 
