@@ -1,5 +1,4 @@
 // TODO: Nodeunit
-
 var zpipe = require("../src/zpipe.js");
 var zlib = require("zlib");
 
@@ -13,20 +12,20 @@ var zlib_deflated, zlib_inflated;
 
 var zlib_inflated_zpipe_deflated, zpipe_inflated_zlib_deflated;
 
-zlib.deflate(data, function(err, buffer) {
+zlib.deflate(new Buffer(data, 'binary'), function(err, buffer) {
 	if(!err) {
-		zlib_deflated = buffer.toString();
+		zlib_deflated = buffer.toString('binary');
 
 		zlib.inflate(buffer, function(err, buffer) {
 			if(!err) {
-				zlib_inflated = buffer.toString();
+				zlib_inflated = buffer.toString('binary');
 
-				zlib.inflate(zpipe_deflated, function(err, buffer) {
+				zlib.inflate(new Buffer(zpipe_deflated, 'binary'), function(err, buffer) {
 					if(!err) {
-						zlib_inflated_zpipe_deflated = buffer.toString();
+						zlib_inflated_zpipe_deflated = buffer.toString('binary');
 
 						zpipe_inflated_zlib_deflated = zpipe.inflate(zlib_deflated);
-						
+					
 						showResults();
 					} else { 
 						throw err;
@@ -44,6 +43,10 @@ zlib.deflate(data, function(err, buffer) {
 var zlib_inflated = zlib.Inflate(zlib_inflated);
 
 function showResults() {
+	console.log(zpipe_deflated == zlib_deflated);
+	console.log(zpipe_inflated == zlib_inflated);
+	console.log(zpipe_inflated_zlib_deflated == zlib_inflated_zpipe_deflated);
+
 	console.log("--------------------------------------------");
 	console.log(zpipe_deflated, zpipe_deflated.length);
 	console.log("--------------------------------------------");
