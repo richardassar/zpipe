@@ -49,6 +49,6 @@ z'pipe works on octet strings only, throw UTF-16 encoded characters at it and it
 
 * Support streaming compression through workers
 * Performance benchmarks
-* Use a test suite
+* Use a unit test framework (nodeunit, mocha)
 * Package for Ender
 * NPM publish
