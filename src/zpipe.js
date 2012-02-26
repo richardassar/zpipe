@@ -13373,7 +13373,7 @@ var zpipe = (function() {
 	FS.init(function() {
 		// Stdin								
 		if(i < data.length) {
-			var val = data.charCodeAt(i) & 0x00FF;
+			var val = data.charCodeAt(i) & 0xFF;
 
 			i++;
 
@@ -13383,7 +13383,7 @@ var zpipe = (function() {
 		}					
 	}, function(data) {
 		// Stdout			
-		output += String.fromCharCode(data & 0x00FF);
+		output += String.fromCharCode(data & 0xFF);
 	});
 
 	// Export interface
