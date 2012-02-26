@@ -1,6 +1,6 @@
 {
 	"name" : "zpipe",
-	"description" : "Client-side DEFLATE module",
+	"description" : "JavaScript port of ZLib DEFLATE for the browser",
 	"keywords" : ["zlib", "deflate", "javascript", "compression"],
 	"version" : "0.0.1",
 	"author" : "Richard Assar <richardassar@googlemail.com>",
