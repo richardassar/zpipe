@@ -1,63 +1,54 @@
-// TODO: Nodeunit
-var zpipe = require("../src/zpipe.js");
-var zlib = require("zlib");
+var 
+	chai = require('chai'),
+	assert = chai.assert,
+	zpipe = require("../"),
+	zlib = require("zlib");
 
 var data = "Experiments With Alternating Currents of Very High Frequency, and Their Application to Methods of Artificial Illumination";
 
-var zpipe_deflated = zpipe.deflate(data);
+describe("zpipe", function() {
+	describe("deflate", function() {
+		it("should compress strings", function() {
+			var zpipe_deflated = zpipe.deflate(data);
 
-var zpipe_inflated = zpipe.inflate(zpipe_deflated);
-
-var zlib_deflated, zlib_inflated;
-
-var zlib_inflated_zpipe_deflated, zpipe_inflated_zlib_deflated;
-
-zlib.deflate(new Buffer(data, 'binary'), function(err, buffer) {
-	if(!err) {
-		zlib_deflated = buffer.toString('binary');
-
-		zlib.inflate(buffer, function(err, buffer) {
-			if(!err) {
-				zlib_inflated = buffer.toString('binary');
-
-				zlib.inflate(new Buffer(zpipe_deflated, 'binary'), function(err, buffer) {
-					if(!err) {
-						zlib_inflated_zpipe_deflated = buffer.toString('binary');
-
-						zpipe_inflated_zlib_deflated = zpipe.inflate(zlib_deflated);
-					
-						showResults();
-					} else { 
-						throw err;
-					}
-				});
-			} else {
-				throw err;
-			}
+			assert.ok(
+				zpipe_deflated !== undefined && zpipe_deflated.length > 0 && zpipe_deflated.length < data.length, 
+				"Did not compress data"
+			);		
 		});
-	} else {
-		throw err;
-	}
+
+		it("should generate valid zlib input", function(done) {
+			var zpipe_deflated = zpipe.deflate(data);
+
+			zlib.inflate(new Buffer(zpipe_deflated, 'binary'), function(err, buffer) {
+				var zlib_inflated = buffer.toString('binary');
+
+				assert.ok(zlib_inflated == data, "Inflated data did not match input data");
+
+				done();
+			});
+		});
+	});
+
+	describe("inflate", function() {
+		it("should decompress strings", function() {
+			var zpipe_deflated = zpipe.deflate(data);
+
+			var zpipe_inflated = zpipe.inflate(zpipe_deflated);
+					
+			assert.ok(zpipe_inflated == data, "Inflated data did not match input data");			
+		});
+
+		it("should handle zlib output", function(done) {
+			zlib.deflate(new Buffer(data, 'binary'), function(err, buffer) {
+				var zlib_deflated = buffer.toString('binary');
+
+				var zpipe_inflated_zlib_deflated = zpipe.inflate(zlib_deflated);
+
+				assert.ok(zpipe_inflated_zlib_deflated == data, "zpipe did not inflate zlib output correctly");
+
+				done();
+			});
+		});	
+	});	
 });
-
-var zlib_inflated = zlib.Inflate(zlib_inflated);
-
-function showResults() {
-	console.log(zpipe_deflated == zlib_deflated);
-	console.log(zpipe_inflated == zlib_inflated);
-	console.log(zpipe_inflated_zlib_deflated == zlib_inflated_zpipe_deflated);
-
-	console.log("--------------------------------------------");
-	console.log(zpipe_deflated, zpipe_deflated.length);
-	console.log("--------------------------------------------");
-	console.log(zpipe_inflated, zpipe_inflated.length);
-	console.log("--------------------------------------------");
-	console.log(zlib_deflated, zlib_deflated.length);
-	console.log("--------------------------------------------");
-	console.log(zlib_inflated, zlib_inflated.length);
-	console.log("--------------------------------------------");
-	console.log(zlib_inflated_zpipe_deflated, zlib_inflated_zpipe_deflated.length);
-	console.log("--------------------------------------------");
-	console.log(zpipe_inflated_zlib_deflated, zpipe_inflated_zlib_deflated.length);
-	console.log("--------------------------------------------");
-};
