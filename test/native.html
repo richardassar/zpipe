@@ -1,0 +1,16 @@
+<html>
+	<html>
+		<script src="../src/zpipe.native.js"></script>
+		<script>
+			var data = "Test";
+
+			var deflated = zpipe.deflate(data);
+
+			var inflated = zpipe.inflate(deflated);
+
+			console.log(deflated, inflated);
+		</script>
+	</html>
+	<body>
+	</body>
+</html>
