@@ -10,36 +10,56 @@ zpipe is **not** a pipe.
 
 z'pipe exposes an interface to the [DEFLATE](http://www.ietf.org/rfc/rfc1951.txt) algorithm of the [ZLib](http://zlib.net/) compression library, it has been cross-compiled to JavaScript with [Emscripten](https://github.com/kripken/emscripten).
 
-## Why?
+## Motivation
 
-* Poor upload bandwidth
+* Help users suffering from poor upload bandwidth
 * Currently no compression API exposed in browsers
-* You might want to compress IDAT chunks of client-side generated PNG images ;)
-* You might like pipes...
 
-## Browser requirements
+## Usage
 
-The ZLib library cannot currently be cross-compiled without the use of typed arrays. Until I investiage a solution to this use of zpipe is restricted to [browsers which support typed arrays](http://caniuse.com/typedarrays).
+Regular `<script>` include ...
 
-**Packing in the Browser**
+``` html
+<script type="text/javascript" src="zpipe.min.js"></script>
 
-    <script type="text/javascript" src="zpipe.min.js"></script>
+<script>
+	var deflated = zpipe.deflate("the balloon");
 
-    <script>
-         var deflated = zpipe.deflate("the balloon");
+	var inflated = zpipe.inflate(deflated); // "the balloon"
+</script>
+```
 
-         var inflated = zpipe.inflate(deflated); // "the balloon"
-    </script>
+With require() ...
 
-**Packing with Ender / Node**
+``` js
+var zpipe = require("zpipe");
 
-**Note**: Node.js already has [zlib bindings](http://nodejs.org/docs/v0.6.0/api/zlib.html) but we want automated testing and browser-side require (**Ender**, **Browserify**) support.
+var deflated = zpipe.deflate("the balloon");
 
-    var zpipe = require("zpipe");
-    
-    var deflated = zpipe.deflate("the balloon");
+var inflated = zpipe.inflate(deflated); // "the balloon"
+```
 
-    var inflated = zpipe.inflate(deflated); // "the balloon"
+## Installation
+
+Install the package with **npm**.
+
+    $ npm install zpipe
+
+Alternatively just add it to your **Ender** packages.
+
+    $ ender add zpipe
+
+## But it's so big!
+
+Ok 201 KB for `zpipe.min.js` is big, however it comes in at **57.6 KB** gzipped. This is acceptable.
+
+## Tests
+
+Test against node zlib:
+
+    $ make test # Run the tests
+
+Run the test in the browser by pointing your browser to `test/test.html`.
 
 ## Notes
 
@@ -47,4 +67,5 @@ z'pipe operates on octet strings only, UTF-16 characters will have their high by
 
 ## TODO
 
-* Support streaming compression through workers
+* Support stream compression through workers
+* Benchmarks
