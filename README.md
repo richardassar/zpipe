@@ -67,7 +67,7 @@ Run the test in the browser by pointing your browser to `test/test.html`.
 
 ## Notes
 
-* zpipe operates on octet strings only, UTF-16 characters will have their high byte masked.
+* zpipe operates on octet strings only, UTF-16 characters will have their high byte masked. If you want to handle multi-byte chars then you must convert your strings to utf-8 prior to calling `deflate()` - for this you can use [utf8](https://github.com/ryanmcgrath/node-utf8) or [jshashes](https://github.com/h2non/jsHashes) for example.
 * Only [browsers suporting TypedArrays](http://caniuse.com/typedarrays) will run zpipe.
 
 ## TODO
