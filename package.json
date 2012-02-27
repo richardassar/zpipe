@@ -1,12 +1,15 @@
 {
 	"name" : "zpipe",
 	"description" : "JavaScript port of ZLib DEFLATE for the browser",
-	"keywords" : ["zlib", "deflate", "javascript", "compression"],
-	"version" : "0.0.1",
+	"keywords" : ["compression", "zlib", "deflate"],
+	"version" : "1.0.0",
 	"author" : "Richard Assar <richardassar@googlemail.com>",
-	"main" : "./dist/zpipe.min.js",
 	"repository" : {
 		"type" : "git",
 		"url" : "https://github.com/richardassar/zpipe"
+	},
+	"devDependencies" : {
+		"mocha" : "*",
+		"chai" : "*"
 	}
 }
