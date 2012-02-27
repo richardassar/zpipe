@@ -12,8 +12,8 @@ z'pipe exposes an interface to the [DEFLATE](http://www.ietf.org/rfc/rfc1951.txt
 
 ## Motivation
 
-* Help users suffering from poor upload bandwidth
 * Currently no compression API exposed in browsers
+* Help users suffering from poor upload bandwidth
 
 ## Usage
 
@@ -63,7 +63,8 @@ Run the test in the browser by pointing your browser to `test/test.html`.
 
 ## Notes
 
-z'pipe operates on octet strings only, UTF-16 characters will have their high byte masked.
+* zpipe operates on octet strings only, UTF-16 characters will have their high byte masked.
+* Only [browsers suporting TypedArrays](http://caniuse.com/typedarrays) will run zpipe.
 
 ## TODO
 
