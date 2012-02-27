@@ -10,7 +10,7 @@
 
 		<!-- Chai -->
 		<script type="text/javascript" src="http://chaijs.com/chai.js"></script>
-		<script>var assert = chai.assert.ok;</script>
+		<script>var assert = chai.assert;</script>
 
 		<!-- Mocha -->
 		<link rel="stylesheet" href="https://raw.github.com/visionmedia/mocha/master/mocha.css" />
@@ -26,7 +26,7 @@
 						it("should compress strings", function() {
 							var zpipe_deflated = zpipe.deflate(data);
 
-							assert(
+							assert.ok(
 								zpipe_deflated !== undefined && zpipe_deflated.length > 0 && zpipe_deflated.length < data.length, 
 								"Did not compress data"
 							);		
@@ -39,7 +39,7 @@
 
 							var zpipe_inflated = zpipe.inflate(zpipe_deflated);
 					
-							assert(zpipe_inflated == data, "Inflated data did not match input data");			
+							assert.ok(zpipe_inflated == data, "Inflated data did not match input data");			
 						});
 					});	
 				});
