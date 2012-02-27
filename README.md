@@ -41,9 +41,13 @@ var inflated = zpipe.inflate(deflated); // "the balloon"
 
 ## Installation
 
-Install the package with **npm**.
+Install the package with **npm**
 
     $ npm install zpipe
+
+and bundle it with **Browserify**.
+
+    $ browserify example.js -o bundle.js
 
 Alternatively just add it to your **Ender** packages.
 
