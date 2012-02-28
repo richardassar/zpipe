@@ -38,6 +38,15 @@ var deflated = zpipe.deflate("the balloon");
 
 var inflated = zpipe.inflate(deflated); // "the balloon"
 ```
+# Browser support
+
+zpipe is supported in the following browsers:
+
+* Internet Explorer 7+ (use `dist/zpipe.native.min.js`)
+* Google Chrome
+* Mozilla Firefox
+* Opera
+* Safari
 
 ## Installation
 
@@ -49,7 +58,7 @@ and bundle it with **Browserify**.
 
     $ browserify example.js -o bundle.js
 
-Alternatively just add it to your **Ender** packages.
+Alternatively just add it to your **Ender** bundle.
 
     $ ender add zpipe
 
@@ -59,16 +68,15 @@ Ok 201 KB for `zpipe.min.js` is big, however it comes in at **57.6 KB** gzipped.
 
 ## Tests
 
-Test against node zlib:
+Test against node zlib bindings:
 
-    $ make test # Run the tests
+    $ make test
 
-Run the test in the browser by pointing your browser to `test/test.html`.
+Run the test in the browser by pointing your browser to `test/test.html` and `test/test-native.html`.
 
-## Notes
+## Important note on character encoding
 
-* zpipe operates on octet strings only, multi-byte characters will have their high byte masked. If you want to handle multi-byte characters then you must convert your strings to UTF-8 prior to calling `deflate()` and convert them back to UTF-16 after `inflate()` - you can use [utf8](https://github.com/ryanmcgrath/node-utf8) or [jshashes](https://github.com/h2non/jsHashes) for this, for example.
-* Only [browsers suporting TypedArrays](http://caniuse.com/typedarrays) will run zpipe. A version supporting untyped arrays is coming soon.
+zpipe operates on octet strings only, multi-byte characters will have their high byte masked. If you want to handle multi-byte characters then you must convert your strings to UTF-8 prior to calling `deflate()` and convert them back to UTF-16 after `inflate()` - you can use [utf8](https://github.com/ryanmcgrath/node-utf8) or [jshashes](https://github.com/h2non/jsHashes) for this, for example. 
 
 ## TODO
 
