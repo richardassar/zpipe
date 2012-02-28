@@ -1,9 +1,3 @@
-!function (name, context, definition) {
-  if (typeof module !== 'undefined') module.exports = definition(name, context);
-  else if (typeof define === 'function' && typeof define.amd  === 'object') define(definition);
-  else context[name] = definition(name, context);
-}("zpipe", this, function(name, context) {
-
 var arguments_ = [];
 
 var ENVIRONMENT_IS_NODE = typeof process === "object";
@@ -117,7 +111,7 @@ var Runtime = {
     return type in Runtime.INT_TYPES || type in Runtime.FLOAT_TYPES;
   }),
   isPointerType: function isPointerType(type) {
-    return type[type.length - 1] == "*";
+    return type.substr(type.length - 1, 1) == "*";
   },
   isStructType: function isStructType(type) {
     if (isPointerType(type)) return false;
@@ -195,7 +189,7 @@ var Runtime = {
       "%double": 8
     }["%" + type];
     if (!size) {
-      if (type[type.length - 1] == "*") {
+      if (type.substr(type.length - 1, 1) == "*") {
         size = Runtime.QUANTUM_SIZE;
       } else if (type[0] == "i") {
         var bits = parseInt(type.substr(1));
@@ -402,7 +396,7 @@ function cwrap(ident, returnType, argTypes) {
 
 function setValue(ptr, value, type, noSafe) {
   type = type || "i8";
-  if (type[type.length - 1] === "*") type = "i32";
+  if (type.substr(type.length - 1, 1) === "*") type = "i32";
   switch (type) {
    case "i1":
     HEAP[ptr] = value;
@@ -434,7 +428,7 @@ Module["setValue"] = setValue;
 
 function getValue(ptr, type, noSafe) {
   type = type || "i8";
-  if (type[type.length - 1] === "*") type = "i32";
+  if (type.substr(type.length - 1, 1) === "*") type = "i32";
   switch (type) {
    case "i1":
     return HEAP[ptr];
@@ -13210,88 +13204,3 @@ HEAP[_static_bl_desc + 4] = _extra_blbits | 0;
 FUNCTION_TABLE = [ 0, 0, _zcalloc, 0, _zcfree, 0, _deflate_stored, 0, _deflate_fast, 0, _deflate_slow, 0 ];
 
 Module["FUNCTION_TABLE"] = FUNCTION_TABLE;
-
-function run(args) {
-  if (Module["preRun"]) {
-    Module["preRun"]();
-  }
-
-  args = args || Module["arguments"];
-  initRuntime();
-  var ret = null;
-  if (Module["_main"]) {
-    ret = Module.callMain(args);
-    exitRuntime();
-  }
-
-  if (Module["postRun"]) {
-    Module["postRun"]();
-  }
-
-  return ret;
-};
-
-Module['run'] = run;
-
-// Make z'pipe!
-var old = context[name];
-
-var zpipe = (function() {
-	var data;
-	var i;
-	var output;
-
-	// Set up iostreams
-	FS.init(function() {
-		// Stdin								
-		if(i < data.length) {
-			var val = data.charCodeAt(i) & 0xFF;
-
-			i++;
-
-			return val;
-		} else {
-			return null;
-		}					
-	}, function(data) {
-		// Stdout			
-		output += String.fromCharCode(data & 0xFF);
-	});
-
-	// Export interface
-	return {
-		'inflate' : function(string) {
-			//
-			data = string;
-			i = 0;
-			output = '';
-
-			//
-			run(['-d']);
-
-			return output;
-		},
-		'deflate' : function(string) {
-			data = string;
-			i = 0;
-			output = '';
-		
-			run([]);
-
-			return output;
-		},
-		'noConflict': function () {
-			if(old === undefined) {
-				delete context[name];				
-			} else {
-				context[name] = old;
-			}
-
-			return this;
-		}
-	};
-})();
-
-return zpipe;
-
-});

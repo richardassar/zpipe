@@ -1,12 +1,12 @@
 var 
 	chai = require('chai'),
 	assert = chai.assert,
-	zpipe = require("../"),
+	zpipe = require("../dist/zpipe.native.min.js"),
 	zlib = require("zlib");
 
 var data = "Experiments With Alternating Currents of Very High Frequency, and Their Application to Methods of Artificial Illumination";
 
-describe("zpipe", function() {
+describe("zpipe-native", function() {
 	describe("deflate", function() {
 		it("should compress strings", function() {
 			var zpipe_deflated = zpipe.deflate(data);
