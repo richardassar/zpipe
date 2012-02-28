@@ -32,7 +32,7 @@ Regular `<script>` include ...
 With require() ...
 
 ``` js
-var zpipe = require("zpipe").zpipe;
+var zpipe = require("zpipe");
 
 var deflated = zpipe.deflate("the balloon");
 
@@ -42,7 +42,7 @@ var inflated = zpipe.inflate(deflated); // "the balloon"
 
 zpipe is supported in the following browsers:
 
-* Internet Explorer 7+ (use **zpipe_native**)
+* Internet Explorer 7+ (**Note**: Use [zpipe-native](https://github.com/richardassar/zpipe-native/))
 * Google Chrome
 * Mozilla Firefox
 * Opera
