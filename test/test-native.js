@@ -1,7 +1,7 @@
 var 
 	chai = require('chai'),
 	assert = chai.assert,
-	zpipe = require("../dist/zpipe.native.min.js"),
+	zpipe = require("../").zpipe_native,
 	zlib = require("zlib");
 
 var data = "Experiments With Alternating Currents of Very High Frequency, and Their Application to Methods of Artificial Illumination";

@@ -53,8 +53,10 @@ var zpipe = (function() {
 			i = 0;
 			output = '';
 
-			//
-			run(['-d']);
+			//			
+			if(run(['-d']) != 0) {
+				throw new Error("Could not inflate string");
+			}
 
 			return output;
 		},
@@ -63,7 +65,9 @@ var zpipe = (function() {
 			i = 0;
 			output = '';
 		
-			run([]);
+			if(run([]) != 0) {
+				throw new Error("Could not deflate string");
+			}
 
 			return output;
 		},

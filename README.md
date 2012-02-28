@@ -32,17 +32,17 @@ Regular `<script>` include ...
 With require() ...
 
 ``` js
-var zpipe = require("zpipe");
+var zpipe = require("zpipe").zpipe;
 
 var deflated = zpipe.deflate("the balloon");
 
 var inflated = zpipe.inflate(deflated); // "the balloon"
 ```
-# Browser support
+## Browser support
 
 zpipe is supported in the following browsers:
 
-* Internet Explorer 7+ (use `dist/zpipe.native.min.js`)
+* Internet Explorer 7+ (use **zpipe_native**)
 * Google Chrome
 * Mozilla Firefox
 * Opera
@@ -74,9 +74,11 @@ Test against node zlib bindings:
 
 Run the test in the browser by pointing your browser to `test/test.html` and `test/test-native.html`.
 
-## Important note on character encoding
+## Character encoding
 
-zpipe operates on octet strings only, multi-byte characters will have their high byte masked. If you want to handle multi-byte characters then you must convert your strings to UTF-8 prior to calling `deflate()` and convert them back to UTF-16 after `inflate()` - you can use [utf8](https://github.com/ryanmcgrath/node-utf8) or [jshashes](https://github.com/h2non/jsHashes) for this, for example. 
+zpipe operates on octet strings only, multi-byte characters will have their high byte masked. If you want to handle multi-byte characters then you must convert your strings to UTF-8 prior to calling `deflate()` and then convert them back after calling `inflate()`
+
+You could use [utf8](https://github.com/ryanmcgrath/node-utf8) or [jshashes](https://github.com/h2non/jsHashes)' `Helpers.utf8Encode()` function for this, for example. 
 
 ## TODO
 

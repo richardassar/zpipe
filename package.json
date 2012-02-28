@@ -4,7 +4,7 @@
 	"keywords" : ["compression", "zlib", "deflate"],
 	"version" : "1.0.1",
 	"author" : "Richard Assar <richardassar@googlemail.com>",
-	"main" : "dist/zpipe.min.js",
+	"main" : "index.js",
 	"test" : "make test",
 	"repository" : {
 		"type" : "git",

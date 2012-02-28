@@ -25,18 +25,7 @@ if (ENVIRONMENT_IS_NODE) {
     return ret;
   });
   arguments_ = process["argv"].slice(2);
-} /*else if (ENVIRONMENT_IS_SHELL) {
-  if (!this["read"]) {
-    read = (function(f) {
-      snarf(f);
-    });
-  }
-  if (!this["arguments"]) {
-    arguments_ = scriptArgs;
-  } else {
-    arguments_ = arguments;
-  }
-}*/ else if (ENVIRONMENT_IS_WEB) {
+} else if (ENVIRONMENT_IS_WEB) {
   var print = printErr = (function(x) {
     console.log(x);
   });
@@ -46,9 +35,6 @@ if (ENVIRONMENT_IS_NODE) {
     xhr.send(null);
     return xhr.responseText;
   });
-  /*if (this["arguments"]) {
-    arguments_ = arguments;
-  }*/
 } else if (ENVIRONMENT_IS_WORKER) {
   var load = importScripts;
 } else {
@@ -72,20 +58,6 @@ if (typeof printErr === "undefined") {
 if (typeof print === "undefined") {
   var print = printErr;
 }
-
-/*try {
-  this["Module"] = Module;
-} catch (e) {
-  this["Module"] = Module = {};
-}
-
-if (!Module.arguments) {
-  Module.arguments = arguments_;
-}
-
-if (Module.print) {
-  print = Module.print;
-}*/
 
 var Module = {};
 
