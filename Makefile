@@ -8,10 +8,9 @@ dist/zpipe.min.js: dist src/zpipe.js
 	cat src/header.js src/zpipe.js src/footer.js | java -jar ~/closure-compiler/compiler.jar > dist/zpipe.min.js
 
 clean:
-	rm -rf dist/ node_modules/
+	rm -rf dist/
 
 test: dist/zpipe.min.js
-	npm install -d
-	@./node_modules/.bin/mocha --reporter list
+	@./node_modules/.bin/mocha --reporter spec
 
 .PHONY: test clean

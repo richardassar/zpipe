@@ -2,7 +2,7 @@
 	"name" : "zpipe",
 	"description" : "JavaScript port of ZLib DEFLATE for the browser",
 	"keywords" : ["compression", "zlib", "deflate"],
-	"version" : "1.0.1",
+	"version" : "1.0.2",
 	"author" : "Richard Assar <richardassar@googlemail.com>",
 	"main" : "./dist/zpipe.min.js",
 	"test" : "make test",
