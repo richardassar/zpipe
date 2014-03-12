@@ -84,3 +84,9 @@ You could use [utf8](https://github.com/ryanmcgrath/node-utf8) or [jshashes](htt
 
 * Support stream compression through workers
 * Benchmarks
+
+## LICENSE
+
+[original zlib](http://zlib.net/zlib_license.html)<br>
+[zpipe](LICENSE)
+

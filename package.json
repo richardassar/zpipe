@@ -4,6 +4,7 @@
 	"keywords" : ["compression", "zlib", "deflate"],
 	"version" : "1.0.2",
 	"author" : "Richard Assar <richardassar@googlemail.com>",
+	"license" : "BSD-3-Clause",
 	"main" : "./dist/zpipe.min.js",
 	"scripts" : {
 		"test" : "make test"
